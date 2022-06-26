@@ -10,6 +10,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+class CustomGLWidget;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -26,6 +28,10 @@ private slots:
     void on_viewIbjectButton_clicked();
 
 private:
+    // Custom widgets
+    CustomGLWidget *glWidget;
+
+    // Other variables
     Ui::MainWindow *ui;
     IObjFileData *fileData;
     OpenGLHandler* opengGLHandler;

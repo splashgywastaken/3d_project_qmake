@@ -1,5 +1,4 @@
-QT += core gui
-QT += opengl
+QT += core gui opengl openglwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,17 +11,28 @@ CONFIG += c++17
 SOURCES = \
     src/main/main.cpp \
     src/main/mainwindow.cpp \
+    \
     src/models/dto/impl/ObjFileData.cpp \
+    src/models/3D_obj_data/logo.cpp \
+    \
     src/service/file_readers/ObjFileReader/ObjFileReader.cpp \
-    src/service/handlers/OpenGL/openglhandler.cpp
+    src/service/handlers/OpenGL/openglhandler.cpp \
+    \
+    src/widgets/customglwidget.cpp
+
 
 HEADERS = \
     src/main/main.h \
     src/main/mainwindow.h \
+    \
     src/models/dto/IObjFileData.h \
     src/models/dto/impl/ObjFileData.h \
+    src/models/3D_obj_data/logo.cpp \
+    \
     src/service/file_readers/ObjFileReader/ObjFileReader.h \
-    src/service/handlers/OpenGL/openglhandler.h
+    src/service/handlers/OpenGL/openglhandler.h \
+    \
+    src/widgets/customglwidget.h
 
 
 FORMS = \

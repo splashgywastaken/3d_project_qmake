@@ -3,7 +3,7 @@
 
 #include <QGuiApplication>
 #include <QMatrix4x4>
-#include <QOpenGLShaderProgram>
+#include <QOpenGLFunctions>
 #include <QScreen>
 #include <QtMath>
 

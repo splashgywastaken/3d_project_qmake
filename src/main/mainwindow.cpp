@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <src/service/file_readers/ObjFileReader/ObjFileReader.h>
+#include <src/widgets/customglwidget.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     fileData = nullptr;
     opengGLHandler = new OpenGLHandler();
+
+    glWidget = new CustomGLWidget();
+    ui->openGLWidget = glWidget;
 }
 
 MainWindow::~MainWindow()
@@ -69,26 +73,27 @@ void MainWindow::on_viewIbjectButton_clicked()
     // TODO: create pipeline for object to view
     arraysMap = opengGLHandler->generateArrays(fileData);
 
-    if (arraysMap != nullptr)
+    if (arraysMap == nullptr)
     {
-        QMessageBox* successMessageBox = new QMessageBox();
+        QMessageBox::warning(
+                    this,
+                    "Ошибка",
+                    "Не получилось сгенерировать массивы данных об объекте"
+                    );
 
-        successMessageBox->addButton(QMessageBox::Ok);
-        successMessageBox->setIcon(QMessageBox::Information);
-        successMessageBox->setText("Успех");
-        successMessageBox->setInformativeText("Массивы данных успешно сгенерированы");
-        successMessageBox->exec();
-
-        delete successMessageBox;
         return;
     }
 
-    QMessageBox::warning(
-                this,
-                "Ошибка",
-                "Не получилось сгенерировать массивы данных об объекте"
-                );
+    QMessageBox* successMessageBox = new QMessageBox();
 
-    return;
+    successMessageBox->addButton(QMessageBox::Ok);
+    successMessageBox->setIcon(QMessageBox::Information);
+    successMessageBox->setText("Успех");
+    successMessageBox->setInformativeText("Массивы данных успешно сгенерированы");
+    successMessageBox->exec();
+
+    delete successMessageBox;
+
+    // Attach vertices from data to open gl widget to show it
 }
 

@@ -12,27 +12,28 @@ SOURCES = \
     src/main/main.cpp \
     src/main/mainwindow.cpp \
     \
-    src/models/dto/impl/ObjFileData.cpp \
+    src/models/3D_obj_data/object3d.cpp \
+    src/models/dto/ObjFileData/ObjFileData.cpp \
     src/models/3D_obj_data/logo.cpp \
     \
     src/service/file_readers/ObjFileReader/ObjFileReader.cpp \
-    src/service/handlers/OpenGL/openglhandler.cpp \
     \
-    src/widgets/customglwidget.cpp
+    src/widgets/customglwidget/customglwidget.cpp \
+    src/widgets/objectviewglwidget/objectviewglwidget.cpp
 
 
 HEADERS = \
     src/main/main.h \
     src/main/mainwindow.h \
     \
-    src/models/dto/IObjFileData.h \
-    src/models/dto/impl/ObjFileData.h \
+    src/models/3D_obj_data/object3d.h \
+    src/models/dto/ObjFileData/ObjFileData.h \
     src/models/3D_obj_data/logo.cpp \
     \
     src/service/file_readers/ObjFileReader/ObjFileReader.h \
-    src/service/handlers/OpenGL/openglhandler.h \
     \
-    src/widgets/customglwidget.h
+    src/widgets/customglwidget/customglwidget.h \
+    src/widgets/objectviewglwidget/objectviewglwidget.h
 
 
 FORMS = \

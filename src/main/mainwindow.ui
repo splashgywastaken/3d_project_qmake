@@ -14,150 +14,42 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QSplitter" name="splitter">
+   <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>10</x>
       <y>30</y>
-      <width>451</width>
-      <height>482</height>
+      <width>1261</width>
+      <height>581</height>
      </rect>
     </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-    <widget class="QWidget" name="layoutWidget">
-     <layout class="QVBoxLayout" name="filePath">
-      <item>
-       <widget class="QLabel" name="filePathLabel">
-        <property name="text">
-         <string>Введите путь к файлу</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="filePathMain">
-        <item>
-         <widget class="QTextEdit" name="filePathText">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOff</enum>
-          </property>
-          <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOff</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="searchButtonFilePath">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Обзор</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="readButtonFilePath">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Прочитать файл</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="layoutWidget">
-     <layout class="QVBoxLayout" name="readProgress">
-      <item>
-       <widget class="QLabel" name="readProgressLabel">
-        <property name="text">
-         <string>Прогресс чтения файла</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProgressBar" name="readProgressProgressBar">
-        <property name="value">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="layoutWidget">
-     <layout class="QVBoxLayout" name="readResults">
-      <item>
-       <widget class="QLabel" name="readResultLabel">
-        <property name="text">
-         <string>Результат чтения файла</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTextBrowser" name="readResultText">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+    <layout class="QVBoxLayout" name="openGLLayout"/>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>530</y>
-      <width>451</width>
+      <x>770</x>
+      <y>620</y>
+      <width>501</width>
       <height>48</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="viewObject">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLabel" name="viewObjectLabel">
+      <widget class="QLabel" name="taskLabel">
        <property name="text">
-        <string>Отображение объекта</string>
+        <string>Прогресс чтения файла</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="viewIbjectButton">
-       <property name="text">
-        <string>Отобразить объект</string>
+      <widget class="QProgressBar" name="taskProgressBar">
+       <property name="value">
+        <number>0</number>
        </property>
       </widget>
      </item>
     </layout>
-   </widget>
-   <widget class="QOpenGLWidget" name="openGLWidget">
-    <property name="geometry">
-     <rect>
-      <x>500</x>
-      <y>30</y>
-      <width>761</width>
-      <height>551</height>
-     </rect>
-    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -172,11 +64,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <tabstops>
-  <tabstop>filePathText</tabstop>
-  <tabstop>searchButtonFilePath</tabstop>
-  <tabstop>readButtonFilePath</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

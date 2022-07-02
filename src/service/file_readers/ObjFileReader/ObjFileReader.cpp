@@ -10,7 +10,7 @@ ObjFileReader &ObjFileReader::Instantiate() {
     return objFileReader;
 }
 
-IObjFileData* ObjFileReader::readFile(const QString& filePath, QProgressBar* progressBar) {
+ObjFileData* ObjFileReader::readFile(const QString& filePath, QProgressBar* progressBar) {
 
     QFileInfo *fileInfo = new QFileInfo(filePath);
 
@@ -23,7 +23,7 @@ IObjFileData* ObjFileReader::readFile(const QString& filePath, QProgressBar* pro
     delete fileInfo;
 
     // Made an object to fill with data
-    IObjFileData *objFileData = new ObjFileData();
+    ObjFileData *objFileData = new ObjFileData();
 
     // Variables inits
     QFile *file = new QFile(filePath);

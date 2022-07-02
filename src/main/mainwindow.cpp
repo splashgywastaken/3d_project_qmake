@@ -3,7 +3,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <src/service/file_readers/ObjFileReader/ObjFileReader.h>
-#include <src/widgets/customglwidget.h>
+#include <src/widgets/customglwidget/customglwidget.h>
+#include <src/widgets/objectviewglwidget/objectviewglwidget.h>
+//#include <src/widgets/customglwidget.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,10 +13,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     fileData = nullptr;
-    opengGLHandler = new OpenGLHandler();
 
-    glWidget = new CustomGLWidget();
-    ui->openGLWidget = glWidget;
+    glWidget = new ObjectViewGLWidget;
+    //glWidget = new CustomGLWidget;
+    //ui->openGLLayout->addWidget(glWidget);
+
+    // MenuBar setup:
+    createActions();
+    createMenus();
+
+    ui->taskProgressBar->setVisible(false);
+    ui->taskLabel->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -22,43 +31,39 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-void MainWindow::on_searchButtonFilePath_clicked()
+void MainWindow::openObjFile()
 {
-    QString *filePath = new QString(QFileDialog::getOpenFileName(this, tr("Выберите файл"),
-                                                     "E:/projects SSD/Qt/3d_project_qmake/res/obj/cube.obj",
-                                                     tr("Object (*.obj)")
-                                                     ));
-    ui->filePathText->setText(*filePath);
+    QString *filePath = new QString(
+                QFileDialog::getOpenFileName(this, tr("Choose file"),
+                "E:/projects SSD/Qt/3d_project_qmake/res/obj/cube.obj",
+                tr("Object (*.obj)")
+            ));
 
-    delete filePath;
-}
-
-
-void MainWindow::on_readButtonFilePath_clicked()
-{
     ObjFileReader fileReader = ObjFileReader::Instantiate();
-    if (ui->filePathText->toPlainText() != "")
-    {
-        fileData = fileReader.readFile(ui->filePathText->toPlainText(), ui->readProgressProgressBar);
-    }
+
+    ui->taskProgressBar->setVisible(true);
+    ui->taskLabel->setVisible(true);
+    setLabelText(ui->taskLabel, "Reading file: " + *filePath);
+
+    fileData = fileReader.readFile(*filePath, ui->taskProgressBar);
 
     if (fileData == nullptr){
         QMessageBox::warning(
                     this,
-                    "Ошибка при чтении файла .obj",
-                    "Неправильный путь к файлу или неправильный формат файла"
+                    "Error occured while reading .obj file",
+                    "Incorrect path to file or incorrect data, please try again"
                     );
         return;
+    } else {
+        setLabelText(ui->taskLabel, "File successfully read");
     }
 
-    QString* fileDataDescription = fileData->getDescription();
+    glWidget->setFileData(fileData);
 
-    ui->readResultText->setText(*fileDataDescription);
+    delete filePath;
 }
 
-
-void MainWindow::on_viewIbjectButton_clicked()
+void MainWindow::showObject()
 {
     if (fileData == nullptr)
     {
@@ -70,30 +75,77 @@ void MainWindow::on_viewIbjectButton_clicked()
         return;
     }
 
-    // TODO: create pipeline for object to view
-    arraysMap = opengGLHandler->generateArrays(fileData);
+    QMessageBox* taskMessageBox = new QMessageBox();
+    taskMessageBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    if (arraysMap == nullptr)
-    {
-        QMessageBox::warning(
-                    this,
-                    "Ошибка",
-                    "Не получилось сгенерировать массивы данных об объекте"
-                    );
+    setLabelText(ui->taskLabel, "Processing Object");
+
+    if (!glWidget->generateArrays(ui->taskProgressBar)){
+        taskMessageBox->addButton(QMessageBox::Ok);
+        taskMessageBox->setIcon(QMessageBox::Information);
+        taskMessageBox->setText("Ошибка");
+        taskMessageBox->setInformativeText("Не получилось сгенерировать данные для отображения объекта");
+        taskMessageBox->exec();
+
+        setLabelText(ui->taskLabel, "Processing failed");
 
         return;
     }
 
-    QMessageBox* successMessageBox = new QMessageBox();
+    setLabelText(ui->taskLabel, "Object successfully processed");
 
-    successMessageBox->addButton(QMessageBox::Ok);
-    successMessageBox->setIcon(QMessageBox::Information);
-    successMessageBox->setText("Успех");
-    successMessageBox->setInformativeText("Массивы данных успешно сгенерированы");
-    successMessageBox->exec();
+    taskMessageBox->addButton(QMessageBox::Ok);
+    taskMessageBox->setIcon(QMessageBox::Information);
+    taskMessageBox->setText("Успех");
+    taskMessageBox->setInformativeText("Массивы данных успешно сгенерированы");
+    taskMessageBox->exec();
 
-    delete successMessageBox;
+    delete taskMessageBox;
+}
 
-    // Attach vertices from data to open gl widget to show it
+void MainWindow::addObject()
+{
+
+}
+
+void MainWindow::setLabelText(QLabel *label, QString text)
+{
+    label->setText(text);
+}
+
+void MainWindow::createActions()
+{
+
+    // Open file Action
+    openAction = new QAction(tr("Open file"), this);
+    openAction->setShortcuts(QKeySequence::Open);
+    openAction->setStatusTip(tr("Open a new file"));
+    connect(openAction, &QAction::triggered, this, &MainWindow::openObjFile);
+
+    // Show object action
+    showObjectAction = new QAction(tr("Show object"), this);
+    // TODO:: rework with QKeyCombination class
+    showObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
+    showObjectAction->setStatusTip(tr("Show object that you got from a file"));
+    connect(showObjectAction, &QAction::triggered, this, &MainWindow::showObject);
+
+    // Add new object to a window action
+    addObjectAction = new QAction(tr("Add object"), this);
+    addObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_A));
+    addObjectAction->setStatusTip(tr("Add new object to a scene"));
+    connect(addObjectAction, &QAction::triggered, this, &MainWindow::addObject);
+
+}
+
+void MainWindow::createMenus()
+{
+
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(openAction);
+
+    objectMenu = menuBar()->addMenu(tr("&Object"));
+    objectMenu->addAction(showObjectAction);
+    objectMenu->addAction(addObjectAction);
+
 }
 

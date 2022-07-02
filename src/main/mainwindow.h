@@ -2,9 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <qlabel.h>
 
-#include <src/models/dto/IObjFileData.h>
-#include <src/service/handlers/OpenGL/openglhandler.h>
+#include <src/widgets/objectviewglwidget/objectviewglwidget.h>
+
+#include <src/models/dto/ObjFileData/ObjFileData.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,20 +23,33 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_searchButtonFilePath_clicked();
+    void openObjFile();
 
-    void on_readButtonFilePath_clicked();
+    void showObject();
 
-    void on_viewIbjectButton_clicked();
+    void addObject();
 
 private:
+    // Misc methods:
+    void setLabelText(QLabel* label, QString text);
+
+    void createActions();
+    void createMenus();
+
+    // Menu bar actions
+    QMenu* fileMenu;
+    QMenu* objectMenu;
+
+    QAction* openAction;
+    QAction* showObjectAction;
+    QAction* addObjectAction;
+
     // Custom widgets
-    CustomGLWidget *glWidget;
+    ObjectViewGLWidget * glWidget;
+    //CustomGLWidget * glWidget;
 
     // Other variables
     Ui::MainWindow *ui;
-    IObjFileData *fileData;
-    OpenGLHandler* opengGLHandler;
-    QMap<QString, QVector<GLfloat>*>* arraysMap;
+    ObjFileData *fileData;
 };
 #endif // MAINWINDOW_H

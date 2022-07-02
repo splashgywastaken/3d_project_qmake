@@ -146,7 +146,7 @@ ObjFileData::~ObjFileData() {
     delete polygonVertexTextureCoordinateIndices_;
 }
 
-IObjFileData &ObjFileData::getObjFIleData() {
+ObjFileData &ObjFileData::getObjFIleData() {
     return *this;
 }
 

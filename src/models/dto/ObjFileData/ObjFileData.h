@@ -1,9 +1,10 @@
 #ifndef QT_3D_PROJECT_OBJFILEDATA_H
 #define QT_3D_PROJECT_OBJFILEDATA_H
 
-#include "src/models/dto/IObjFileData.h"
+#include <QVector>
+#include <QVector2D>
 
-class ObjFileData : public IObjFileData {
+class ObjFileData {
 
 private:
     // QVector<QVector3D*>*
@@ -21,7 +22,7 @@ private:
 public:
     // Base constructor and destructor
     ObjFileData();
-    ~ObjFileData() override;
+    ~ObjFileData();
     // Copy and move constructors
     ObjFileData(const ObjFileData& other);
     ObjFileData(ObjFileData&& other) noexcept;
@@ -37,32 +38,32 @@ public:
 
     // Setters
     // QVector<QVector3D>
-    void addVertex(QVector3D vertex) override;
-    void addNormal(QVector3D normal) override;
+    void addVertex(QVector3D vertex);
+    void addNormal(QVector3D normal);
     // QVector<QVector2D>
-    void addVertexTextureCoordinate(QVector2D textureCoordinate) override;
+    void addVertexTextureCoordinate(QVector2D textureCoordinate);
     // QVector<int>
-    void addPolygonVertexIndex(QVector<int*> polygonVertexIndex) override;
-    void addPolygonVertexTextureCoordinateIndex(QVector<int*> polygonVertexTextureCoordinatesIndex) override;
-    void addPolygonNormalIndex(QVector<int*> polygonNormalIndex) override;
+    void addPolygonVertexIndex(QVector<int*> polygonVertexIndex);
+    void addPolygonVertexTextureCoordinateIndex(QVector<int*> polygonVertexTextureCoordinatesIndex);
+    void addPolygonNormalIndex(QVector<int*> polygonNormalIndex);
     // QVector<QVector<QString>>
-    void addFace(QVector<QString*> face) override;
+    void addFace(QVector<QString*> face);
 
     // Getters
-    IObjFileData &getObjFIleData() override;
+    ObjFileData &getObjFIleData();
     // QVector<QVector3D>
-    QVector<QVector3D*>& getVertices() const override;
-    QVector<QVector3D*>& getNormals() const override;
-    QVector<QVector<QString *> *> & getFaces() const override;
+    QVector<QVector3D*>& getVertices() const;
+    QVector<QVector3D*>& getNormals() const;
+    QVector<QVector<QString *> *> & getFaces() const;
     // QVector<QVector2D>
-    QVector<QVector2D*>& getVertexTextureCoordinates() const override;
+    QVector<QVector2D*>& getVertexTextureCoordinates() const;
     // QVector<int>
-    QVector<QVector<int*>*>& getPolygonVertexIndices() const override;
-    QVector<QVector<int*>*>& getPolygonVertexTextureCoordinateIndices() const override;
-    QVector<QVector<int*>*>& getPolygonNormalIndices() const override;
+    QVector<QVector<int*>*>& getPolygonVertexIndices() const;
+    QVector<QVector<int*>*>& getPolygonVertexTextureCoordinateIndices() const;
+    QVector<QVector<int*>*>& getPolygonNormalIndices() const;
 
     // Getting file description
-    QString* getDescription() override;
+    QString* getDescription();
 
     // Friend operators
     friend void swap(ObjFileData& first, ObjFileData& second); //nothrow   

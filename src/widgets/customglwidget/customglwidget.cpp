@@ -35,6 +35,11 @@ QSize CustomGLWidget::sizeHint() const
     return QSize(400, 400);
 }
 
+void CustomGLWidget::setVertexArrays(QMap<QString, QList<GLfloat> *> *vertexArrays)
+{
+    m_vertexArrays = vertexArrays;
+}
+
 void CustomGLWidget::cleanup()
 {
     if (m_program == nullptr)
@@ -148,6 +153,7 @@ void CustomGLWidget::initializeGL()
     m_logoVbo.create();
     m_logoVbo.bind();
     m_logoVbo.allocate(m_logo.constData(), m_logo.count() * sizeof(GLfloat));
+    m_logoVbo.allocate(m_objectData->getConstData("vertices"), m_objectData->getVertexCount() * sizeof(GLfloat));
 
     // Store the vertex attribute bindings for the program.
     setupVertexAttributes();
@@ -186,7 +192,8 @@ void CustomGLWidget::paintGL()
     QMatrix3x3 normalMatrix = m_world.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
 
-    glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
+    //glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
+    glDrawArrays(GL_TRIANGLES, 0, m_objectData->getVertexCount());
 
     m_program->release();
 }

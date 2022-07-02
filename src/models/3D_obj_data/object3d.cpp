@@ -1,13 +1,23 @@
-#include "openglhandler.h"
+#include "object3d.h"
 
-OpenGLHandler::OpenGLHandler()
+#include <QMap>
+
+#include <src/models/dto/ObjFileData/ObjFileData.h>
+
+Object3D::Object3D(QString inputObjectName, ObjFileData *inputFileData)
 {
+    objectName = new QString(inputObjectName);
+    objectArrays = nullptr;
+    fileData = inputFileData;
 
+    facesCount = new int();
+    normalsCount = new int();
+    verticesCount = new int();
+    textureCoordinatesCount = new int();
 }
 
-QMap<QString, QVector<GLfloat> *> *OpenGLHandler::generateArrays(IObjFileData *fileData)
+bool Object3D::generateData(QProgressBar* progressBar)
 {
-
     // Data from fileData variable
     QVector<QVector3D*>* fileDataVertices = new QVector<QVector3D*>(fileData->getVertices());
     QVector<QVector3D*>* fileDataNormals = new QVector<QVector3D*>(fileData->getNormals());
@@ -16,12 +26,15 @@ QMap<QString, QVector<GLfloat> *> *OpenGLHandler::generateArrays(IObjFileData *f
 
     // Vectors to form data in
     // Change to GLfloat* data type
-    QVector<GLfloat>* vertices = new QVector<GLfloat>();
-    QVector<GLfloat>* normals = new QVector<GLfloat>();
-    QVector<GLfloat>* textureCoordinates = new QVector<GLfloat>();
+    QList<GLfloat>* vertices = new QList<GLfloat>();
+    QList<GLfloat>* normals = new QList<GLfloat>();
+    QList<GLfloat>* textureCoordinates = new QList<GLfloat>();
 
     // Faces look like this: 1/1/1 2/2/2 3/3/3 where first num is vertex, second one is normal, third one is texCoord
-    /// Algorythm
+
+    progressBar->setRange(0, fileDataFaces->count() * 3);
+
+    int* progressBarStep = new int(0);
 
     for (QVector<QString*>* faces : *fileDataFaces)
     {
@@ -44,20 +57,68 @@ QMap<QString, QVector<GLfloat> *> *OpenGLHandler::generateArrays(IObjFileData *f
             normals->append(fileDataNormals->at(faceData->at(2).toInt() - 1)->z());
 
             delete faceData;
+
+            progressBar->setValue(++(*progressBarStep));
+
         }
     }
 
+    delete progressBarStep;
+
     // Result variable
-    QMap<QString, QVector<GLfloat>*>* resultMap = new QMap<QString, QVector<GLfloat>*>();
+    QMap<QString, QList<GLfloat>*>* resultMap = new QMap<QString, QList<GLfloat>*>();
     // Forming data to pass as return
     resultMap->insert("vertices", vertices);
     resultMap->insert("normals", normals);
     resultMap->insert("textureCoordinates", textureCoordinates);
+
+    *facesCount = vertices->count() / 3;
+    *verticesCount = vertices->count() / 3;
+    *normalsCount = normals->count() / 3;
+    *textureCoordinatesCount = textureCoordinates->count() / 2;
 
     delete fileDataFaces;
     delete fileDataTextureCoordinates;
     delete fileDataNormals;
     delete fileDataVertices;
 
-    return resultMap;
+    objectArrays = resultMap;
+
+    return true;
 }
+
+void Object3D::setFileData(ObjFileData *objData)
+{
+    fileData = objData;
+}
+
+QMap<QString, QList<GLfloat> *> *Object3D::getObjectArrays()
+{
+    return objectArrays;
+}
+
+const GLfloat* Object3D::getConstData(QString key) const
+{
+    return objectArrays->take(key)->constData();
+}
+
+int Object3D::getFacesCount() const
+{
+    return *facesCount;
+}
+
+int Object3D::getVertexCount() const
+{
+    return *verticesCount;
+}
+
+int Object3D::getNormalsCount() const
+{
+    return *normalsCount;
+}
+
+int Object3D::getTextureCoordinatesCount() const
+{
+    return *textureCoordinatesCount;
+}
+

@@ -8,6 +8,7 @@
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 #include "src/models/3D_obj_data/logo.h"
+#include "src/models/3D_obj_data/object3d.h"
 
 QT_BEGIN_NAMESPACE
 class QPainter;
@@ -29,6 +30,8 @@ public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
+    void setVertexArrays(QMap<QString, QList<GLfloat>*>* vertexArrays);
+
 public slots:
     void cleanup();
 
@@ -46,6 +49,7 @@ private:
     int m_zRot = 0;
     QPoint m_lastPos;
     Logo m_logo;
+    Object3D* m_objectData;
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_logoVbo;
     QOpenGLShaderProgram *m_program = nullptr;
@@ -56,6 +60,7 @@ private:
     QMatrix4x4 m_proj;
     QMatrix4x4 m_camera;
     QMatrix4x4 m_world;
+    QMap<QString, QList<GLfloat>*>* m_vertexArrays;
 
     static bool m_transparent;
 };

@@ -16,7 +16,7 @@ Object3D::Object3D(QString inputObjectName, ObjFileData *inputFileData)
     textureCoordinatesCount = new int();
 }
 
-bool Object3D::generateData(QProgressBar* progressBar)
+bool Object3D::generateData()
 {
     // Data from fileData variable
     QVector<QVector3D*>* fileDataVertices = new QVector<QVector3D*>(fileData->getVertices());
@@ -30,16 +30,22 @@ bool Object3D::generateData(QProgressBar* progressBar)
     QList<GLfloat>* normals = new QList<GLfloat>();
     QList<GLfloat>* textureCoordinates = new QList<GLfloat>();
 
-    // Faces look like this: 1/1/1 2/2/2 3/3/3 where first num is vertex, second one is normal, third one is texCoord
+    // Init for Singleton to work with
+    ProgressNotifierSingleton *progressNotifier = ProgressNotifierSingleton::getInstance();
 
-    progressBar->setRange(0, fileDataFaces->count() * 3);
+    // Setting up progressBar
+    progressNotifier->start(0, fileDataFaces->count() * 3);
+    progressNotifier->setProgress(0);
 
-    int* progressBarStep = new int(0);
+    int* progressStep = new int(0);
 
+    // Viewing each triples of faces in list of faces data
     for (QVector<QString*>* faces : *fileDataFaces)
     {
+        // Viewing each face in triples of faces:
         for (QString* face : *faces)
         {
+            // Converts string that contains data about a face to work with as a QList of ints
             QStringList* faceData = new QList(face->split("/").toList());
 
             // Adding vertices
@@ -58,13 +64,29 @@ bool Object3D::generateData(QProgressBar* progressBar)
 
             delete faceData;
 
-            progressBar->setValue(++(*progressBarStep));
+            progressNotifier->setProgress(++(*progressStep));
 
         }
     }
 
-    delete progressBarStep;
+    progressNotifier->finish();
+    delete progressStep;
 
+    // Return false if data wasn't generated
+    if (vertices == nullptr && normals == nullptr && textureCoordinates == nullptr){
+        delete textureCoordinates;
+        delete normals;
+        delete vertices;
+
+        delete fileDataFaces;
+        delete fileDataTextureCoordinates;
+        delete fileDataNormals;
+        delete fileDataVertices;
+
+        return false;
+    }
+
+    // Return true if data was generated and assign pointer to a field for data to be in
     // Result variable
     QMap<QString, QList<GLfloat>*>* resultMap = new QMap<QString, QList<GLfloat>*>();
     // Forming data to pass as return
@@ -82,6 +104,7 @@ bool Object3D::generateData(QProgressBar* progressBar)
     delete fileDataNormals;
     delete fileDataVertices;
 
+    // Assigning data to a field of current instance
     objectArrays = resultMap;
 
     return true;

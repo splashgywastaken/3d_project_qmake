@@ -10,7 +10,7 @@ ObjFileReader &ObjFileReader::Instantiate() {
     return objFileReader;
 }
 
-ObjFileData* ObjFileReader::readFile(const QString& filePath, QProgressBar* progressBar) {
+ObjFileData* ObjFileReader::readFile(const QString& filePath) {
 
     QFileInfo *fileInfo = new QFileInfo(filePath);
 
@@ -50,8 +50,10 @@ ObjFileData* ObjFileReader::readFile(const QString& filePath, QProgressBar* prog
 
     int* counter = new int(0);
 
-    progressBar->setRange(*counter, *fileNumberOfLines);
-    progressBar->setValue(*counter);
+    ProgressNotifierSingleton* progressNotifier = ProgressNotifierSingleton::getInstance();
+
+    progressNotifier->start(0, *fileNumberOfLines);
+    progressNotifier->setProgress(*counter);
 
     // Filling up an object to return it in the end
     while(!in->atEnd()){        
@@ -62,6 +64,10 @@ ObjFileData* ObjFileReader::readFile(const QString& filePath, QProgressBar* prog
 
         if (*dataType != "#")
         {
+            if (*dataType == "o"){
+                objFileData->setObjectName(*line);
+            }
+
             if (*dataType == "v") {
                 // Resolving vertex
                 QVector3D * vertex_vector = new QVector3D;
@@ -133,8 +139,10 @@ ObjFileData* ObjFileReader::readFile(const QString& filePath, QProgressBar* prog
         delete line;
         delete dataType;
 
-        progressBar->setValue(++*counter);
+        progressNotifier->setProgress(++*counter);
     }
+
+    progressNotifier->finish();
 
     // Memory management
     delete counter;

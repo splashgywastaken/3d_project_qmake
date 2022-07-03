@@ -3,6 +3,8 @@
 
 ObjFileData::ObjFileData() {
     // Inits for fields:
+    // QString*
+    objectName_ = new QString;
     // QVector<QVector3D*>
     vertices_ = new QVector<QVector3D*>;
     normals_ = new QVector<QVector3D*>;
@@ -77,6 +79,8 @@ QString* ObjFileData::getDescription()
 
     QString* fileDescription = new QString;
 
+    fileDescription->append("Название объекта: " + *objectName_);
+
     fileDescription->append("Вершины ");
     fileDescription->append("\nКоличество: ");
     fileDescription->append(QString::fromStdString(std::to_string(vertices_->length())));
@@ -135,6 +139,8 @@ ObjFileData::~ObjFileData() {
     polygonVertexIndices_->clear();
 
     // Delete all fields
+    // QString
+    delete objectName_;
     // QVector<QVector3D*>*
     delete vertices_;
     delete normals_;
@@ -150,8 +156,15 @@ ObjFileData &ObjFileData::getObjFIleData() {
     return *this;
 }
 
+QString ObjFileData::getObjectName() const
+{
+    return *objectName_;
+}
+
 ObjFileData::ObjFileData(const ObjFileData &other) {
     // Putting in new one
+    // QString*
+    objectName_ = new QString(other.getObjectName());
     // QVector<QVector3D*>*
     vertices_ = new QVector<QVector3D *>(other.getVertices());
     normals_ = new QVector<QVector3D*>(other.getNormals());
@@ -167,6 +180,8 @@ ObjFileData::ObjFileData(const ObjFileData &other) {
 
 ObjFileData::ObjFileData(ObjFileData &&other)  noexcept {
     // Putting in new one
+    // QString*
+    objectName_ = new QString(other.getObjectName());
     // QVector<QVector3D*>*
     vertices_ = new QVector<QVector3D*>(std::move(other.getVertices()));
     normals_ = new QVector<QVector3D*>(std::move(other.getNormals()));
@@ -197,6 +212,11 @@ ObjFileData &ObjFileData::operator=(ObjFileData &&other)  noexcept {
 
 bool ObjFileData::operator!=(const ObjFileData& other) const {
     return !(*this == other);
+}
+
+void ObjFileData::setObjectName(QString objectName)
+{
+    *objectName_ = objectName;
 }
 
 bool ObjFileData::operator==(const ObjFileData& other) const {
@@ -232,6 +252,8 @@ void swap(ObjFileData& first, ObjFileData& second) {
 
     auto tempObjFileData = new ObjFileData();
 
+    // QString*
+    *tempObjFileData->objectName_ = first.getObjectName();
     // QVector<QVector3D*>*
     *tempObjFileData->vertices_ = first.getVertices();
     *tempObjFileData->normals_ = first.getNormals();

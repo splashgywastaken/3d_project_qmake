@@ -13,6 +13,8 @@
 #include <QOpenGLShaderProgram>
 #include "src/models/3D_obj_data/object3d.h"
 
+// TODO:: Закончить работу над шейдером, сделать возможность передачи данных о вершинах и т.д.
+
 class ObjectViewGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
@@ -20,7 +22,7 @@ public:
     explicit ObjectViewGLWidget(QWidget* parent = nullptr);
     ~ObjectViewGLWidget();
 
-    bool generateArrays(QProgressBar* progressBar);
+    bool generateArrays();
     void setFileData(ObjFileData *fileData);
 
     // QOpenGLWidget interface
@@ -30,11 +32,14 @@ protected:
     void paintGL() override;
 
 private:
+    QOpenGLShaderProgram* createShaderProgram(QString vertexShaderPath, QString fragmentShaderPath);
+
     Object3D* object;
 
-    QOpenGLShaderProgram *m_program;
-    QOpenGLContext *m_context;
-    QOpenGLPaintDevice *m_device;
+    QOpenGLShaderProgram *m_shader;
+    QOpenGLBuffer *m_vertexBuffer;
+
+    int m_nVertices;
 };
 
 #endif // OBJECTVIEWGLWIDGET_H

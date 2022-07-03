@@ -18,11 +18,13 @@ SOURCES = \
     \
     src/service/file_readers/ObjFileReader/ObjFileReader.cpp \
     \
+    src/service/progress_notifier/progressnotifiersingleton.cpp \
     src/widgets/customglwidget/customglwidget.cpp \
     src/widgets/objectviewglwidget/objectviewglwidget.cpp
 
 
 HEADERS = \
+    src/main/main.h \
     src/main/main.h \
     src/main/mainwindow.h \
     \
@@ -30,8 +32,10 @@ HEADERS = \
     src/models/dto/ObjFileData/ObjFileData.h \
     src/models/3D_obj_data/logo.cpp \
     \
+    src/service/GlobalState.h \
     src/service/file_readers/ObjFileReader/ObjFileReader.h \
     \
+    src/service/progress_notifier/progressnotifiersingleton.h \
     src/widgets/customglwidget/customglwidget.h \
     src/widgets/objectviewglwidget/objectviewglwidget.h
 
@@ -43,3 +47,9 @@ FORMS = \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    src/shader/basicShader.fsh \
+    src/shader/basicShader.vsh \
+    src/shaders/basicShader/basicShader.fsh \
+    src/shaders/basicShader/basicShader.vsh

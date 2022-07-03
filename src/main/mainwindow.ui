@@ -25,7 +25,7 @@
     </property>
     <layout class="QVBoxLayout" name="openGLLayout"/>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>770</x>
@@ -38,7 +38,7 @@
      <item>
       <widget class="QLabel" name="taskLabel">
        <property name="text">
-        <string>Прогресс чтения файла</string>
+        <string>Прогресс работы над заданием</string>
        </property>
       </widget>
      </item>
@@ -46,6 +46,32 @@
       <widget class="QProgressBar" name="taskProgressBar">
        <property name="value">
         <number>0</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>620</y>
+      <width>441</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="currentObjectDataLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Программа работает с объектом:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="objectNameLabel">
+       <property name="text">
+        <string>(данные об объекте пусты, загрузите объект для его обработки)</string>
        </property>
       </widget>
      </item>

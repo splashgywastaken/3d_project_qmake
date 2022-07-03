@@ -2,9 +2,10 @@
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
 #include <QMessageBox>
-#include <src/service/file_readers/ObjFileReader/ObjFileReader.h>
 #include <src/widgets/customglwidget/customglwidget.h>
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
+
+#include <src/service/GlobalState.h>
 //#include <src/widgets/customglwidget.h>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -15,8 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
     fileData = nullptr;
 
     glWidget = new ObjectViewGLWidget;
-    //glWidget = new CustomGLWidget;
-    //ui->openGLLayout->addWidget(glWidget);
 
     // MenuBar setup:
     createActions();
@@ -45,9 +44,12 @@ void MainWindow::openObjFile()
     ui->taskLabel->setVisible(true);
     setLabelText(ui->taskLabel, "Reading file: " + *filePath);
 
-    fileData = fileReader.readFile(*filePath, ui->taskProgressBar);
+    ProgressNotifierSingleton::initialize(ui->taskProgressBar);
+
+    fileData = fileReader.readFile(*filePath);
 
     if (fileData == nullptr){
+        // If reading failed
         QMessageBox::warning(
                     this,
                     "Error occured while reading .obj file",
@@ -55,11 +57,15 @@ void MainWindow::openObjFile()
                     );
         return;
     } else {
+        // If reading was successfull
         setLabelText(ui->taskLabel, "File successfully read");
+        setLabelText(ui->objectNameLabel, fileData->getObjectName());
     }
 
+    // Setting file data for glWidget to work with
     glWidget->setFileData(fileData);
 
+    // Memory cleaning
     delete filePath;
 }
 
@@ -80,7 +86,9 @@ void MainWindow::showObject()
 
     setLabelText(ui->taskLabel, "Processing Object");
 
-    if (!glWidget->generateArrays(ui->taskProgressBar)){
+    ProgressNotifierSingleton::initialize(ui->taskProgressBar);
+
+    if (!glWidget->generateArrays()){
         taskMessageBox->addButton(QMessageBox::Ok);
         taskMessageBox->setIcon(QMessageBox::Information);
         taskMessageBox->setText("Ошибка");

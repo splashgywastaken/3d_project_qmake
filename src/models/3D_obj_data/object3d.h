@@ -7,13 +7,15 @@
 #include <QProgressBar>
 #include <src/models/dto/ObjFileData/ObjFileData.h>
 
+#include <src/service/GlobalState.h>
+
 class Object3D
 {
 public:
     Object3D(QString inputObjectName, ObjFileData *inputFileData);
     ~Object3D() = default;
 
-    bool generateData(QProgressBar* progressBar);
+    bool generateData();
 
     void setFileData(ObjFileData* objData);
 

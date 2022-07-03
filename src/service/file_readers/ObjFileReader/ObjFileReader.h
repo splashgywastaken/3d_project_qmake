@@ -5,11 +5,13 @@
 #include <QProgressBar>
 #include "src/models/dto/ObjFileData/ObjFileData.h"
 
+#include <src/service/GlobalState.h>
+
 class ObjFileReader {
 public:
     static ObjFileReader& Instantiate();
 
-    static ObjFileData* readFile(const QString& filePath, QProgressBar* progressBar);
+    static ObjFileData* readFile(const QString& filePath);
 
 
 private:

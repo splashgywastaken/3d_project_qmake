@@ -7,6 +7,8 @@
 class ObjFileData {
 
 private:
+    // QString*
+    QString* objectName_;
     // QVector<QVector3D*>*
     QVector<QVector3D*>* vertices_;
     QVector<QVector3D*>* normals_;
@@ -37,6 +39,8 @@ public:
     bool operator!=(const ObjFileData& other) const;
 
     // Setters
+    // QString*
+    void setObjectName(QString objectName);
     // QVector<QVector3D>
     void addVertex(QVector3D vertex);
     void addNormal(QVector3D normal);
@@ -51,6 +55,8 @@ public:
 
     // Getters
     ObjFileData &getObjFIleData();
+    // QString
+    QString getObjectName() const;
     // QVector<QVector3D>
     QVector<QVector3D*>& getVertices() const;
     QVector<QVector3D*>& getNormals() const;

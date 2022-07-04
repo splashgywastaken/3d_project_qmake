@@ -11,7 +11,10 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
+
 #include "src/models/3D_obj_data/object3d.h"
+
+#include <src/service/GlobalState.h>
 
 // TODO:: Закончить работу над шейдером, сделать возможность передачи данных о вершинах и т.д.
 
@@ -22,8 +25,10 @@ public:
     explicit ObjectViewGLWidget(QWidget* parent = nullptr);
     ~ObjectViewGLWidget();
 
-    bool generateArrays();
+    bool generateArrays(AbstractProgressNotifier* progressNotifier);
     void setFileData(ObjFileData *fileData);
+    bool addObject(QList<GLfloat> vertices);
+    bool addObject();
 
     // QOpenGLWidget interface
 protected:

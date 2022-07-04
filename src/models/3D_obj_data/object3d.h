@@ -15,7 +15,7 @@ public:
     Object3D(QString inputObjectName, ObjFileData *inputFileData);
     ~Object3D() = default;
 
-    bool generateData();
+    bool generateData(AbstractProgressNotifier* progressNotifier);
 
     void setFileData(ObjFileData* objData);
 

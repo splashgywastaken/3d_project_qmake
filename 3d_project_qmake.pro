@@ -14,12 +14,10 @@ SOURCES = \
     \
     src/models/3D_obj_data/object3d.cpp \
     src/models/dto/ObjFileData/ObjFileData.cpp \
-    src/models/3D_obj_data/logo.cpp \
     \
     src/service/file_readers/ObjFileReader/ObjFileReader.cpp \
     \
     src/service/progress_notifier/progressnotifiersingleton.cpp \
-    src/widgets/customglwidget/customglwidget.cpp \
     src/widgets/objectviewglwidget/objectviewglwidget.cpp
 
 
@@ -30,13 +28,12 @@ HEADERS = \
     \
     src/models/3D_obj_data/object3d.h \
     src/models/dto/ObjFileData/ObjFileData.h \
-    src/models/3D_obj_data/logo.cpp \
     \
     src/service/GlobalState.h \
     src/service/file_readers/ObjFileReader/ObjFileReader.h \
     \
+    src/service/progress_notifier/AbstractProgressNotifier.h \
     src/service/progress_notifier/progressnotifiersingleton.h \
-    src/widgets/customglwidget/customglwidget.h \
     src/widgets/objectviewglwidget/objectviewglwidget.h
 
 

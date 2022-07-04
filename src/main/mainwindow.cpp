@@ -2,11 +2,9 @@
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
 #include <QMessageBox>
-#include <src/widgets/customglwidget/customglwidget.h>
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
 #include <src/service/GlobalState.h>
-//#include <src/widgets/customglwidget.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,6 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->taskProgressBar->setVisible(false);
     ui->taskLabel->setVisible(false);
+
+    glWidget = new ObjectViewGLWidget;
+
+    ui->openGLLayout->addWidget(glWidget);
 }
 
 MainWindow::~MainWindow()
@@ -42,22 +44,22 @@ void MainWindow::openObjFile()
 
     ui->taskProgressBar->setVisible(true);
     ui->taskLabel->setVisible(true);
+    setLabelFontColor(ui->taskLabel, "#3498DB");
     setLabelText(ui->taskLabel, "Reading file: " + *filePath);
 
     ProgressNotifierSingleton::initialize(ui->taskProgressBar);
+    AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
 
-    fileData = fileReader.readFile(*filePath);
+    fileData = fileReader.readFile(*filePath, progressNotifier);
 
     if (fileData == nullptr){
-        // If reading failed
-        QMessageBox::warning(
-                    this,
-                    "Error occured while reading .obj file",
-                    "Incorrect path to file or incorrect data, please try again"
-                    );
+        setLabelFontColor(ui->taskLabel, "#C0392B");
+        setLabelText(ui->taskLabel, "Reading failed");
+
         return;
     } else {
         // If reading was successfull
+        setLabelFontColor(ui->taskLabel, "#27AE60");
         setLabelText(ui->taskLabel, "File successfully read");
         setLabelText(ui->objectNameLabel, fileData->getObjectName());
     }
@@ -84,41 +86,36 @@ void MainWindow::showObject()
     QMessageBox* taskMessageBox = new QMessageBox();
     taskMessageBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+    setLabelFontColor(ui->taskLabel, "#3498DB");
     setLabelText(ui->taskLabel, "Processing Object");
 
     ProgressNotifierSingleton::initialize(ui->taskProgressBar);
+    AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
 
-    if (!glWidget->generateArrays()){
-        taskMessageBox->addButton(QMessageBox::Ok);
-        taskMessageBox->setIcon(QMessageBox::Information);
-        taskMessageBox->setText("Ошибка");
-        taskMessageBox->setInformativeText("Не получилось сгенерировать данные для отображения объекта");
-        taskMessageBox->exec();
-
+    if (!glWidget->generateArrays(progressNotifier)){
+        setLabelFontColor(ui->taskLabel, "#C0392B");
         setLabelText(ui->taskLabel, "Processing failed");
 
         return;
     }
 
+    setLabelFontColor(ui->taskLabel, "#27AE60");
     setLabelText(ui->taskLabel, "Object successfully processed");
 
-    taskMessageBox->addButton(QMessageBox::Ok);
-    taskMessageBox->setIcon(QMessageBox::Information);
-    taskMessageBox->setText("Успех");
-    taskMessageBox->setInformativeText("Массивы данных успешно сгенерированы");
-    taskMessageBox->exec();
+    glWidget->addObject();
+    glWidget->update();
 
     delete taskMessageBox;
-}
-
-void MainWindow::addObject()
-{
-
 }
 
 void MainWindow::setLabelText(QLabel *label, QString text)
 {
     label->setText(text);
+}
+
+void MainWindow::setLabelFontColor(QLabel *label, QString color)
+{
+    label->setStyleSheet("{color: " + color + "}");
 }
 
 void MainWindow::createActions()
@@ -137,12 +134,6 @@ void MainWindow::createActions()
     showObjectAction->setStatusTip(tr("Show object that you got from a file"));
     connect(showObjectAction, &QAction::triggered, this, &MainWindow::showObject);
 
-    // Add new object to a window action
-    addObjectAction = new QAction(tr("Add object"), this);
-    addObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_A));
-    addObjectAction->setStatusTip(tr("Add new object to a scene"));
-    connect(addObjectAction, &QAction::triggered, this, &MainWindow::addObject);
-
 }
 
 void MainWindow::createMenus()
@@ -153,7 +144,6 @@ void MainWindow::createMenus()
 
     objectMenu = menuBar()->addMenu(tr("&Object"));
     objectMenu->addAction(showObjectAction);
-    objectMenu->addAction(addObjectAction);
 
 }
 

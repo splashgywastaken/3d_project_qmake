@@ -10,7 +10,7 @@ ObjFileReader &ObjFileReader::Instantiate() {
     return objFileReader;
 }
 
-ObjFileData* ObjFileReader::readFile(const QString& filePath) {
+ObjFileData* ObjFileReader::readFile(const QString& filePath, AbstractProgressNotifier* progressNotifier) {
 
     QFileInfo *fileInfo = new QFileInfo(filePath);
 
@@ -48,12 +48,13 @@ ObjFileData* ObjFileReader::readFile(const QString& filePath) {
     }
     in->seek(0);
 
-    int* counter = new int(0);
+    int* progressStep = new int(0);
 
-    ProgressNotifierSingleton* progressNotifier = ProgressNotifierSingleton::getInstance();
-
-    progressNotifier->start(0, *fileNumberOfLines);
-    progressNotifier->setProgress(*counter);
+    if (progressNotifier != nullptr)
+    {
+        progressNotifier->start(0, *fileNumberOfLines);
+        progressNotifier->setProgress(*progressStep);
+    }
 
     // Filling up an object to return it in the end
     while(!in->atEnd()){        
@@ -139,13 +140,19 @@ ObjFileData* ObjFileReader::readFile(const QString& filePath) {
         delete line;
         delete dataType;
 
-        progressNotifier->setProgress(++*counter);
+        if (progressNotifier != nullptr)
+        {
+            progressNotifier->setProgress(++*progressStep);
+        }
     }
 
-    progressNotifier->finish();
+    if (progressNotifier != nullptr)
+    {
+        progressNotifier->finish();
+    }
 
     // Memory management
-    delete counter;
+    delete progressStep;
     delete fileNumberOfLines;
     delete file;
     delete in;

@@ -16,7 +16,7 @@ Object3D::Object3D(QString inputObjectName, ObjFileData *inputFileData)
     textureCoordinatesCount = new int();
 }
 
-bool Object3D::generateData()
+bool Object3D::generateData(AbstractProgressNotifier* progressNotifier)
 {
     // Data from fileData variable
     QVector<QVector3D*>* fileDataVertices = new QVector<QVector3D*>(fileData->getVertices());
@@ -30,14 +30,15 @@ bool Object3D::generateData()
     QList<GLfloat>* normals = new QList<GLfloat>();
     QList<GLfloat>* textureCoordinates = new QList<GLfloat>();
 
-    // Init for Singleton to work with
-    ProgressNotifierSingleton *progressNotifier = ProgressNotifierSingleton::getInstance();
-
-    // Setting up progressBar
-    progressNotifier->start(0, fileDataFaces->count() * 3);
-    progressNotifier->setProgress(0);
+    if (progressNotifier != nullptr)
+    {
+        // Setting up progressBar
+        progressNotifier->start(0, fileDataFaces->count() * 3);
+        progressNotifier->setProgress(0);
+    }
 
     int* progressStep = new int(0);
+
 
     // Viewing each triples of faces in list of faces data
     for (QVector<QString*>* faces : *fileDataFaces)
@@ -64,13 +65,18 @@ bool Object3D::generateData()
 
             delete faceData;
 
-            progressNotifier->setProgress(++(*progressStep));
+            if (progressNotifier != nullptr)
+            {
+                progressNotifier->setProgress(++(*progressStep));
+            }
 
         }
     }
 
-    progressNotifier->finish();
-    delete progressStep;
+    if (progressNotifier != nullptr)
+    {
+        progressNotifier->finish();
+    }
 
     // Return false if data wasn't generated
     if (vertices == nullptr && normals == nullptr && textureCoordinates == nullptr){
@@ -99,6 +105,7 @@ bool Object3D::generateData()
     *normalsCount = normals->count() / 3;
     *textureCoordinatesCount = textureCoordinates->count() / 2;
 
+    delete progressStep;
     delete fileDataFaces;
     delete fileDataTextureCoordinates;
     delete fileDataNormals;

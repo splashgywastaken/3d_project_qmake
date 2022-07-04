@@ -27,11 +27,10 @@ private slots:
 
     void showObject();
 
-    void addObject();
-
 private:
     // Misc methods:
     void setLabelText(QLabel* label, QString text);
+    void setLabelFontColor(QLabel* label, QString color);
 
     void createActions();
     void createMenus();
@@ -42,7 +41,6 @@ private:
 
     QAction* openAction;
     QAction* showObjectAction;
-    QAction* addObjectAction;
 
     // Custom widgets
     ObjectViewGLWidget * glWidget;

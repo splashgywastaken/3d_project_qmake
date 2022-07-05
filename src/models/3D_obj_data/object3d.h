@@ -12,29 +12,25 @@
 class Object3D
 {
 public:
-    Object3D(QString inputObjectName, ObjFileData *inputFileData);
+    Object3D();
     ~Object3D() = default;
 
-    bool generateData(AbstractProgressNotifier* progressNotifier);
+    bool generateData(ObjFileData& fileData, AbstractProgressNotifier* progressNotifier);
 
-    void setFileData(ObjFileData* objData);
+    QMap<QString, QList<GLfloat>>& getObjectArrays();
+    const GLfloat* getConstData(QString key);
 
-    QMap<QString, QList<GLfloat>*>* getObjectArrays();
-    const GLfloat* getConstData(QString key) const;
-
-    int getFacesCount() const;
-    int getVertexCount() const;
-    int getNormalsCount() const;
-    int getTextureCoordinatesCount() const;
+    int getFacesCount();
+    int getVertexCount();
+    int getNormalsCount();
+    int getTextureCoordinatesCount();
 
 private:
-    QString *objectName;
-    QMap<QString, QList<GLfloat>*> *objectArrays;
-    ObjFileData* fileData;
-    int* facesCount;
-    int* verticesCount;
-    int* textureCoordinatesCount;
-    int* normalsCount;
+    QMap<QString, QList<GLfloat>> objectArrays;
+    int facesCount;
+    int verticesCount;
+    int textureCoordinatesCount;
+    int normalsCount;
 };
 
 #endif // OBJECT3D_H

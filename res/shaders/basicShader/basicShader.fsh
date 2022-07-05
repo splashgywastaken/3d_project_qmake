@@ -14,10 +14,9 @@
 //    float ambientAmount = 1.0 - diffuseAmount;
 //    gl_FragColor = vec4(color * ambientAmount + color * diffuse * diffuseAmount + specular * specularAmount, 1.0);
 //}
-
-uniform vec3 u_objectColor;
+uniform vec3 objectColor;
 
 void main(void)
 {
-    gl_FragColor = vec4(u_objectColor, 1.0);
+    gl_FragColor = vec4(objectColor, 1.0);
 }

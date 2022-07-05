@@ -1,28 +1,19 @@
 #include "objectviewglwidget.h"
 
+#include <QMessageBox>
+
 ObjectViewGLWidget::ObjectViewGLWidget(QWidget* parent)
 {
-    object = nullptr;
+    m_object = Object3D();
 }
 
 ObjectViewGLWidget::~ObjectViewGLWidget()
 {
-
 }
 
-bool ObjectViewGLWidget::generateArrays(AbstractProgressNotifier* progressNotifier = nullptr)
+bool ObjectViewGLWidget::generateArrays(ObjFileData& fileData, AbstractProgressNotifier* progressNotifier = nullptr)
 {
-    return object->generateData(progressNotifier);
-}
-
-void ObjectViewGLWidget::setFileData(ObjFileData* fileData)
-{
-    if (object == nullptr){
-        object = new Object3D("Object", fileData);
-    }
-    else {
-        object->setFileData(fileData);
-    }
+    return m_object.generateData(fileData, progressNotifier);
 }
 
 bool ObjectViewGLWidget::addObject(QList<GLfloat> vertices)
@@ -48,17 +39,56 @@ bool ObjectViewGLWidget::addObject(QList<GLfloat> vertices)
 
 bool ObjectViewGLWidget::addObject()
 {
-    return addObject(*object->getObjectArrays()->take("vertices"));
+    return addObject(m_object.getObjectArrays().take("vertices"));
+}
+
+void ObjectViewGLWidget::setVertexShaderPath(QString vertexShaderPath)
+{
+    m_vertexShaderPath = vertexShaderPath;
+}
+
+void ObjectViewGLWidget::setFragmentShaderPath(QString fragmentShaderPath)
+{
+    m_fragmentShaderPath = fragmentShaderPath;
+}
+
+void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
+{
+    m_objectColor = objectColor;
+    update();
+}
+
+void ObjectViewGLWidget::setUseNormals(bool useNormals)
+{
+    m_useNormals = useNormals;
+}
+
+void ObjectViewGLWidget::reinit()
+{
+    if (m_fragmentShaderPath.isEmpty() || m_vertexShaderPath.isEmpty()){
+        QString basicVertexShaderFileName = "E:/projects SSD/Qt/3d_project_qmake/src/widgets/objectviewglwidget/shaders/basicShader/basicShader.vsh";
+        QString basicFragmentShaderFileName = "E:/projects SSD/Qt/3d_project_qmake/src/widgets/objectviewglwidget/shaders/basicShader/basicShader.fsh";
+        QMessageBox::warning(
+                    this,
+                    "Не был задан вершинный или фрагментный шейдер",
+                    "Программа будет использовать стандартный шейдер"
+                    );
+        m_shader = createShaderProgram(basicVertexShaderFileName, basicFragmentShaderFileName);
+    } else
+    {
+        m_shader = createShaderProgram(m_vertexShaderPath, m_fragmentShaderPath);
+    }
+    Q_ASSERT(m_shader != nullptr);
 }
 
 void ObjectViewGLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
 
-    QString vertexShaderFileName = "E:/projects SSD/Qt/3d_project_qmake/src/widgets/objectviewglwidget/shaders/basicShader/basicShader.vsh";
-    QString fragmentShaderFileName = "E:/projects SSD/Qt/3d_project_qmake/src/widgets/objectviewglwidget/shaders/basicShader/basicShader.fsh";
+    QString basicVertexShaderFileName = "E:/projects SSD/Qt/3d_project_qmake/src/widgets/objectviewglwidget/shaders/basicShader/basicShader.vsh";
+    QString basicFragmentShaderFileName = "E:/projects SSD/Qt/3d_project_qmake/src/widgets/objectviewglwidget/shaders/basicShader/basicShader.fsh";
 
-    m_shader = createShaderProgram(vertexShaderFileName, fragmentShaderFileName);
+    m_shader = createShaderProgram(basicVertexShaderFileName, basicFragmentShaderFileName);
     Q_ASSERT(m_shader != nullptr);
 
     QList<GLfloat> vertices;
@@ -93,6 +123,7 @@ void ObjectViewGLWidget::paintGL()
         qFatal("Can not bind shader");
     m_shader->setUniformValue("modelViewMatrix", modelViewMatrix);
     m_shader->setUniformValue("projectionMatrix", projectionMatrix);
+    m_shader->setUniformValue("u_objectColor", m_objectColor);
 
     if(!m_vertexBuffer->bind())
         qFatal("Can not bind shader");
@@ -100,7 +131,8 @@ void ObjectViewGLWidget::paintGL()
     m_shader->enableAttributeArray("vertex");
     m_vertexBuffer->release();
 
-    glDrawArrays(GL_LINES, 0, m_nVertices);
+//    glDrawArrays(GL_LINES, 0, m_nVertices);
+    glDrawArrays(GL_TRIANGLES, 0, m_nVertices);
 
     m_shader->release();
 }

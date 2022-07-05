@@ -8,37 +8,41 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES = \
+#include(main/main.pri)
+
+SOURCES += \
     src/main/main.cpp \
-    src/main/mainwindow.cpp \
-    \
+    src/main/colorpicker/colorpicker.cpp \
+    src/main/mainwindow/mainwindow.cpp \
     src/models/3D_obj_data/object3d.cpp \
     src/models/dto/ObjFileData/ObjFileData.cpp \
     \
+    src/service/camera/camera.cpp \
     src/service/file_readers/ObjFileReader/ObjFileReader.cpp \
     \
     src/service/progress_notifier/progressnotifiersingleton.cpp \
     src/widgets/objectviewglwidget/objectviewglwidget.cpp
 
 
-HEADERS = \
+HEADERS += \
     src/main/main.h \
-    src/main/main.h \
-    src/main/mainwindow.h \
-    \
+    src/main/colorpicker/colorpicker.h \
+    src/main/mainwindow/mainwindow.h \
     src/models/3D_obj_data/object3d.h \
     src/models/dto/ObjFileData/ObjFileData.h \
     \
     src/service/GlobalState.h \
+    src/service/camera/camera.h \
     src/service/file_readers/ObjFileReader/ObjFileReader.h \
     \
     src/service/progress_notifier/AbstractProgressNotifier.h \
     src/service/progress_notifier/progressnotifiersingleton.h \
     src/widgets/objectviewglwidget/objectviewglwidget.h
 
+FORMS += \
+    src/main/colorpicker/colorpicker.ui \
+    src/main/mainwindow/mainwindow.ui
 
-FORMS = \
-    src/main/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -46,7 +50,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    src/shader/basicShader.fsh \
-    src/shader/basicShader.vsh \
-    src/shaders/basicShader/basicShader.fsh \
-    src/shaders/basicShader/basicShader.vsh
+    src/main/main.pri

@@ -11,8 +11,7 @@ class ObjFileReader {
 public:
     static ObjFileReader& Instantiate();
 
-    static ObjFileData* readFile(const QString& filePath, AbstractProgressNotifier* progressNotifier = nullptr);
-
+    static bool readFile(const QString& filePath, ObjFileData&, AbstractProgressNotifier* progressNotifier = nullptr);
 
 private:
     ObjFileReader() = default;

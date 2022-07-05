@@ -12,8 +12,6 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class CustomGLWidget;
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -27,6 +25,12 @@ private slots:
 
     void showObject();
 
+    void changeVertexShader();
+    void changeFragmentShader();
+
+    void reinitShaderProgram();
+    void useNormalsCheckBoxClicked(bool checked);
+
 private:
     // Misc methods:
     void setLabelText(QLabel* label, QString text);
@@ -38,16 +42,21 @@ private:
     // Menu bar actions
     QMenu* fileMenu;
     QMenu* objectMenu;
+    QMenu* shaderMenu;
 
     QAction* openAction;
     QAction* showObjectAction;
+    QAction* changeVertexShaderAction;
+    QAction* changeFragmentShaderAction;
+    QAction* reinitShaderProgramAction;
 
     // Custom widgets
     ObjectViewGLWidget * glWidget;
-    //CustomGLWidget * glWidget;
+
+    // UI
+    Ui::MainWindow *ui;
 
     // Other variables
-    Ui::MainWindow *ui;
     ObjFileData *fileData;
 };
 #endif // MAINWINDOW_H

@@ -7,26 +7,26 @@
 class ObjFileData {
 
 private:
-    // QString*
-    QString* objectName_;
-    // QVector<QVector3D*>*
-    QVector<QVector3D*>* vertices_;
-    QVector<QVector3D*>* normals_;
-    // QVector<QVector2D*>*
-    QVector<QVector2D*>* vertexTextureCoordinates_;
-    // QVector<QVector<int*>*>*
-    QVector<QVector<int*>*>* polygonVertexIndices_;
-    QVector<QVector<int*>*>* polygonVertexTextureCoordinateIndices_;
-    QVector<QVector<int*>*>* polygonNormalIndices_;
-    // QVector<QVector<QString*>>
-    QVector<QVector<QString*>*>* faces_;
+    // QString
+    QString m_objectName;
+    // QVector<QVector3D>
+    QVector<QVector3D> m_vertices;
+    QVector<QVector3D> m_normals;
+    // QVector<QVector2D>
+    QVector<QVector2D> m_vertexTextureCoordinates;
+    // QVector<QVector<int>>
+    QVector<QVector<int>> m_polygonVertexIndices;
+    QVector<QVector<int>> m_polygonVertexTextureCoordinateIndices;
+    QVector<QVector<int>> m_polygonNormalIndices;
+    // QVector<QVector<QString>>
+    QVector<QVector<QString>> m_faces;
 
 public:
     // Base constructor and destructor
     ObjFileData();
     ~ObjFileData();
     // Copy and move constructors
-    ObjFileData(const ObjFileData& other);
+    ObjFileData(ObjFileData& other);
     ObjFileData(ObjFileData&& other) noexcept;
 
     // Copy-assign operator
@@ -35,8 +35,8 @@ public:
     ObjFileData& operator=(ObjFileData&& other) noexcept ;
 
     // Boolean operators
-    bool operator==(const ObjFileData& other) const;
-    bool operator!=(const ObjFileData& other) const;
+    bool operator==(ObjFileData& other);
+    bool operator!=(ObjFileData& other);
 
     // Setters
     // QString*
@@ -47,32 +47,34 @@ public:
     // QVector<QVector2D>
     void addVertexTextureCoordinate(QVector2D textureCoordinate);
     // QVector<int>
-    void addPolygonVertexIndex(QVector<int*> polygonVertexIndex);
-    void addPolygonVertexTextureCoordinateIndex(QVector<int*> polygonVertexTextureCoordinatesIndex);
-    void addPolygonNormalIndex(QVector<int*> polygonNormalIndex);
+    void addPolygonVertexIndex(QVector<int> polygonVertexIndex);
+    void addPolygonVertexTextureCoordinateIndex(QVector<int> polygonVertexTextureCoordinatesIndex);
+    void addPolygonNormalIndex(QVector<int> polygonNormalIndex);
     // QVector<QVector<QString>>
-    void addFace(QVector<QString*> face);
+    void addFace(QVector<QString> face);
 
     // Getters
     ObjFileData &getObjFIleData();
     // QString
-    QString getObjectName() const;
+    QString getObjectName();
     // QVector<QVector3D>
-    QVector<QVector3D*>& getVertices() const;
-    QVector<QVector3D*>& getNormals() const;
-    QVector<QVector<QString *> *> & getFaces() const;
+    QVector<QVector3D>& getVertices();
+    QVector<QVector3D>& getNormals();
+    QVector<QVector<QString>>& getFaces();
     // QVector<QVector2D>
-    QVector<QVector2D*>& getVertexTextureCoordinates() const;
+    QVector<QVector2D>& getVertexTextureCoordinates();
     // QVector<int>
-    QVector<QVector<int*>*>& getPolygonVertexIndices() const;
-    QVector<QVector<int*>*>& getPolygonVertexTextureCoordinateIndices() const;
-    QVector<QVector<int*>*>& getPolygonNormalIndices() const;
+    QVector<QVector<int>>& getPolygonVertexIndices();
+    QVector<QVector<int>>& getPolygonVertexTextureCoordinateIndices();
+    QVector<QVector<int>>& getPolygonNormalIndices();
 
     // Getting file description
-    QString* getDescription();
+    QString getDescription();
+
+    bool isEmpty();
 
     // Friend operators
-    friend void swap(ObjFileData& first, ObjFileData& second); //nothrow   
+    friend void swap(ObjFileData& first, ObjFileData& second); //nothrow
 };
 
 #endif

@@ -77,6 +77,35 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="fitToViewButton">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>620</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Fit to view</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="useNormalsCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>620</y>
+      <width>211</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Использовать значения нормалей</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

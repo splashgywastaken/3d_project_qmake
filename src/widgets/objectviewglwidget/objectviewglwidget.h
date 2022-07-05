@@ -12,11 +12,9 @@
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 
-#include "src/models/3D_obj_data/object3d.h"
+#include <src/models/3D_obj_data/object3d.h>
 
 #include <src/service/GlobalState.h>
-
-// TODO:: Закончить работу над шейдером, сделать возможность передачи данных о вершинах и т.д.
 
 class ObjectViewGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -25,26 +23,41 @@ public:
     explicit ObjectViewGLWidget(QWidget* parent = nullptr);
     ~ObjectViewGLWidget();
 
-    bool generateArrays(AbstractProgressNotifier* progressNotifier);
-    void setFileData(ObjFileData *fileData);
-    bool addObject(QList<GLfloat> vertices);
+    void reinit();
+
+    bool generateArrays(ObjFileData& fileData, AbstractProgressNotifier* progressNotifier);
     bool addObject();
 
-    // QOpenGLWidget interface
+    void setVertexShaderPath(QString vertexShaderPath);
+    void setFragmentShaderPath(QString fragmentShaderPath);
+
+    void setObjectColor(QVector3D objectColor);
+    void setUseNormals(bool useNormals);
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
 private:
+    bool addObject(QList<GLfloat> vertices);
+    bool addObject(QList<GLfloat> vertices, QList<GLfloat> normals);
+
     QOpenGLShaderProgram* createShaderProgram(QString vertexShaderPath, QString fragmentShaderPath);
 
-    Object3D* object;
+    Object3D m_object;
+
+    QVector3D m_objectColor = QVector3D(0.0, 1.0, 1.0);
 
     QOpenGLShaderProgram *m_shader;
     QOpenGLBuffer *m_vertexBuffer;
 
+    QString m_vertexShaderPath;
+    QString m_fragmentShaderPath;
+
     int m_nVertices;
+
+    bool m_useNormals = true;
 };
 
 #endif // OBJECTVIEWGLWIDGET_H

@@ -10,139 +10,112 @@ ObjFileReader &ObjFileReader::Instantiate() {
     return objFileReader;
 }
 
-ObjFileData* ObjFileReader::readFile(const QString& filePath, AbstractProgressNotifier* progressNotifier) {
+bool ObjFileReader::readFile(const QString& filePath, ObjFileData& fileData, AbstractProgressNotifier* progressNotifier) {
 
-    QFileInfo *fileInfo = new QFileInfo(filePath);
+    QFileInfo fileInfo(filePath);
 
     // Check for correct file format
-    if (fileInfo->suffix() != "obj"){
-        delete fileInfo;
-        return nullptr;
+    if (fileInfo.suffix() != "obj"){
+        qCritical()<<QString("Incorrect file format in file" + filePath);
+        return false;
     }
-
-    delete fileInfo;
-
-    // Made an object to fill with data
-    ObjFileData *objFileData = new ObjFileData();
 
     // Variables inits
-    QFile *file = new QFile(filePath);
-    QTextStream* in = new QTextStream(&(*file));
+    QFile file(filePath);
+    QTextStream in(&file);
 
     // Opening file etc.
-    if (!file->open(QIODevice::ReadOnly)){
-        qWarning("Cannot open file for reading");
-
-        delete in;
-        delete file;
-        delete objFileData;
-
-        return nullptr;
+    if (!file.open(QIODevice::ReadOnly)){
+        qFatal("Cannot open file for reading");
+        return false;
     }
 
-    int* fileNumberOfLines = new int(0);
+    int fileNumberOfLines = 0;
 
-    while (!in->atEnd()){
-        *fileNumberOfLines += 1;
-        in->readLine();
+    while (!in.atEnd()){
+        fileNumberOfLines += 1;
+        in.readLine();
     }
-    in->seek(0);
+    in.seek(0);
 
-    int* progressStep = new int(0);
+    int progressStep = 0;
 
     if (progressNotifier != nullptr)
     {
-        progressNotifier->start(0, *fileNumberOfLines);
-        progressNotifier->setProgress(*progressStep);
+        progressNotifier->start(0, fileNumberOfLines);
+        progressNotifier->setProgress(progressStep);
     }
 
     // Filling up an object to return it in the end
-    while(!in->atEnd()){        
-        QString* line = new QString(in->readLine());
+    while(!in.atEnd()){
+        QString line(in.readLine());
 
-        QString* dataType = new QString(line->mid(0, line->indexOf(" ")));
-        *line = QString(line->mid(line->indexOf(" ") + 1, line->length()));
+        QString dataType(line.mid(0, line.indexOf(" ")));
+        line = QString(line.mid(line.indexOf(" ") + 1, line.length()));
 
-        if (*dataType != "#")
+        if (dataType != "#")
         {
-            if (*dataType == "o"){
-                objFileData->setObjectName(*line);
+            if (dataType == "o"){
+                fileData.setObjectName(line);
             }
 
-            if (*dataType == "v") {
+            if (dataType == "v") {
                 // Resolving vertex
-                QVector3D * vertex_vector = new QVector3D;
+                QVector3D vertex_vector;
 
                 // Do things with line if it is a vertex element
-                QStringList *line_data = new QList(line->split(" ").toList());
+                QStringList line_data(line.split(" ").toList());
 
-                vertex_vector->setX(line_data->at(0).toDouble());
-                vertex_vector->setY(line_data->at(1).toDouble());
-                vertex_vector->setZ(line_data->at(2).toDouble());
+                vertex_vector.setX(line_data.at(0).toDouble());
+                vertex_vector.setY(line_data.at(1).toDouble());
+                vertex_vector.setZ(line_data.at(2).toDouble());
 
-                objFileData->addVertex(*vertex_vector);
+                fileData.addVertex(vertex_vector);
 
-                // Memory management
-                delete line_data;
-                delete vertex_vector;
-            } else if (*dataType == "vn") {
+            } else if (dataType == "vn") {
                 // Resolving vertex normals
-                QVector3D * vertex_normal_vector = new QVector3D;
+                QVector3D vertex_normal_vector;
 
                 // Do things with line if it is a vertex normal element
-                QStringList *line_data = new QList(line->split(" ").toList());
+                QStringList line_data(line.split(" ").toList());
 
-                vertex_normal_vector->setX(line_data->at(0).toDouble());
-                vertex_normal_vector->setY(line_data->at(1).toDouble());
-                vertex_normal_vector->setZ(line_data->at(2).toDouble());
+                vertex_normal_vector.setX(line_data.at(0).toDouble());
+                vertex_normal_vector.setY(line_data.at(1).toDouble());
+                vertex_normal_vector.setZ(line_data.at(2).toDouble());
 
-                objFileData->addNormal(*vertex_normal_vector);
+                fileData.addNormal(vertex_normal_vector);
 
-                // Memory management
-                delete line_data;
-                delete vertex_normal_vector;
-            } else if (*dataType == "vt") {
+            } else if (dataType == "vt") {
                 // Resolving vertex normals
-                QVector2D * vertex_texture_vector = new QVector2D;
+                QVector2D vertex_texture_vector;
 
                 // Do things with line if it is a vertex texture coordinates
-                QStringList *line_data = new QList(line->split(" ").toList());
+                QStringList line_data(line.split(" ").toList());
 
-                vertex_texture_vector->setX(line_data->at(0).toDouble());
-                vertex_texture_vector->setY(line_data->at(1).toDouble());
+                vertex_texture_vector.setX(line_data.at(0).toDouble());
+                vertex_texture_vector.setY(line_data.at(1).toDouble());
 
-                objFileData->addVertexTextureCoordinate(*vertex_texture_vector);
+                fileData.addVertexTextureCoordinate(vertex_texture_vector);
 
-                // Memory management
-                delete line_data;
-                delete vertex_texture_vector;
-            } else if (*dataType == "f") {
+            } else if (dataType == "f") {
                 // Resolving polygonal faces element
-                QVector < QString * > *face_vector = new QVector<QString *>;
+                QVector <QString> face_vector;
 
                 // Do things with line if it is a face element
-                QStringList *line_data = new QList(line->split(" ").toList());
+                QStringList line_data(line.split(" ").toList());
 
                 foreach(
-                const QString &str, *line_data){
-                    *face_vector << new QString(str);
+                const QString &str, line_data){
+                    face_vector << str;
                 }
 
-                objFileData->addFace(*face_vector);
-
-                // Memory management
-                delete line_data;
-                delete face_vector;
+                fileData.addFace(face_vector);
             }
         }
 
-        // Memory management
-        delete line;
-        delete dataType;
-
         if (progressNotifier != nullptr)
         {
-            progressNotifier->setProgress(++*progressStep);
+            progressNotifier->setProgress(++progressStep);
         }
     }
 
@@ -151,11 +124,5 @@ ObjFileData* ObjFileReader::readFile(const QString& filePath, AbstractProgressNo
         progressNotifier->finish();
     }
 
-    // Memory management
-    delete progressStep;
-    delete fileNumberOfLines;
-    delete file;
-    delete in;
-
-    return objFileData;
+    return !fileData.isEmpty();
 }

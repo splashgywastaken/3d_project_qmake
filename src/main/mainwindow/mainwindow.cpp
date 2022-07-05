@@ -6,14 +6,13 @@
 
 #include <src/service/GlobalState.h>
 
+#include <src/main/colorpicker/colorpicker.h>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    // UI Style setup
-    this->setStyleSheet("background-color: white;");
 
     // Variables setup
     fileData = nullptr;
@@ -32,12 +31,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->openGLLayout->addWidget(glWidget);
 
     // Slots connection
-    connect(ui->useNormalsCheckBox, SIGNAL(QCheckBox::clicked(bool)), this, SLOT(useNormalsCheckBoxClicked(bool)));
+    connect(ui->useNormalsCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalsCheckBoxClicked);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setObjectColor(QVector3D objectColor)
+{
+    glWidget->setObjectColor(objectColor);
 }
 
 void MainWindow::openObjFile()
@@ -109,6 +113,14 @@ void MainWindow::showObject()
     glWidget->update();
 }
 
+void MainWindow::changeObjectColor()
+{
+    ColorPicker* colorPicker = new ColorPicker(this);
+    colorPicker->setMainWindow(this);
+
+    colorPicker->show();
+}
+
 void MainWindow::changeVertexShader()
 {
     glWidget->setVertexShaderPath(
@@ -154,20 +166,27 @@ void MainWindow::setLabelFontColor(QLabel *label, QString color)
 
 void MainWindow::createActions()
 {
-
+    // Files actions
     // Open file Action
     openAction = new QAction(tr("Open file"), this);
     openAction->setShortcuts(QKeySequence::Open);
     openAction->setStatusTip(tr("Open a new file"));
     connect(openAction, &QAction::triggered, this, &MainWindow::openObjFile);
 
+    // Objects actions
     // Show object action
     showObjectAction = new QAction(tr("Show object"), this);
-    // TODO:: rework with QKeyCombination class
     showObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
     showObjectAction->setStatusTip(tr("Show object that you got from a file"));
     connect(showObjectAction, &QAction::triggered, this, &MainWindow::showObject);
 
+    // Change object color
+    changeObjectColorAction = new QAction(tr("Change object color"), this);
+    changeObjectColorAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
+    changeObjectColorAction->setToolTip(tr("Use color pallete to change object color"));
+    connect(changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeObjectColor);
+
+    // Shaders actions
     changeVertexShaderAction = new QAction(tr("Change vertex shader"), this);
     changeVertexShaderAction->setShortcut(QKeySequence(Qt::Key_S | Qt::Key_C | Qt::Key_V));
     changeVertexShaderAction->setStatusTip(tr("Change vertex shader that OpenGL uses to display objects"));
@@ -191,6 +210,7 @@ void MainWindow::createMenus()
 
     objectMenu = menuBar()->addMenu(tr("&Object"));
     objectMenu->addAction(showObjectAction);
+    objectMenu->addAction(changeObjectColorAction);
 
     shaderMenu = menuBar()->addMenu(tr("&Shader"));
     shaderMenu->addAction(changeVertexShaderAction);

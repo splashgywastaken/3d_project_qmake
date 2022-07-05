@@ -20,10 +20,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void setObjectColor(QVector3D objectColor);
+
 private slots:
     void openObjFile();
 
     void showObject();
+    void changeObjectColor();
 
     void changeVertexShader();
     void changeFragmentShader();
@@ -44,8 +47,12 @@ private:
     QMenu* objectMenu;
     QMenu* shaderMenu;
 
+    // Files
     QAction* openAction;
+    // Objects
     QAction* showObjectAction;
+    QAction* changeObjectColorAction;
+    // Shaders
     QAction* changeVertexShaderAction;
     QAction* changeFragmentShaderAction;
     QAction* reinitShaderProgramAction;

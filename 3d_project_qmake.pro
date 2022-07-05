@@ -11,8 +11,8 @@ CONFIG += c++17
 #include(main/main.pri)
 
 SOURCES += \
-    src/main/main.cpp \
     src/main/colorpicker/colorpicker.cpp \
+    src/main/main.cpp \
     src/main/mainwindow/mainwindow.cpp \
     src/models/3D_obj_data/object3d.cpp \
     src/models/dto/ObjFileData/ObjFileData.cpp \
@@ -25,8 +25,8 @@ SOURCES += \
 
 
 HEADERS += \
-    src/main/main.h \
     src/main/colorpicker/colorpicker.h \
+    src/main/main.h \
     src/main/mainwindow/mainwindow.h \
     src/models/3D_obj_data/object3d.h \
     src/models/dto/ObjFileData/ObjFileData.h \

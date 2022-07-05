@@ -1,9 +1,9 @@
-#include "mainwindow.h"
+#include "src/main/mainwindow/mainwindow.h"
 
 #include <QApplication>
 #include <QTextEdit>
 
-#include "src/main/mainwindow.h"
+#include "src/main/mainwindow/mainwindow.h"
 #include "src/service/file_readers/ObjFileReader/ObjFileReader.h"
 
 // 05.07.2022

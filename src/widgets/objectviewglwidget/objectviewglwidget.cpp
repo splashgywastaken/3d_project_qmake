@@ -54,7 +54,7 @@ void ObjectViewGLWidget::setFragmentShaderPath(QString fragmentShaderPath)
 
 void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
 {
-    m_objectColor = objectColor;
+    m_objectColor = objectColor.normalized();
     update();
 }
 

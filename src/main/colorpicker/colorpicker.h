@@ -2,21 +2,37 @@
 #define COLORPICKER_H
 
 #include <QDialog>
+#include <QVector3D>
+
+#include <src/main/mainwindow/mainwindow.h>
 
 namespace Ui {
-class colorpicker;
+class ColorPicker;
 }
 
-class colorpicker : public QDialog
+class ColorPicker : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit colorpicker(QWidget *parent = nullptr);
-    ~colorpicker();
+    explicit ColorPicker(QWidget *parent = nullptr);
+    ~ColorPicker();
+
+    void setMainWindow(MainWindow* mainWindow);
+
+private slots:
+    void redColorChanged(int color);
+    void greenColorChanged(int color);
+    void blueColorChanged(int color);
+
+    void accept();
 
 private:
-    Ui::colorpicker *ui;
+    void updateColorLabel();
+
+    Ui::ColorPicker *ui;
+    MainWindow* m_mainWindow;
+    QVector3D m_color;
 };
 
 #endif // COLORPICKER_H

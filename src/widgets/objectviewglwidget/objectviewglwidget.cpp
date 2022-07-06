@@ -63,6 +63,11 @@ void ObjectViewGLWidget::setUseNormals(bool useNormals)
     m_useNormals = useNormals;
 }
 
+QVector3D ObjectViewGLWidget::getObjectColor()
+{
+    return m_objectColor;
+}
+
 void ObjectViewGLWidget::reinit()
 {
     if (m_fragmentShaderPath.isEmpty() || m_vertexShaderPath.isEmpty()){

@@ -34,6 +34,8 @@ public:
     void setObjectColor(QVector3D objectColor);
     void setUseNormals(bool useNormals);
 
+    QVector3D getObjectColor();
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

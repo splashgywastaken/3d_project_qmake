@@ -15,10 +15,8 @@ class ColorPicker : public QDialog
     Q_OBJECT
 
 public:
-    explicit ColorPicker(QWidget *parent = nullptr);
+    explicit ColorPicker(QWidget *parent = nullptr, MainWindow* mainWindow = nullptr, QVector3D currentColor = QVector3D(0.0, 0.0, 0.0));
     ~ColorPicker();
-
-    void setMainWindow(MainWindow* mainWindow);
 
 private slots:
     void redColorChanged(int color);

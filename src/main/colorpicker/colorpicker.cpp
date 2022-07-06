@@ -3,11 +3,21 @@
 
 #include <src/main/mainwindow/mainwindow.h>
 
-ColorPicker::ColorPicker(QWidget *parent) :
+ColorPicker::ColorPicker(QWidget *parent, MainWindow* mainWindow, QVector3D currentColor) :
     QDialog(parent),
     ui(new Ui::ColorPicker)
 {
     ui->setupUi(this);
+
+    // Setting up values:
+    m_mainWindow = mainWindow;
+    m_color = currentColor;
+    updateColorLabel();
+
+    // Styles
+    ui->redLabel->setStyleSheet("color: red");
+    ui->greenLabel->setStyleSheet("color: green");
+    ui->blueLabel->setStyleSheet("color: blue");
 
     // Sliders
     connect(ui->redSlider, &QSlider::valueChanged, this, &ColorPicker::redColorChanged);
@@ -21,11 +31,6 @@ ColorPicker::ColorPicker(QWidget *parent) :
 ColorPicker::~ColorPicker()
 {
     delete ui;
-}
-
-void ColorPicker::setMainWindow(MainWindow *mainWindow)
-{
-    m_mainWindow = mainWindow;
 }
 
 void ColorPicker::redColorChanged(int color)
@@ -60,4 +65,7 @@ void ColorPicker::updateColorLabel()
                 QString::number(m_color.y()) + ", " +
                 QString::number(m_color.z()) +
                 ")");
+    ui->redValueLabel->setText(QString::number(m_color.x()));
+    ui->greenValueLabel->setText(QString::number(m_color.y()));
+    ui->blueValueLabel->setText(QString::number(m_color.z()));
 }

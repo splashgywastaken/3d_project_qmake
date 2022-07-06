@@ -115,9 +115,7 @@ void MainWindow::showObject()
 
 void MainWindow::changeObjectColor()
 {
-    ColorPicker* colorPicker = new ColorPicker(this);
-    colorPicker->setMainWindow(this);
-
+    static ColorPicker *colorPicker = new ColorPicker(this, this, glWidget->getObjectColor());
     colorPicker->show();
 }
 

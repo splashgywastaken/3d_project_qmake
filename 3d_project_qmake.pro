@@ -1,4 +1,6 @@
-QT += core gui opengl openglwidgets
+QT += core gui testlib opengl openglwidgets
+
+LIBS += -lglu32 -lopengl32
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,11 +19,15 @@ SOURCES += \
     src/models/3D_obj_data/object3d.cpp \
     src/models/dto/ObjFileData/ObjFileData.cpp \
     \
+    src/service/DrawableObjectTools/drawableobjecttools.cpp \
+    src/service/MeshTools/meshtools.cpp \
     src/service/camera/camera.cpp \
     src/service/file_readers/ObjFileReader/ObjFileReader.cpp \
     \
     src/service/progress_notifier/progressnotifiersingleton.cpp \
-    src/widgets/objectviewglwidget/objectviewglwidget.cpp
+    src/widgets/objectviewglwidget/objectviewglwidget.cpp \
+    tests/MeshTools/meshtoolstests.cpp \
+    tests/ObjReaderTests/objreadertests.cpp
 
 
 HEADERS += \
@@ -31,13 +37,17 @@ HEADERS += \
     src/models/3D_obj_data/object3d.h \
     src/models/dto/ObjFileData/ObjFileData.h \
     \
+    src/service/DrawableObjectTools/drawableobjecttools.h \
     src/service/GlobalState.h \
+    src/service/MeshTools/meshtools.h \
     src/service/camera/camera.h \
     src/service/file_readers/ObjFileReader/ObjFileReader.h \
     \
     src/service/progress_notifier/AbstractProgressNotifier.h \
     src/service/progress_notifier/progressnotifiersingleton.h \
-    src/widgets/objectviewglwidget/objectviewglwidget.h
+    src/widgets/objectviewglwidget/objectviewglwidget.h \
+    tests/MeshTools/meshtoolstests.h \
+    tests/ObjReaderTests/objreadertests.h
 
 FORMS += \
     src/main/colorpicker/colorpicker.ui \

@@ -1,138 +1,101 @@
 #include "object3d.h"
 
+#include <QDir>
 #include <QMap>
 
 #include <src/models/dto/ObjFileData/ObjFileData.h>
 
-Object3D::Object3D()
+Object3D::Object3D(
+        QVector<QVector3D> vertices, QVector<int> polygonVertexIndices,
+        QVector<int> polygonStart,
+        QVector<QVector3D> normals, QVector<int> polygonNormalIndices
+        )
 {
-}
+    QVector<int> triangleVertexIndices = MeshTools::buildTriangleVertexIndices(polygonVertexIndices, polygonStart);
+    QVector<float> triangleVertexCoords = MeshTools::packTriangleVertexCoords(vertices, triangleVertexIndices);
+    m_nVertices = triangleVertexCoords.size() / 3;
+    int dataSize = triangleVertexCoords.size() * static_cast<int>(sizeof(float));
 
-bool Object3D::generateData(ObjFileData& fileData, AbstractProgressNotifier* progressNotifier)
-{
-    // Return false and assert if fileData is empty
-    if (fileData.isEmpty())
+    m_vertexBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    if (!m_vertexBuffer->create())
     {
-        qFatal("Failed to generateData. fileData member was empty in Object");
-        return false;
+        qFatal("Failed to create vertex buffer");
     }
-
-    // Data from fileData variable
-    if (fileData.getVertices().count() == 0)
+    if (!m_vertexBuffer->bind())
     {
-        qFatal("Vertices array is empty");
-        return false;
+        qFatal("Failed to bind vertex buffer");
     }
-    QVector<QVector3D> fileDataVertices = fileData.getVertices();
-    QVector<QVector3D> fileDataNormals = fileData.getNormals();
-    QVector<QVector2D> fileDataTextureCoordinates = fileData.getVertexTextureCoordinates();
-    QVector<QVector<QString>> fileDataFaces = fileData.getFaces();
 
-    // Vectors to form data in
-    // Change to GLfloat* data type
-    QList<GLfloat> vertices;
-    QList<GLfloat> normals;
-    QList<GLfloat> textureCoordinates;
+    m_vertexBuffer->allocate(triangleVertexCoords.constData(), dataSize);
+    m_vertexBuffer->release();
 
-    if (progressNotifier != nullptr)
+    QVector<int> triangleNormalIndices = MeshTools::buildTriangleVertexIndices(polygonNormalIndices, polygonStart);
+    QVector<float> triangleNormalCoords = MeshTools::packTriangleVertexCoords(normals, triangleNormalIndices);
+
+    m_normalBuffer = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    if (!m_normalBuffer->create())
     {
-        // Setting up progressBar
-        progressNotifier->start(0, fileDataFaces.count() * 3);
-        progressNotifier->setProgress(0);
+        qFatal("Failed to create normal buffer");
     }
-
-    int progressStep = 0;
-
-
-    // Viewing each triples of faces in list of faces data
-    for (QVector<QString> &faces : fileDataFaces)
+    if (!m_normalBuffer->bind())
     {
-        // Viewing each face in triples of faces:
-        for (QString &face : faces)
-        {
-            // Converts string that contains data about a face to work with as a QList of ints
-            QStringList* faceData = new QList(face.split("/").toList());
-
-            // Adding vertices
-            vertices.append(fileDataVertices.at(faceData->at(0).toInt() - 1).x());
-            vertices.append(fileDataVertices.at(faceData->at(0).toInt() - 1).y());
-            vertices.append(fileDataVertices.at(faceData->at(0).toInt() - 1).z());
-
-            // Adding textureCoordinates
-            textureCoordinates.append(fileDataTextureCoordinates.at(faceData->at(1).toInt() - 1).x());
-            textureCoordinates.append(fileDataTextureCoordinates.at(faceData->at(1).toInt() - 1).y());
-
-            // Adding normals
-            normals.append(fileDataNormals.at(faceData->at(2).toInt() - 1).x());
-            normals.append(fileDataNormals.at(faceData->at(2).toInt() - 1).y());
-            normals.append(fileDataNormals.at(faceData->at(2).toInt() - 1).z());
-
-            delete faceData;
-
-            if (progressNotifier != nullptr)
-            {
-                progressNotifier->setProgress(++progressStep);
-            }
-
-        }
+        qFatal("Failed to bind normal buffer");
     }
 
-    if (progressNotifier != nullptr)
-    {
-        progressNotifier->finish();
-    }
+    m_normalBuffer->allocate(triangleNormalCoords.constData(), dataSize);
+    m_normalBuffer->release();
 
-    // Return false if data wasn't generated
-    if (vertices.count() == 0 && normals.count() == 0 && textureCoordinates.count() == 0){
-        return false;
-    }
-
-    // Return true if data was generated and assign pointer to a field for data to be in
-    // Result variable
-    QMap<QString, QList<GLfloat>> resultMap;
-    // Forming data to pass as return
-    resultMap.insert("vertices", vertices);
-    resultMap.insert("normals", normals);
-    resultMap.insert("textureCoordinates", textureCoordinates);
-
-    facesCount = vertices.count() / 3;
-    verticesCount = vertices.count() / 3;
-    normalsCount = normals.count() / 3;
-    textureCoordinatesCount = textureCoordinates.count() / 2;
-
-    // Assigning data to a field of current instance
-    objectArrays = resultMap;
-
-    return true;
+    QString vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.vert";
+    QString fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.frag";
+    m_shader = DrawableObjectTools::createShaderProgram(vertexShaderPath, fragmentShaderPath);
+    Q_ASSERT(m_shader != nullptr);
 }
 
-QMap<QString, QList<GLfloat>>& Object3D::getObjectArrays()
+Object3D::~Object3D()
 {
-    return objectArrays;
+    delete m_vertexBuffer;
+    delete m_normalBuffer;
+    delete m_shader;
 }
 
-const GLfloat* Object3D::getConstData(QString key)
+void Object3D::draw(QMatrix4x4 viewMatrix, QMatrix4x4 projectionMatrix)
 {
-    return objectArrays.take(key).constData();
+    QMatrix4x4 normalMatrix = viewMatrix.inverted().transposed();
+
+    bool isBound = m_shader->bind();
+    Q_ASSERT(isBound);
+    m_shader->setUniformValue("modelViewMatrix", viewMatrix);
+    m_shader->setUniformValue("normalMatrix", normalMatrix);
+    m_shader->setUniformValue("projectionMatrix", projectionMatrix);
+    m_shader->setUniformValue("u_objectColor", m_objectColor);
+
+    isBound = m_vertexBuffer->bind();
+    Q_ASSERT(isBound);
+    m_shader->setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+    m_shader->enableAttributeArray("vertex");
+    m_vertexBuffer->release();
+
+    isBound = m_normalBuffer->bind();
+    Q_ASSERT(isBound);
+    m_shader->setAttributeBuffer("normal", GL_FLOAT, 0, 3, 0);
+    m_shader->enableAttributeArray("normal");
+    m_vertexBuffer->release();
+
+    glEnable(GL_DEPTH_TEST);
+    glDrawArrays(GL_TRIANGLES, 0, m_nVertices);
+
+    m_shader->disableAttributeArray("vertex");
+    m_shader->disableAttributeArray("normal");
+
+    m_shader->release();
 }
 
-int Object3D::getFacesCount()
+void Object3D::setObjectColor(QVector3D objectColor)
 {
-    return facesCount;
+    m_objectColor = objectColor;
 }
 
-int Object3D::getVertexCount()
+QVector3D& Object3D::getObjectColor()
 {
-    return verticesCount;
+    return m_objectColor;
 }
-
-int Object3D::getNormalsCount()
-{
-    return normalsCount;
-}
-
-int Object3D::getTextureCoordinatesCount()
-{
-    return textureCoordinatesCount;
-}
-

@@ -1,7 +1,6 @@
 #include "ObjFileData.h"
 
-
-ObjFileData::ObjFileData() {
+ObjReadingTools::ObjFileData::ObjFileData() {
     // Inits for fields:
     m_objectName = QString();
     // QVector<QVector3D>
@@ -17,63 +16,63 @@ ObjFileData::ObjFileData() {
     m_faces = QVector<QVector<QString>>();
 }
 
-void ObjFileData::addVertex(QVector3D vertex) {
+void ObjReadingTools::ObjFileData::addVertex(QVector3D vertex) {
     m_vertices.append(vertex);
 }
 
-void ObjFileData::addNormal(QVector3D normal) {
+void ObjReadingTools::ObjFileData::addNormal(QVector3D normal) {
     m_normals.append(normal);
 }
 
-void ObjFileData::addVertexTextureCoordinate(QVector2D textureCoordinate) {
+void ObjReadingTools::ObjFileData::addVertexTextureCoordinate(QVector2D textureCoordinate) {
     m_vertexTextureCoordinates.append(textureCoordinate);
 }
 
-void ObjFileData::addPolygonVertexIndex(QVector<int> polygonVertexIndex) {
+void ObjReadingTools::ObjFileData::addPolygonVertexIndex(QVector<int> polygonVertexIndex) {
     m_polygonVertexIndices.append(polygonVertexIndex);
 }
 
-void ObjFileData::addPolygonVertexTextureCoordinateIndex(QVector<int> polygonVertexTextureCoordinatesIndex) {
+void ObjReadingTools::ObjFileData::addPolygonVertexTextureCoordinateIndex(QVector<int> polygonVertexTextureCoordinatesIndex) {
     m_polygonVertexTextureCoordinateIndices.append(polygonVertexTextureCoordinatesIndex);
 }
 
-void ObjFileData::addPolygonNormalIndex(QVector<int> polygonNormalIndex) {
-    m_polygonVertexIndices.append(polygonNormalIndex);
+void ObjReadingTools::ObjFileData::addPolygonNormalIndex(QVector<int> polygonNormalIndex) {
+    m_polygonNormalIndices.append(polygonNormalIndex);
 }
 
-void ObjFileData::addFace(QVector<QString> face) {
+void ObjReadingTools::ObjFileData::addFace(QVector<QString> face) {
     m_faces.append(face);
 }
 
-QVector<QVector3D>& ObjFileData::getVertices() {
+QVector<QVector3D>& ObjReadingTools::ObjFileData::getVertices() {
     return m_vertices;
 }
 
-QVector<QVector3D>& ObjFileData::getNormals() {
+QVector<QVector3D>& ObjReadingTools::ObjFileData::getNormals() {
     return m_normals;
 }
 
-QVector<QVector<QString>>& ObjFileData::getFaces() {
+QVector<QVector<QString>>& ObjReadingTools::ObjFileData::getFaces() {
     return m_faces;
 }
 
-QVector<QVector2D>& ObjFileData::getVertexTextureCoordinates() {
+QVector<QVector2D>& ObjReadingTools::ObjFileData::getVertexTextureCoordinates() {
     return m_vertexTextureCoordinates;
 }
 
-QVector<QVector<int>>& ObjFileData::getPolygonVertexIndices() {
+QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonVertexIndices() {
     return m_polygonVertexIndices;
 }
 
-QVector<QVector<int>>& ObjFileData::getPolygonVertexTextureCoordinateIndices() {
+QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonVertexTextureCoordinateIndices() {
     return m_polygonVertexTextureCoordinateIndices;
 }
 
-QVector<QVector<int>>& ObjFileData::getPolygonNormalIndices() {
-    return m_polygonVertexIndices;
+QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonNormalIndices() {
+    return m_polygonNormalIndices;
 }
 
-QString ObjFileData::getDescription()
+QString ObjReadingTools::ObjFileData::getDescription()
 {
     QString fileDescription;
 
@@ -102,7 +101,7 @@ QString ObjFileData::getDescription()
     return fileDescription;
 }
 
-bool ObjFileData::isEmpty()
+bool ObjReadingTools::ObjFileData::isEmpty()
 {
 
     if (m_vertices.count() != 0)
@@ -133,18 +132,18 @@ bool ObjFileData::isEmpty()
     return true;
 }
 
-ObjFileData::~ObjFileData() {}
+ObjReadingTools::ObjFileData::~ObjFileData() {}
 
-ObjFileData &ObjFileData::getObjFIleData() {
+ObjReadingTools::ObjFileData &ObjReadingTools::ObjFileData::getObjFIleData() {
     return *this;
 }
 
-QString ObjFileData::getObjectName()
+QString& ObjReadingTools::ObjFileData::getObjectName()
 {
     return m_objectName;
 }
 
-ObjFileData::ObjFileData(ObjFileData &other)
+ObjReadingTools::ObjFileData::ObjFileData(ObjReadingTools::ObjFileData &other)
 {
     // Putting in new one
     // QString*
@@ -162,7 +161,7 @@ ObjFileData::ObjFileData(ObjFileData &other)
     m_faces = other.getFaces();
 }
 
-ObjFileData::ObjFileData(ObjFileData &&other)  noexcept
+ObjReadingTools::ObjFileData::ObjFileData(ObjReadingTools::ObjFileData &&other)  noexcept
 {
     // Putting in new one
     // QString*
@@ -181,61 +180,43 @@ ObjFileData::ObjFileData(ObjFileData &&other)  noexcept
 
 }
 
-ObjFileData &ObjFileData::operator=(ObjFileData other)
+ObjReadingTools::ObjFileData &ObjReadingTools::ObjFileData::operator=(ObjReadingTools::ObjFileData other)
 {
     swap(*this, other);
 
     return *this;
 }
 
-bool ObjFileData::operator!=(ObjFileData& other)
+bool ObjReadingTools::ObjFileData::operator!=(const ObjReadingTools::ObjFileData& other) const
 {
     return !(*this == other);
 }
 
-void ObjFileData::setObjectName(QString objectName)
+void ObjReadingTools::ObjFileData::setObjectName(const QString objectName)
 {
     m_objectName = objectName;
 }
 
-bool ObjFileData::operator==(ObjFileData& other)
+bool ObjReadingTools::ObjFileData::operator==(const ObjReadingTools::ObjFileData& other) const
 {
-    // QVector<QVector3D*>*
-    if (getVertices() != other.getVertices()){
+    if (this->m_vertices != other.m_vertices){
         return false;
     }
-    if (getNormals() != other.getNormals()){
+    if (this->m_normals != other.m_normals){
         return false;
     }
-    // QVector<QVector2D*>*
-    if (getVertexTextureCoordinates() != other.getVertexTextureCoordinates()){
+    if (this->m_vertexTextureCoordinates != other.m_vertexTextureCoordinates){
         return false;
     }
-    // QVector<QVector<int*>*>*
-    if (getPolygonVertexIndices() != other.getPolygonVertexIndices()){
+    if (this->m_polygonVertexIndices != other.m_polygonVertexIndices){
         return false;
     }
-    if (getPolygonVertexTextureCoordinateIndices() != other.getPolygonVertexTextureCoordinateIndices()){
+    if (this->m_polygonVertexTextureCoordinateIndices != other.m_polygonVertexTextureCoordinateIndices){
         return false;
     }
-    if (getPolygonNormalIndices() != other.getPolygonNormalIndices()){
+    if (this->m_polygonNormalIndices != other.m_polygonNormalIndices){
         return false;
     }
 
     return true;
-}
-
-void swap(ObjFileData& first, ObjFileData& second) {
-    // QString
-    std::swap(first.getVertices(), second.getVertices());
-    // QVector<QVector3D>
-    std::swap(first.getVertices(), second.getVertices());
-    std::swap(first.getNormals(), second.getNormals());
-    std::swap(first.getFaces(), second.getFaces());
-    // QVector<QVector2D>
-    std::swap(first.getVertexTextureCoordinates(), second.getVertexTextureCoordinates());
-    // QVector<QVector<int>>
-    std::swap(first.getPolygonVertexIndices(), second.getPolygonVertexIndices());
-    std::swap(first.getPolygonNormalIndices(), second.getPolygonNormalIndices());
-    std::swap(first.getPolygonVertexTextureCoordinateIndices(), second.getPolygonVertexTextureCoordinateIndices());
 }

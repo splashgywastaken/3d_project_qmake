@@ -4,6 +4,8 @@
 #include <QVector>
 #include <QVector2D>
 
+namespace ObjReadingTools {
+
 class ObjFileData {
 
 private:
@@ -35,8 +37,8 @@ public:
     ObjFileData& operator=(ObjFileData&& other) noexcept ;
 
     // Boolean operators
-    bool operator==(ObjFileData& other);
-    bool operator!=(ObjFileData& other);
+    bool operator==(const ObjFileData& other) const;
+    bool operator!=(const ObjFileData& other) const;
 
     // Setters
     // QString*
@@ -56,7 +58,7 @@ public:
     // Getters
     ObjFileData &getObjFIleData();
     // QString
-    QString getObjectName();
+    QString& getObjectName();
     // QVector<QVector3D>
     QVector<QVector3D>& getVertices();
     QVector<QVector3D>& getNormals();
@@ -74,7 +76,23 @@ public:
     bool isEmpty();
 
     // Friend operators
-    friend void swap(ObjFileData& first, ObjFileData& second); //nothrow
+    friend void swap(ObjReadingTools::ObjFileData& first, ObjReadingTools::ObjFileData& second)
+    {
+        // QString
+        std::swap(first.getObjectName(), second.getObjectName());
+        // QVector<QVector3D>
+        std::swap(first.getVertices(), second.getVertices());
+        std::swap(first.getNormals(), second.getNormals());
+        std::swap(first.getFaces(), second.getFaces());
+        // QVector<QVector2D>
+        std::swap(first.getVertexTextureCoordinates(), second.getVertexTextureCoordinates());
+        // QVector<QVector<int>>
+        std::swap(first.getPolygonVertexIndices(), second.getPolygonVertexIndices());
+        std::swap(first.getPolygonNormalIndices(), second.getPolygonNormalIndices());
+        std::swap(first.getPolygonVertexTextureCoordinateIndices(), second.getPolygonVertexTextureCoordinateIndices());
+    }
 };
+
+}
 
 #endif

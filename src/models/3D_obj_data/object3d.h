@@ -5,6 +5,8 @@
 #include <QString>
 #include <QMap>
 #include <QProgressBar>
+#include <QOpenGLBuffer>
+#include <QOpenGLShaderProgram>
 #include <src/models/dto/ObjFileData/ObjFileData.h>
 
 #include <src/service/GlobalState.h>
@@ -12,25 +14,26 @@
 class Object3D
 {
 public:
-    Object3D();
-    ~Object3D() = default;
+    Object3D(
+            QVector<QVector3D> vertices, QVector<int> polygonVertexIndices,
+            QVector<int> polygonStart,
+            QVector<QVector3D> normals, QVector<int> polygonNormalIndices
+            );
+    ~Object3D();
 
-    bool generateData(ObjFileData& fileData, AbstractProgressNotifier* progressNotifier);
-
-    QMap<QString, QList<GLfloat>>& getObjectArrays();
-    const GLfloat* getConstData(QString key);
-
-    int getFacesCount();
-    int getVertexCount();
-    int getNormalsCount();
-    int getTextureCoordinatesCount();
-
+    void draw(QMatrix4x4 viewMatrix, QMatrix4x4 projectionMatrix);
+    void setObjectColor(QVector3D objectColor);
+    QVector3D& getObjectColor();
 private:
-    QMap<QString, QList<GLfloat>> objectArrays;
-    int facesCount;
-    int verticesCount;
-    int textureCoordinatesCount;
-    int normalsCount;
+    QOpenGLBuffer* m_vertexBuffer = nullptr;
+    QOpenGLBuffer* m_normalBuffer  = nullptr;
+
+    QVector3D m_objectColor = {1.0, 0.0, 0.0};
+
+    int m_nVertices = -1;
+    bool m_useNormals = true;
+
+    QOpenGLShaderProgram *m_shader = nullptr;
 };
 
 #endif // OBJECT3D_H

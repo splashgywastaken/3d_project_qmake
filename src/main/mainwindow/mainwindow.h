@@ -25,13 +25,12 @@ public:
 private slots:
     void openObjFile();
 
-    void showObject();
+    void addObject();
     void changeObjectColor();
 
     void changeVertexShader();
     void changeFragmentShader();
 
-    void reinitShaderProgram();
     void useNormalsCheckBoxClicked(bool checked);
 
 private:
@@ -45,12 +44,11 @@ private:
     // Menu bar actions
     QMenu* fileMenu;
     QMenu* objectMenu;
-    QMenu* shaderMenu;
 
     // Files
     QAction* openAction;
     // Objects
-    QAction* showObjectAction;
+    QAction* addObjectAction;
     QAction* changeObjectColorAction;
     // Shaders
     QAction* changeVertexShaderAction;
@@ -64,6 +62,6 @@ private:
     Ui::MainWindow *ui;
 
     // Other variables
-    ObjFileData *fileData;
+    ObjReadingTools::ObjFileData *fileData;
 };
 #endif // MAINWINDOW_H

@@ -23,10 +23,7 @@ public:
     explicit ObjectViewGLWidget(QWidget* parent = nullptr);
     ~ObjectViewGLWidget();
 
-    void reinit();
-
-    bool generateArrays(ObjFileData& fileData, AbstractProgressNotifier* progressNotifier);
-    bool addObject();
+    void addObject(Object3D* object);
 
     void setVertexShaderPath(QString vertexShaderPath);
     void setFragmentShaderPath(QString fragmentShaderPath);
@@ -42,17 +39,12 @@ protected:
     void paintGL() override;
 
 private:
-    bool addObject(QList<GLfloat> vertices);
-    bool addObject(QList<GLfloat> vertices, QList<GLfloat> normals);
+
 
     QOpenGLShaderProgram* createShaderProgram(QString vertexShaderPath, QString fragmentShaderPath);
 
-    Object3D m_object;
-
-    QVector3D m_objectColor = QVector3D(0.0, 1.0, 1.0);
-
-    QOpenGLShaderProgram *m_shader;
-    QOpenGLBuffer *m_vertexBuffer;
+//    QVector<Object3D>* m_objects;
+    Object3D* m_object = nullptr;
 
     QString m_vertexShaderPath;
     QString m_fragmentShaderPath;

@@ -12,7 +12,6 @@ ColorPicker::ColorPicker(QWidget *parent, MainWindow* mainWindow, QVector3D curr
     // Setting up values:
     m_mainWindow = mainWindow;
     m_color = currentColor;
-    updateColorLabel();
 
     // Styles
     ui->redLabel->setStyleSheet("color: red");
@@ -26,6 +25,12 @@ ColorPicker::ColorPicker(QWidget *parent, MainWindow* mainWindow, QVector3D curr
 
     // Button
     connect(ui->acceptButton, &QPushButton::clicked, this, &ColorPicker::accept);
+
+    // Update
+    ui->redSlider->setValue(currentColor.x() * 255);
+    ui->greenSlider->setValue(currentColor.y() * 255);
+    ui->blueSlider->setValue(currentColor.z() * 255);
+    updateColorLabel();
 }
 
 ColorPicker::~ColorPicker()

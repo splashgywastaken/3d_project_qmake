@@ -23,16 +23,6 @@ void ObjectViewGLWidget::addObject(Object3D *object)
     m_object = object;
 }
 
-void ObjectViewGLWidget::setVertexShaderPath(QString vertexShaderPath)
-{
-    m_vertexShaderPath = vertexShaderPath;
-}
-
-void ObjectViewGLWidget::setFragmentShaderPath(QString fragmentShaderPath)
-{
-    m_fragmentShaderPath = fragmentShaderPath;
-}
-
 void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
 {
     m_object->setObjectColor(objectColor.normalized());

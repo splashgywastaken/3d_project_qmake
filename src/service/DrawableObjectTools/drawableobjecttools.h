@@ -29,7 +29,7 @@ public:
 protected:
     static ResourceManager* m_instance;
 
-    QMap<QString, QOpenGLShaderProgram*> shaders;
+    QMap<QString, QOpenGLShaderProgram*> m_shaders;
 private:
     ResourceManager();
 };

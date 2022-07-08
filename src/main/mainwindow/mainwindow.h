@@ -28,9 +28,6 @@ protected slots:
     void addObject();
     void changeObjectColor();
 
-    void changeVertexShader();
-    void changeFragmentShader();
-
     void useNormalsCheckBoxClicked(bool checked);
 
 protected:
@@ -57,7 +54,7 @@ protected:
     ObjectViewGLWidget * m_glWidget;
 
     // UI
-    Ui::MainWindow *ui;
+    Ui::MainWindow *m_ui;
 
     // Other variables
     ObjReadingTools::ObjFileData *m_fileData;

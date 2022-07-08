@@ -31,7 +31,7 @@ bool DrawableObjectTools::ResourceManager::createShaderProgram(QString vertexSha
         return false;
     }
 
-    shaders.insert(shaderName, shader);
+    m_shaders.insert(shaderName, shader);
     return true;
 }
 
@@ -42,15 +42,15 @@ QOpenGLShaderProgram *DrawableObjectTools::ResourceManager::getShaderProgram(QSt
         return nullptr;
     }
 
-    if (!shaders.contains(key))
+    if (!m_shaders.contains(key))
     {
         return nullptr;
     }
 
-    return shaders[key];
+    return m_shaders[key];
 }
 
 DrawableObjectTools::ResourceManager::ResourceManager()
 {
-    shaders = QMap<QString, QOpenGLShaderProgram*>();
+    m_shaders = QMap<QString, QOpenGLShaderProgram*>();
 }

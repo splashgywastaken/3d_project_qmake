@@ -34,10 +34,6 @@ public:
 
     void addObject(Object3D* object);
 
-    // Setters
-    void setVertexShaderPath(QString vertexShaderPath);
-    void setFragmentShaderPath(QString fragmentShaderPath);
-
     void setObjectColor(QVector3D objectColor);
     void setUseNormals(bool useNormals);
 
@@ -74,9 +70,6 @@ protected:
     Camera* m_camera = nullptr;
     QOpenGLShaderProgram* m_shader;
     DrawableObjectTools::ShaderProgrammType m_shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
-
-    QString m_vertexShaderPath;
-    QString m_fragmentShaderPath;
 
     int m_nVertices;
 

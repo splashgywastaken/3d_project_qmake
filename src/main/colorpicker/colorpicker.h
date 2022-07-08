@@ -28,7 +28,7 @@ private slots:
 private:
     void updateColorLabel();
 
-    Ui::ColorPicker *ui;
+    Ui::ColorPicker *m_ui;
     MainWindow* m_mainWindow;
     QVector3D m_color;
 };

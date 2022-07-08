@@ -10,34 +10,34 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , m_ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
     // Variables setup
     m_fileData = nullptr;
-    m_useNormals = ui->useNormalsCheckBox->isChecked();
+    m_useNormals = m_ui->useNormalsCheckBox->isChecked();
 
     // MenuBar setup:
     createActions();
     createMenus();
 
     // UI setup
-    ui->taskProgressBar->setVisible(false);
-    ui->taskLabel->setVisible(false);
+    m_ui->taskProgressBar->setVisible(false);
+    m_ui->taskLabel->setVisible(false);
 
     // GlWidget inits
     m_glWidget = new ObjectViewGLWidget;
 
-    ui->openGLLayout->addWidget(m_glWidget);
+    m_ui->openGLLayout->addWidget(m_glWidget);
 
     // Slots connection
-    connect(ui->useNormalsCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalsCheckBoxClicked);
+    connect(m_ui->useNormalsCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalsCheckBoxClicked);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void MainWindow::setObjectColor(QVector3D objectColor)
@@ -59,26 +59,26 @@ void MainWindow::openObjFile()
         return;
     }
 
-    ui->taskProgressBar->setVisible(true);
-    ui->taskLabel->setVisible(true);
-    setLabelFontColor(ui->taskLabel, "yellow");
-    setLabelText(ui->taskLabel, "Reading file: " + filePath);
+    m_ui->taskProgressBar->setVisible(true);
+    m_ui->taskLabel->setVisible(true);
+    setLabelFontColor(m_ui->taskLabel, "yellow");
+    setLabelText(m_ui->taskLabel, "Reading file: " + filePath);
 
-    ProgressNotifierSingleton::initialize(ui->taskProgressBar);
+    ProgressNotifierSingleton::initialize(m_ui->taskProgressBar);
     AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
     m_fileData = new ObjReadingTools::ObjFileData();
     QString errorMessage;
 
     if (!ObjReadingTools::readFile(filePath, *m_fileData, errorMessage, progressNotifier)){
-        setLabelFontColor(ui->taskLabel, "red");
-        setLabelText(ui->taskLabel, errorMessage);
+        setLabelFontColor(m_ui->taskLabel, "red");
+        setLabelText(m_ui->taskLabel, errorMessage);
         qDebug() << errorMessage;
         return;
     } else {
         // If reading was successfull
-        setLabelFontColor(ui->taskLabel, "green");
-        setLabelText(ui->taskLabel, "File successfully read");
-        setLabelText(ui->objectNameLabel, m_fileData->getObjectName());
+        setLabelFontColor(m_ui->taskLabel, "green");
+        setLabelText(m_ui->taskLabel, "File successfully read");
+        setLabelText(m_ui->objectNameLabel, m_fileData->getObjectName());
     }
 }
 
@@ -97,8 +97,8 @@ void MainWindow::addObject()
     QMessageBox taskMessageBox;
     taskMessageBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    setLabelFontColor(ui->taskLabel, "yellow");
-    setLabelText(ui->taskLabel, "Processing Object");
+    setLabelFontColor(m_ui->taskLabel, "yellow");
+    setLabelText(m_ui->taskLabel, "Processing Object");
 
     QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_fileData->getPolygonVertexIndices());
     QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_fileData->getPolygonNormalIndices());
@@ -114,8 +114,8 @@ void MainWindow::addObject()
 
     m_glWidget->addObject(object);
 
-    setLabelFontColor(ui->taskLabel, "green");
-    setLabelText(ui->taskLabel, "Object added");
+    setLabelFontColor(m_ui->taskLabel, "green");
+    setLabelText(m_ui->taskLabel, "Object added");
 
     m_glWidget->update();
 }
@@ -124,28 +124,6 @@ void MainWindow::changeObjectColor()
 {
     static ColorPicker *colorPicker = new ColorPicker(this, this, m_glWidget->getObjectColor());
     colorPicker->show();
-}
-
-void MainWindow::changeVertexShader()
-{
-    m_glWidget->setVertexShaderPath(
-                QFileDialog::getOpenFileName(
-                    this, tr("Choose file"),
-                    "../res/shaders/",
-                    tr("Vertex shader (*.glsl, *.vsh)")
-                    )
-                );
-}
-
-void MainWindow::changeFragmentShader()
-{
-    m_glWidget->setFragmentShaderPath(
-                QFileDialog::getOpenFileName(
-                    this, tr("Choose file"),
-                    "../res/shaders/",
-                    tr("Fragment shader (*.glsl, *.fsh)")
-                    )
-                );
 }
 
 void MainWindow::useNormalsCheckBoxClicked(bool checked)

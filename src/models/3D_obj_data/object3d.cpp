@@ -74,7 +74,10 @@ void Object3D::draw(
     shader->enableAttributeArray("vertex");
     m_vertexBuffer->release();
 
-    if (shaderType == DrawableObjectTools::ShaderProgrammType::Lightning || shaderType == DrawableObjectTools::ShaderProgrammType::LightningWithTextures )
+    if (shaderType == DrawableObjectTools::ShaderProgrammType::Lightning
+            || shaderType == DrawableObjectTools::ShaderProgrammType::LightningWithTextures
+            || shaderType == DrawableObjectTools::ShaderProgrammType::NormalMap
+            )
     {
         isBound = m_normalBuffer->bind();
         Q_ASSERT(isBound);
@@ -87,7 +90,10 @@ void Object3D::draw(
     glDrawArrays(GL_TRIANGLES, 0, m_nVertices);
 
     shader->disableAttributeArray("vertex");
-    if (shaderType == DrawableObjectTools::ShaderProgrammType::Lightning || shaderType == DrawableObjectTools::ShaderProgrammType::LightningWithTextures )
+    if (shaderType == DrawableObjectTools::ShaderProgrammType::Lightning
+            || shaderType == DrawableObjectTools::ShaderProgrammType::LightningWithTextures
+            || shaderType == DrawableObjectTools::ShaderProgrammType::NormalMap
+            )
     {
         shader->disableAttributeArray("normal");
     }

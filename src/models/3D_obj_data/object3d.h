@@ -36,7 +36,6 @@ private:
     QVector3D m_objectColor = {1.0, 0.0, 0.0};
 
     int m_nVertices = -1;
-    bool m_useNormals = true;
 };
 
 #endif // OBJECT3D_H

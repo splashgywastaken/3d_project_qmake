@@ -12,7 +12,8 @@ enum class ShaderProgrammType
 {
     Standard,
     Lightning,
-    LightningWithTextures
+    LightningWithTextures,
+    NormalMap
 };
 
 class ResourceManager

@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Slots connection
     connect(m_ui->useNormalsCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalsCheckBoxClicked);
+    connect(m_ui->useNormalMapCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalMapCheckBoxClicked);
 }
 
 MainWindow::~MainWindow()
@@ -132,6 +133,16 @@ void MainWindow::useNormalsCheckBoxClicked(bool checked)
     changeShader();
 }
 
+void MainWindow::useNormalMapCheckBoxClicked(bool checked)
+{
+    m_useNormalMap = checked;
+
+    m_ui->useNormalsCheckBox->setCheckable(!m_useNormalMap);
+    m_ui->useNormalsCheckBox->setChecked(m_useNormals);
+
+    changeShader();
+}
+
 void MainWindow::setLabelText(QLabel *label, QString text)
 {
     label->setText(text);
@@ -145,10 +156,18 @@ void MainWindow::setLabelFontColor(QLabel *label, QString color)
 void MainWindow::changeShader()
 {
     DrawableObjectTools::ShaderProgrammType shaderType;
-    shaderType = m_useNormals ?
-                DrawableObjectTools::ShaderProgrammType::Lightning
-                              :
-                DrawableObjectTools::ShaderProgrammType::Standard;
+    if (m_useNormals && m_useNormalMap)
+    {
+        shaderType = DrawableObjectTools::ShaderProgrammType::NormalMap;
+    }
+    else if (m_useNormals)
+    {
+        shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
+    }
+    else
+    {
+        shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
+    }
 
     m_glWidget->switchShaders(shaderType);
     m_glWidget->update();

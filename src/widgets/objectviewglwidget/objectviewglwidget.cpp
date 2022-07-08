@@ -25,7 +25,10 @@ void ObjectViewGLWidget::addObject(Object3D *object)
 
 void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
 {
-    m_object->setObjectColor(objectColor.normalized());
+    if (m_object != nullptr)
+    {
+        m_object->setObjectColor(objectColor.normalized());
+    }
 }
 
 void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType shaderType)
@@ -42,13 +45,21 @@ void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType s
     {
         m_shader = resourceManager->getShaderProgram("lightningShader");
     }
+    if (m_shaderType == DrawableObjectTools::ShaderProgrammType::NormalMap)
+    {
+        m_shader = resourceManager->getShaderProgram("normalMapShader");
+    }
 
     Q_ASSERT(m_shader != nullptr);
 }
 
 QVector3D ObjectViewGLWidget::getObjectColor()
 {
-    return m_object->getObjectColor();
+    if (m_object != nullptr)
+    {
+        return m_object->getObjectColor();
+    }
+    return QVector3D();
 }
 
 float ObjectViewGLWidget::getAspectRatio() const
@@ -83,9 +94,9 @@ void ObjectViewGLWidget::doPanning(const QPoint &dstPosition)
     QMatrix4x4 projectionMatrix = m_camera->projectionMatrix(getAspectRatio());
     float depth = m_camera->getCameraPosition().z();
     QVector3D screenPosition3D = unprojectSreenPointToEye(m_screenPosition, depth, projectionMatrix, size());
-    QVector3D destinationPosition3D = unprojectSreenPointToEye(dstPosition, depth, projectionMatrix, size());
-    QVector3D shift = destinationPosition3D - screenPosition3D;
-    m_camera->setCameraPosition(m_camera->getCameraPosition() - shift);
+    QVector3D dstPosition3D = unprojectSreenPointToEye(dstPosition, depth, projectionMatrix, size());
+    QVector3D shift = dstPosition3D - screenPosition3D;
+    m_camera->setCameraPosition(m_camera->getCameraPosition() + shift);
     m_screenPosition = dstPosition;
     update();
 }
@@ -139,6 +150,10 @@ void ObjectViewGLWidget::initializeGL()
     vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/lightningShader/lightningShader.vert";
     fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/lightningShader/lightningShader.frag";
     Q_ASSERT(resourceManager->createShaderProgram(vertexShaderPath, fragmentShaderPath, "lightningShader"));
+
+    vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/normalMapShader/normalMapShader.vert";
+    fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/normalMapShader/normalMapShader.frag";
+    Q_ASSERT(resourceManager->createShaderProgram(vertexShaderPath, fragmentShaderPath, "normalMapShader"));
 
     switchShaders(m_shaderType);
 }

@@ -29,7 +29,7 @@ protected slots:
     void changeObjectColor();
 
     void useNormalsCheckBoxClicked(bool checked);
-
+    void useNormalMapCheckBoxClicked(bool checked);
 protected:
     // Misc methods:
     void setLabelText(QLabel* label, QString text);
@@ -60,5 +60,6 @@ protected:
     ObjReadingTools::ObjFileData *m_fileData;
 
     bool m_useNormals;
+    bool m_useNormalMap = false;
 };
 #endif // MAINWINDOW_H

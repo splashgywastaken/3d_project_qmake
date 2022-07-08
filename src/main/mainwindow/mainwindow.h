@@ -50,10 +50,6 @@ private:
     // Objects
     QAction* addObjectAction;
     QAction* changeObjectColorAction;
-    // Shaders
-    QAction* changeVertexShaderAction;
-    QAction* changeFragmentShaderAction;
-    QAction* reinitShaderProgramAction;
 
     // Custom widgets
     ObjectViewGLWidget * glWidget;

@@ -53,6 +53,11 @@ void MainWindow::openObjFile()
                 tr("Object (*.obj)")
             ));
 
+    if (filePath.isEmpty())
+    {
+        return;
+    }
+
     ui->taskProgressBar->setVisible(true);
     ui->taskLabel->setVisible(true);
     setLabelFontColor(ui->taskLabel, "yellow");
@@ -94,8 +99,6 @@ void MainWindow::addObject()
     setLabelFontColor(ui->taskLabel, "yellow");
     setLabelText(ui->taskLabel, "Processing Object");
 
-    QString errorMessage;
-
     QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(fileData->getPolygonVertexIndices());
     QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(fileData->getPolygonNormalIndices());
     QVector<int> polygonStart = MeshTools::buildPolygonStartVector(fileData->getPolygonVertexIndices());
@@ -111,7 +114,7 @@ void MainWindow::addObject()
     glWidget->addObject(object);
 
     setLabelFontColor(ui->taskLabel, "green");
-    setLabelText(ui->taskLabel, "Object successfully processed");
+    setLabelText(ui->taskLabel, "Object added");
 
     glWidget->update();
 }

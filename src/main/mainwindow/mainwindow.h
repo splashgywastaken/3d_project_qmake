@@ -22,7 +22,7 @@ public:
 
     void setObjectColor(QVector3D objectColor);
 
-private slots:
+protected slots:
     void openObjFile();
 
     void addObject();
@@ -33,31 +33,35 @@ private slots:
 
     void useNormalsCheckBoxClicked(bool checked);
 
-private:
+protected:
     // Misc methods:
     void setLabelText(QLabel* label, QString text);
     void setLabelFontColor(QLabel* label, QString color);
+    void changeShader();
 
     void createActions();
     void createMenus();
 
+protected:
     // Menu bar actions
-    QMenu* fileMenu;
-    QMenu* objectMenu;
+    QMenu* m_fileMenu;
+    QMenu* m_objectMenu;
 
     // Files
-    QAction* openAction;
+    QAction* m_openAction;
     // Objects
-    QAction* addObjectAction;
-    QAction* changeObjectColorAction;
+    QAction* m_addObjectAction;
+    QAction* m_changeObjectColorAction;
 
     // Custom widgets
-    ObjectViewGLWidget * glWidget;
+    ObjectViewGLWidget * m_glWidget;
 
     // UI
     Ui::MainWindow *ui;
 
     // Other variables
-    ObjReadingTools::ObjFileData *fileData;
+    ObjReadingTools::ObjFileData *m_fileData;
+
+    bool m_useNormals;
 };
 #endif // MAINWINDOW_H

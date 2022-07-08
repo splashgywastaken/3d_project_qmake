@@ -41,6 +41,8 @@ public:
     void setObjectColor(QVector3D objectColor);
     void setUseNormals(bool useNormals);
 
+    void switchShaders(DrawableObjectTools::ShaderProgrammType shaderType);
+
     // Getters
     QVector3D getObjectColor();
     float getAspectRatio() const;
@@ -70,13 +72,13 @@ protected:
 //    QVector<Object3D>* m_objects;
     Object3D* m_object = nullptr;
     Camera* m_camera = nullptr;
+    QOpenGLShaderProgram* m_shader;
+    DrawableObjectTools::ShaderProgrammType m_shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
 
     QString m_vertexShaderPath;
     QString m_fragmentShaderPath;
 
     int m_nVertices;
-
-    bool m_useNormals = true;
 
     NavigationState m_navigationState = NavigationState::None;
     QPoint m_screenPosition;

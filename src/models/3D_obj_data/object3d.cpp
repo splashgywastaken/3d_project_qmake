@@ -44,50 +44,55 @@ Object3D::Object3D(
 
     m_normalBuffer->allocate(triangleNormalCoords.constData(), dataSize);
     m_normalBuffer->release();
-
-    QString vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.vert";
-    QString fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.frag";
-    m_shader = DrawableObjectTools::createShaderProgram(vertexShaderPath, fragmentShaderPath);
-    Q_ASSERT(m_shader != nullptr);
 }
 
 Object3D::~Object3D()
 {
     delete m_vertexBuffer;
     delete m_normalBuffer;
-    delete m_shader;
 }
 
-void Object3D::draw(QMatrix4x4 viewMatrix, QMatrix4x4 projectionMatrix)
+void Object3D::draw(
+        QMatrix4x4 viewMatrix,
+        QMatrix4x4 projectionMatrix,
+        QOpenGLShaderProgram* shader,
+        DrawableObjectTools::ShaderProgrammType shaderType
+        )
 {
     QMatrix4x4 normalMatrix = viewMatrix.inverted().transposed();
 
-    bool isBound = m_shader->bind();
+    bool isBound = shader->bind();
     Q_ASSERT(isBound);
-    m_shader->setUniformValue("modelViewMatrix", viewMatrix);
-    m_shader->setUniformValue("normalMatrix", normalMatrix);
-    m_shader->setUniformValue("projectionMatrix", projectionMatrix);
-    m_shader->setUniformValue("u_objectColor", m_objectColor);
+    shader->setUniformValue("modelViewMatrix", viewMatrix);
+    shader->setUniformValue("normalMatrix", normalMatrix);
+    shader->setUniformValue("projectionMatrix", projectionMatrix);
+    shader->setUniformValue("u_objectColor", m_objectColor);
 
     isBound = m_vertexBuffer->bind();
     Q_ASSERT(isBound);
-    m_shader->setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
-    m_shader->enableAttributeArray("vertex");
+    shader->setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+    shader->enableAttributeArray("vertex");
     m_vertexBuffer->release();
 
-    isBound = m_normalBuffer->bind();
-    Q_ASSERT(isBound);
-    m_shader->setAttributeBuffer("normal", GL_FLOAT, 0, 3, 0);
-    m_shader->enableAttributeArray("normal");
-    m_vertexBuffer->release();
+    if (shaderType == DrawableObjectTools::ShaderProgrammType::Lightning || shaderType == DrawableObjectTools::ShaderProgrammType::LightningWithTextures )
+    {
+        isBound = m_normalBuffer->bind();
+        Q_ASSERT(isBound);
+        shader->setAttributeBuffer("normal", GL_FLOAT, 0, 3, 0);
+        shader->enableAttributeArray("normal");
+        m_vertexBuffer->release();
+    }
 
     glEnable(GL_DEPTH_TEST);
     glDrawArrays(GL_TRIANGLES, 0, m_nVertices);
 
-    m_shader->disableAttributeArray("vertex");
-    m_shader->disableAttributeArray("normal");
+    shader->disableAttributeArray("vertex");
+    if (shaderType == DrawableObjectTools::ShaderProgrammType::Lightning || shaderType == DrawableObjectTools::ShaderProgrammType::LightningWithTextures )
+    {
+        shader->disableAttributeArray("normal");
+    }
 
-    m_shader->release();
+    shader->release();
 }
 
 void Object3D::setObjectColor(QVector3D objectColor)

@@ -21,7 +21,12 @@ public:
             );
     ~Object3D();
 
-    void draw(QMatrix4x4 viewMatrix, QMatrix4x4 projectionMatrix);
+    void draw(
+            QMatrix4x4 viewMatrix,
+            QMatrix4x4 projectionMatrix,
+            QOpenGLShaderProgram* shader,
+            DrawableObjectTools::ShaderProgrammType shaderType
+            );
     void setObjectColor(QVector3D objectColor);
     QVector3D& getObjectColor();
 private:
@@ -32,8 +37,6 @@ private:
 
     int m_nVertices = -1;
     bool m_useNormals = true;
-
-    QOpenGLShaderProgram *m_shader = nullptr;
 };
 
 #endif // OBJECT3D_H

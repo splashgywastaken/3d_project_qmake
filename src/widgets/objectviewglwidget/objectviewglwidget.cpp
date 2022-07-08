@@ -7,6 +7,9 @@
 ObjectViewGLWidget::ObjectViewGLWidget(QWidget* parent)
 {
     Q_UNUSED(parent);
+
+    // Inits for singletons
+    // Camera
     m_camera = Camera::getInstance();
 }
 
@@ -35,9 +38,22 @@ void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
     m_object->setObjectColor(objectColor.normalized());
 }
 
-void ObjectViewGLWidget::setUseNormals(bool useNormals)
+void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType shaderType)
 {
-    m_useNormals = useNormals;
+    m_shaderType = shaderType;
+
+    DrawableObjectTools:: ResourceManager *resourceManager = DrawableObjectTools::ResourceManager::getInstance();
+
+    if (m_shaderType == DrawableObjectTools::ShaderProgrammType::Standard)
+    {
+        m_shader = resourceManager->getShaderProgram("basicShader");
+    }
+    if (m_shaderType == DrawableObjectTools::ShaderProgrammType::Lightning)
+    {
+        m_shader = resourceManager->getShaderProgram("lightningShader");
+    }
+
+    Q_ASSERT(m_shader != nullptr);
 }
 
 QVector3D ObjectViewGLWidget::getObjectColor()
@@ -122,6 +138,19 @@ void ObjectViewGLWidget::doCameraRotationAroundObject(const QPoint &dstPosition)
 void ObjectViewGLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
+
+    // init for resource manager
+    DrawableObjectTools::ResourceManager* resourceManager = DrawableObjectTools::ResourceManager::getInstance();
+
+    QString vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.vert";
+    QString fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.frag";
+    Q_ASSERT(resourceManager->createShaderProgram(vertexShaderPath, fragmentShaderPath, "basicShader"));
+
+    vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/lightningShader/lightningShader.vert";
+    fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/lightningShader/lightningShader.frag";
+    Q_ASSERT(resourceManager->createShaderProgram(vertexShaderPath, fragmentShaderPath, "lightningShader"));
+
+    switchShaders(m_shaderType);
 }
 
 void ObjectViewGLWidget::resizeGL(int w, int h)
@@ -147,7 +176,7 @@ void ObjectViewGLWidget::paintGL()
 
     if (m_object != nullptr)
     {
-        m_object->draw(modelViewMatrix, projectionMatrix);
+        m_object->draw(modelViewMatrix, projectionMatrix, m_shader, m_shaderType);
     }
 
 }

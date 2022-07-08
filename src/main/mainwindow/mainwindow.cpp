@@ -15,7 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // Variables setup
-    fileData = nullptr;
+    m_fileData = nullptr;
+    m_useNormals = ui->useNormalsCheckBox->isChecked();
 
     // MenuBar setup:
     createActions();
@@ -26,9 +27,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->taskLabel->setVisible(false);
 
     // GlWidget inits
-    glWidget = new ObjectViewGLWidget;
+    m_glWidget = new ObjectViewGLWidget;
 
-    ui->openGLLayout->addWidget(glWidget);
+    ui->openGLLayout->addWidget(m_glWidget);
 
     // Slots connection
     connect(ui->useNormalsCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalsCheckBoxClicked);
@@ -41,8 +42,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::setObjectColor(QVector3D objectColor)
 {
-    glWidget->setObjectColor(objectColor);
-    glWidget->update();
+    m_glWidget->setObjectColor(objectColor);
+    m_glWidget->update();
 }
 
 void MainWindow::openObjFile()
@@ -65,10 +66,10 @@ void MainWindow::openObjFile()
 
     ProgressNotifierSingleton::initialize(ui->taskProgressBar);
     AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
-    fileData = new ObjReadingTools::ObjFileData();
+    m_fileData = new ObjReadingTools::ObjFileData();
     QString errorMessage;
 
-    if (!ObjReadingTools::readFile(filePath, *fileData, errorMessage, progressNotifier)){
+    if (!ObjReadingTools::readFile(filePath, *m_fileData, errorMessage, progressNotifier)){
         setLabelFontColor(ui->taskLabel, "red");
         setLabelText(ui->taskLabel, errorMessage);
         qDebug() << errorMessage;
@@ -77,13 +78,13 @@ void MainWindow::openObjFile()
         // If reading was successfull
         setLabelFontColor(ui->taskLabel, "green");
         setLabelText(ui->taskLabel, "File successfully read");
-        setLabelText(ui->objectNameLabel, fileData->getObjectName());
+        setLabelText(ui->objectNameLabel, m_fileData->getObjectName());
     }
 }
 
 void MainWindow::addObject()
 {
-    if (fileData == nullptr)
+    if (m_fileData == nullptr)
     {
         QMessageBox::warning(
                     this,
@@ -99,35 +100,35 @@ void MainWindow::addObject()
     setLabelFontColor(ui->taskLabel, "yellow");
     setLabelText(ui->taskLabel, "Processing Object");
 
-    QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(fileData->getPolygonVertexIndices());
-    QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(fileData->getPolygonNormalIndices());
-    QVector<int> polygonStart = MeshTools::buildPolygonStartVector(fileData->getPolygonVertexIndices());
+    QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_fileData->getPolygonVertexIndices());
+    QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_fileData->getPolygonNormalIndices());
+    QVector<int> polygonStart = MeshTools::buildPolygonStartVector(m_fileData->getPolygonVertexIndices());
 
     Object3D *object = new Object3D(
-                fileData->getVertices(),
+                m_fileData->getVertices(),
                 polygonVertexIndices,
                 polygonStart,
-                fileData->getNormals(),
+                m_fileData->getNormals(),
                 polygonNormalIndices
                 );
 
-    glWidget->addObject(object);
+    m_glWidget->addObject(object);
 
     setLabelFontColor(ui->taskLabel, "green");
     setLabelText(ui->taskLabel, "Object added");
 
-    glWidget->update();
+    m_glWidget->update();
 }
 
 void MainWindow::changeObjectColor()
 {
-    static ColorPicker *colorPicker = new ColorPicker(this, this, glWidget->getObjectColor());
+    static ColorPicker *colorPicker = new ColorPicker(this, this, m_glWidget->getObjectColor());
     colorPicker->show();
 }
 
 void MainWindow::changeVertexShader()
 {
-    glWidget->setVertexShaderPath(
+    m_glWidget->setVertexShaderPath(
                 QFileDialog::getOpenFileName(
                     this, tr("Choose file"),
                     "../res/shaders/",
@@ -138,7 +139,7 @@ void MainWindow::changeVertexShader()
 
 void MainWindow::changeFragmentShader()
 {
-    glWidget->setFragmentShaderPath(
+    m_glWidget->setFragmentShaderPath(
                 QFileDialog::getOpenFileName(
                     this, tr("Choose file"),
                     "../res/shaders/",
@@ -149,7 +150,8 @@ void MainWindow::changeFragmentShader()
 
 void MainWindow::useNormalsCheckBoxClicked(bool checked)
 {
-    glWidget->setUseNormals(checked);
+    m_useNormals = checked;
+    changeShader();
 }
 
 void MainWindow::setLabelText(QLabel *label, QString text)
@@ -162,36 +164,48 @@ void MainWindow::setLabelFontColor(QLabel *label, QString color)
     label->setStyleSheet("color: " + color);
 }
 
+void MainWindow::changeShader()
+{
+    DrawableObjectTools::ShaderProgrammType shaderType;
+    shaderType = m_useNormals ?
+                DrawableObjectTools::ShaderProgrammType::Lightning
+                              :
+                DrawableObjectTools::ShaderProgrammType::Standard;
+
+    m_glWidget->switchShaders(shaderType);
+    m_glWidget->update();
+}
+
 void MainWindow::createActions()
 {
     // Files actions
     // Open file Action
-    openAction = new QAction(tr("Open file"), this);
-    openAction->setShortcuts(QKeySequence::Open);
-    openAction->setStatusTip(tr("Open a new file"));
-    connect(openAction, &QAction::triggered, this, &MainWindow::openObjFile);
+    m_openAction = new QAction(tr("Open file"), this);
+    m_openAction->setShortcuts(QKeySequence::Open);
+    m_openAction->setStatusTip(tr("Open a new file"));
+    connect(m_openAction, &QAction::triggered, this, &MainWindow::openObjFile);
 
     // Objects actions
     // Show object action
-    addObjectAction = new QAction(tr("Add object"), this);
-    addObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
-    addObjectAction->setStatusTip(tr("Add object that you got from a file to a scene"));
-    connect(addObjectAction, &QAction::triggered, this, &MainWindow::addObject);
+    m_addObjectAction = new QAction(tr("Add object"), this);
+    m_addObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
+    m_addObjectAction->setStatusTip(tr("Add object that you got from a file to a scene"));
+    connect(m_addObjectAction, &QAction::triggered, this, &MainWindow::addObject);
 
     // Change object color
-    changeObjectColorAction = new QAction(tr("Change object color"), this);
-    changeObjectColorAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
-    changeObjectColorAction->setToolTip(tr("Use color pallete to change object color"));
-    connect(changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeObjectColor);
+    m_changeObjectColorAction = new QAction(tr("Change object color"), this);
+    m_changeObjectColorAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
+    m_changeObjectColorAction->setToolTip(tr("Use color pallete to change object color"));
+    connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeObjectColor);
 }
 
 void MainWindow::createMenus()
 {
-    fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(openAction);
+    m_fileMenu = menuBar()->addMenu(tr("&File"));
+    m_fileMenu->addAction(m_openAction);
 
-    objectMenu = menuBar()->addMenu(tr("&Object"));
-    objectMenu->addAction(addObjectAction);
-    objectMenu->addAction(changeObjectColorAction);
+    m_objectMenu = menuBar()->addMenu(tr("&Object"));
+    m_objectMenu->addAction(m_addObjectAction);
+    m_objectMenu->addAction(m_changeObjectColorAction);
 }
 

@@ -80,3 +80,133 @@ void MeshToolsTests::testPackTriangleVertexCoords01()
     };
     QCOMPARE(packTriangleVertexCoords(vertices, triangleVertexIndices), expected);
 }
+
+void MeshToolsTests::testGetMin01()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {-1.45, 0, 0};
+
+    QCOMPARE(getMin(vertices, true, false, false), expected);
+}
+
+void MeshToolsTests::testGetMin02()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {-1.45, -5, 0};
+
+    QCOMPARE(getMin(vertices, true, true, false), expected);
+}
+
+void MeshToolsTests::testGetMin03()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {-1.45, -5, -10};
+
+    QCOMPARE(getMin(vertices, true, true, true), expected);
+}
+
+void MeshToolsTests::testGetMin04()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {0, 0, 0};
+
+    QCOMPARE(getMin(vertices, false, false, false), expected);
+}
+
+void MeshToolsTests::testGetMin05()
+{
+    QVector<QVector3D> vertices;
+
+    QVector3D expected = {0, 0, 0};
+
+    QCOMPARE(getMin(vertices, false, false, false), expected);
+}
+
+void MeshToolsTests::testGetMax01()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {20, 0, 0};
+
+    QCOMPARE(getMax(vertices, true, false, false), expected);
+}
+
+void MeshToolsTests::testGetMax02()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {20, 2, 0};
+
+    QCOMPARE(getMax(vertices, true, true, false), expected);
+}
+
+void MeshToolsTests::testGetMax03()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {20, 2, 3};
+
+    QCOMPARE(getMax(vertices, true, true, true), expected);
+}
+
+void MeshToolsTests::testGetMax04()
+{
+    QVector<QVector3D> vertices = {
+        {5, 2, 3},
+        {20, 1, 2},
+        {-1.45, -5, -10},
+        {10, 0, 1}
+    };
+
+    QVector3D expected = {0, 0, 0};
+
+    QCOMPARE(getMax(vertices, false, false, false), expected);
+}
+
+void MeshToolsTests::testGetMax05()
+{
+    QVector<QVector3D> vertices;
+
+    QVector3D expected = {0, 0, 0};
+
+    QCOMPARE(getMax(vertices, true, false, false), expected);
+}

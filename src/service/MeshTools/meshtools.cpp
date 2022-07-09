@@ -54,3 +54,117 @@ QVector<float> MeshTools::packTriangleVertexCoords(QVector<QVector3D> vertices, 
     }
     return triangleVertexCoords;
 }
+
+float MeshTools::getMax(QVector<float> vector)
+{
+    return *std::max_element(vector.begin(), vector.end());
+}
+
+float MeshTools::getMin(QVector<float> vector)
+{
+    return *std::min_element(vector.begin(), vector.end());
+}
+
+QVector3D MeshTools::getMax(QVector<QVector3D> vector, bool getX, bool getY, bool getZ)
+{
+    if (vector.isEmpty() || (!getX && !getY && !getZ))
+    {
+        return QVector3D(0, 0, 0);
+    }
+
+    float maxX = vector[0].x();
+    float maxY = vector[0].y();
+    float maxZ = vector[0].z();
+    QVector3D resultVector;
+
+    if (getX)
+    {
+        for (QVector3D& vector3d : vector)
+        {
+            if (vector3d.x() > maxX)
+            {
+                maxX = vector3d.x();
+            }
+        }
+
+        resultVector.setX(maxX);
+    }
+    if (getY)
+    {
+        for (QVector3D& vector3d : vector)
+        {
+            if (vector3d.y() > maxY)
+            {
+                maxY = vector3d.y();
+            }
+        }
+
+        resultVector.setY(maxY);
+    }
+    if (getZ)
+    {
+        for (QVector3D& vector3d : vector)
+        {
+            if (vector3d.z() > maxZ)
+            {
+                maxZ = vector3d.z();
+            }
+        }
+
+        resultVector.setZ(maxZ);
+    }
+
+    return resultVector;
+}
+
+QVector3D MeshTools::getMin(QVector<QVector3D> vector, bool getX, bool getY, bool getZ)
+{
+    if (vector.isEmpty() || (!getX && !getY && !getZ))
+    {
+        return QVector3D(0, 0, 0);
+    }
+
+    float minX = vector[0].x();
+    float minY = vector[0].y();
+    float minZ = vector[0].z();
+    QVector3D resultVector;
+
+    if (getX)
+    {
+        for (QVector3D& vector3d : vector)
+        {
+            if (vector3d.x() < minX)
+            {
+                minX = vector3d.x();
+            }
+        }
+
+        resultVector.setX(minX);
+    }
+    if (getY)
+    {
+        for (QVector3D& vector3d : vector)
+        {
+            if (vector3d.y() < minY)
+            {
+                minY = vector3d.y();
+            }
+        }
+
+        resultVector.setY(minY);
+    }
+    if (getZ)
+    {
+        for (QVector3D& vector3d : vector)
+        {
+            if (vector3d.z() < minZ)
+            {
+                minZ = vector3d.z();
+            }
+        }
+
+        resultVector.setZ(minZ);
+    }
+
+    return resultVector;
+}

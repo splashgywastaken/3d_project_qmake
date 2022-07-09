@@ -17,6 +17,17 @@ private slots:
     void testBuildTriangleVertexIndices01();
     void testBuildTriangleVertexIndices02();
     void testPackTriangleVertexCoords01();
+
+    void testGetMin01();
+    void testGetMin02();
+    void testGetMin03();
+    void testGetMin04();
+    void testGetMin05();
+    void testGetMax01();
+    void testGetMax02();
+    void testGetMax03();
+    void testGetMax04();
+    void testGetMax05();
 };
 
 #endif // MESHTOOLSTESTS_H

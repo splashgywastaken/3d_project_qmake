@@ -6,7 +6,7 @@
 #include "src/main/mainwindow/mainwindow.h"
 #include "src/service/file_readers/ObjFileReader/ObjFileReader.h"
 
-#include "tests/MeshTools/meshtoolstests.h"
+#include "tests/MeshToolsTests/meshtoolstests.h"
 #include "tests/ObjReaderTests/objreadertests.h"
 
 int main(int argc, char *argv[])

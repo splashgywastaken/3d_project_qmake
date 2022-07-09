@@ -89,14 +89,30 @@ void ObjectViewGLWidget::doCameraRotation(const QPoint &dstPosition)
     update();
 }
 
-void ObjectViewGLWidget::doPanning(const QPoint &dstPosition)
+void ObjectViewGLWidget::doPanningXZ(const QPoint &dstPosition)
+{
+    QMatrix4x4 projectionMatrix = m_camera->projectionMatrix(getAspectRatio());
+    float depth = m_camera->getCameraPosition().z();
+    QVector3D screenPosition3D = unprojectSreenPointToEye(m_screenPosition, depth, projectionMatrix, size());
+    QVector3D dstPosition3D = unprojectSreenPointToEye(dstPosition, depth, projectionMatrix, size());
+
+    std::swap(screenPosition3D[1], screenPosition3D[2]);
+    std::swap(dstPosition3D[1], dstPosition3D[2]);
+
+    QVector3D shift = dstPosition3D - screenPosition3D;
+    m_camera->setCameraPosition(m_camera->getCameraPosition() - shift);
+    m_screenPosition = dstPosition;
+    update();
+}
+
+void ObjectViewGLWidget::doPanningXY(const QPoint &dstPosition)
 {
     QMatrix4x4 projectionMatrix = m_camera->projectionMatrix(getAspectRatio());
     float depth = m_camera->getCameraPosition().z();
     QVector3D screenPosition3D = unprojectSreenPointToEye(m_screenPosition, depth, projectionMatrix, size());
     QVector3D dstPosition3D = unprojectSreenPointToEye(dstPosition, depth, projectionMatrix, size());
     QVector3D shift = dstPosition3D - screenPosition3D;
-    m_camera->setCameraPosition(m_camera->getCameraPosition() + shift);
+    m_camera->setCameraPosition(m_camera->getCameraPosition() - shift);
     m_screenPosition = dstPosition;
     update();
 }
@@ -190,12 +206,18 @@ void ObjectViewGLWidget::mousePressEvent(QMouseEvent *event)
 {
     bool altPressed = (event->modifiers() == Qt::AltModifier);
     bool ctrlPressed = (event->modifiers() == Qt::ControlModifier);
-    bool startPanning = (event->buttons() == Qt::MiddleButton) && altPressed;
+    bool startPanningXZ = (event->buttons() == Qt::MiddleButton) && altPressed;
+    bool startPanningXY = (event->buttons() == Qt::MiddleButton) && ctrlPressed;
     bool startRotatingCamera = (event->buttons() == Qt::LeftButton) && altPressed;
     bool startRotatingAroundObject = (event->button() == Qt::LeftButton) && ctrlPressed;
-    if (startPanning)
+    if (startPanningXZ)
     {
-        m_navigationState = NavigationState::Pan;
+        m_navigationState = NavigationState::PanXZ;
+        m_screenPosition = event->pos();
+    }
+    if (startPanningXY)
+    {
+        m_navigationState = NavigationState::PanXY;
         m_screenPosition = event->pos();
     }
     bool startZooming = (event->buttons() == Qt::RightButton) && altPressed;
@@ -234,9 +256,13 @@ void ObjectViewGLWidget::mouseMoveEvent(QMouseEvent *event)
     {
         doCameraRotation(event->pos());
     }
-    if (m_navigationState == NavigationState::Pan)
+    if (m_navigationState == NavigationState::PanXZ)
     {
-        doPanning(event->pos());
+        doPanningXZ(event->pos());
+    }
+    if (m_navigationState == NavigationState::PanXY)
+    {
+        doPanningXY(event->pos());
     }
     if (m_navigationState == NavigationState::RotateAroundObject)
     {

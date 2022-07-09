@@ -12,7 +12,7 @@
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 
-#include <src/models/3D_obj_data/object3d.h>
+#include <src/models/3D_obj_data/Object3D/object3d.h>
 
 #include <src/service/GlobalState.h>
 
@@ -21,7 +21,8 @@ enum class NavigationState
     Zoom,
     RotateCamera,
     RotateAroundObject,
-    Pan,
+    PanXZ,
+    PanXY,
     None
 };
 
@@ -47,7 +48,8 @@ protected:
     QVector3D unprojectSreenPointToEye(const QPoint &position, float depth, const QMatrix4x4 &projectionMatrix, const QSize &screenSize);
 
     void doCameraRotation(const QPoint &dstPosition);
-    void doPanning(const QPoint &dstPosition);
+    void doPanningXZ(const QPoint &dstPosition);
+    void doPanningXY(const QPoint &dstPosition);
     void doZooming(const QPoint &dstPosition);
     void doWheelZooming(float delta);
     void doCameraRotationAroundObject(const QPoint &dstPosition);
@@ -72,6 +74,7 @@ protected:
     DrawableObjectTools::ShaderProgrammType m_shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
 
     int m_nVertices;
+    int m_fitToViewSpacing = 5;
 
     NavigationState m_navigationState = NavigationState::None;
     QPoint m_screenPosition;

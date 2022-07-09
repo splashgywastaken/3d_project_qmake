@@ -8,10 +8,11 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <src/models/dto/ObjFileData/ObjFileData.h>
+#include <src/models/3D_obj_data/SceneObject/sceneobject.h>
 
 #include <src/service/GlobalState.h>
 
-class Object3D
+class Object3D : SceneObject
 {
 public:
     Object3D(
@@ -26,9 +27,9 @@ public:
             QMatrix4x4 projectionMatrix,
             QOpenGLShaderProgram* shader,
             DrawableObjectTools::ShaderProgrammType shaderType
-            );
-    void setObjectColor(QVector3D objectColor);
-    QVector3D& getObjectColor();
+            ) override;
+    void setObjectColor(QVector3D objectColor) override;
+    QVector3D& getObjectColor() override;
 private:
     QOpenGLBuffer* m_vertexBuffer = nullptr;
     QOpenGLBuffer* m_normalBuffer  = nullptr;

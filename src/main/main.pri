@@ -1,19 +1,17 @@
 !MAIN_PRI {
-CONFIG +=MAIN_PRI
+    CONFIG += MAIN_PRI
 
-INCLUDEPATH += $$PWD
+    INCLUDEPATH += $$PWD
 
-include($$PWD/../main/main.pri)
+    HEADERS += \
+    $$PWD/main.h
 
-HEADERS += \
-    $$PWD/mainwindow/mainwindow.h \
-    $$PWD/colorpicker/colorpicker.h
+    SOURCES += \
+    $$PWD/main.cpp
 
-SOURCES += \
-    $$PWD/mainwindow/mainwindow.cpp \
-    $$PWD/colorpicker/colorpicker.cpp
+    include($$PWD/colorpicker/colorpicker.pri)
+    include($$PWD/mainwindow/mainwindow.pri)
 
-FORMS += \
-    $$PWD/mainwindow/mainwindow.ui \
-    $$PWD/colorpicker/colorpicker.ui
+    # Tests
+    include($$PWD/../../tests/tests.pri)
 }

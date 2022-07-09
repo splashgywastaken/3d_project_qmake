@@ -6,53 +6,23 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
-# You can make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+DEFINES += QT_DEPRECATED_WARNINGS
 
-#include(main/main.pri)
-
-SOURCES += \
-    src/main/colorpicker/colorpicker.cpp \
-    src/main/main.cpp \
-    src/main/mainwindow/mainwindow.cpp \
-    src/models/3D_obj_data/object3d.cpp \
-    src/models/dto/ObjFileData/ObjFileData.cpp \
-    \
-    src/service/DrawableObjectTools/drawableobjecttools.cpp \
-    src/service/MeshTools/meshtools.cpp \
-    src/service/camera/camera.cpp \
-    src/service/file_readers/ObjFileReader/ObjFileReader.cpp \
-    \
-    src/service/progress_notifier/progressnotifiersingleton.cpp \
-    src/widgets/objectviewglwidget/objectviewglwidget.cpp \
-    tests/MeshTools/meshtoolstests.cpp \
-    tests/ObjReaderTests/objreadertests.cpp
+# Main and forms
+include($$PWD/src/main/main.pri)
 
 
-HEADERS += \
-    src/main/colorpicker/colorpicker.h \
-    src/main/main.h \
-    src/main/mainwindow/mainwindow.h \
-    src/models/3D_obj_data/object3d.h \
-    src/models/dto/ObjFileData/ObjFileData.h \
-    \
-    src/service/DrawableObjectTools/drawableobjecttools.h \
-    src/service/GlobalState.h \
-    src/service/MeshTools/meshtools.h \
-    src/service/camera/camera.h \
-    src/service/file_readers/ObjFileReader/ObjFileReader.h \
-    \
-    src/service/progress_notifier/AbstractProgressNotifier.h \
-    src/service/progress_notifier/progressnotifiersingleton.h \
-    src/widgets/objectviewglwidget/objectviewglwidget.h \
-    tests/MeshTools/meshtoolstests.h \
-    tests/ObjReaderTests/objreadertests.h
+# Models
+include($$PWD/src/models/models.pri)
 
-FORMS += \
-    src/main/colorpicker/colorpicker.ui \
-    src/main/mainwindow/mainwindow.ui
 
+# Service and global state
+include($$PWD/src/widgets/widgets.pri)
+include($$PWD/src/service/service.pri)
+
+
+# Tests
+include($$PWD/tests/tests.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -60,4 +30,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    src/main/main.pri
+    src/main/colorpicker/colorpicker.pri \
+    src/main/mainwindow/mainwindow.pri \
+    src/models/3D_obj_data/3D_obj_data.pri \
+    src/models/3D_obj_data/SceneObject/sceneobject.pri \
+    src/models/dto/ObjFileData/ObjFileData.pri \
+    src/models/dto/dto.pri \
+    src/models/models.pri \
+    tests/MeshTools/meshtoolstests.pri \
+    tests/tests.pri

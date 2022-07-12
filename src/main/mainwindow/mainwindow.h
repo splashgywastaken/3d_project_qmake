@@ -53,6 +53,9 @@ protected:
     // Custom widgets
     ObjectViewGLWidget * m_glWidget;
 
+    // Event filters:
+    CameraMovementEventFilter* m_cameraMovementEventFilter = nullptr;
+
     // UI
     Ui::MainWindow *m_ui;
 

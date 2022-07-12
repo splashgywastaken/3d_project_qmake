@@ -5,5 +5,5 @@
     INCLUDEPATH += $$PWD
 
     include($$PWD/globalstate.pri)
-
+    include($$PWD/EventFilters/EventFilters.pri)
 }

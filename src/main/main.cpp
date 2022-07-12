@@ -4,7 +4,7 @@
 #include <QTextEdit>
 
 #include "src/main/mainwindow/mainwindow.h"
-#include "src/service/file_readers/ObjFileReader/ObjFileReader.h"
+#include "src/service/FileReaders/ObjFileReader/ObjFileReader.h"
 
 #include "tests/MeshToolsTests/meshtoolstests.h"
 #include "tests/ObjReaderTests/objreadertests.h"

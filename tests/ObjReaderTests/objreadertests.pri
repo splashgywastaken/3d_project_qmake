@@ -3,7 +3,7 @@
 
     INCLUDEPATH += $$PWD
 
-    include($$PWD/../../src/service/file_readers/ObjFileReader/ObjFileReader.pri)
+    include($$PWD/../../src/service/FileReaders/ObjFileReader/ObjFileReader.pri)
 
     HEADERS += \
     $$PWD/objreadertests.h

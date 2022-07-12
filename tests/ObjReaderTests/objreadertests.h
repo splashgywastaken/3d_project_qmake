@@ -2,7 +2,7 @@
 #define OBJREADERTESTS_H
 
 #include <QObject>
-#include "src/service/file_readers/ObjFileReader/ObjFileReader.h"
+#include "src/service/FileReaders/ObjFileReader/ObjFileReader.h"
 #include <QTest>
 
 class ObjReaderTests : public QObject

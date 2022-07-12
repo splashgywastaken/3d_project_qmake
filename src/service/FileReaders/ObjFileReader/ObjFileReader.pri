@@ -3,7 +3,7 @@
 
     INCLUDEPATH += $$PWD
 
-    include($$PWD/../../progress_notifier/progress_notifier.pri)
+    include($$PWD/../../ProgressNotifier/ProgressNotifier.pri)
 
     HEADERS += \
         $$PWD/ObjFileReader.h

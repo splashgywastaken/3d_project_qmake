@@ -25,7 +25,7 @@
     </property>
     <layout class="QVBoxLayout" name="openGLLayout"/>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -55,7 +55,7 @@
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="1">
+       <item row="0" column="0">
         <widget class="QCheckBox" name="useNormalsCheckBox">
          <property name="text">
           <string>Использовать значения нормалей</string>
@@ -65,14 +65,7 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QPushButton" name="fitToViewButton">
-         <property name="text">
-          <string>Fit to view</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
+       <item row="1" column="0">
         <widget class="QCheckBox" name="useNormalMapCheckBox">
          <property name="text">
           <string>Отрисовывать карту нормалей</string>

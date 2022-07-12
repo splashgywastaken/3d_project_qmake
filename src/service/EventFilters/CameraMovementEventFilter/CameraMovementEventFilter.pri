@@ -1,0 +1,9 @@
+!CAMERAMOVEMENTEVENTFILTER_PRI {
+    CONFIG += CAMERAMOVEMENTEVENTFILTER_PRI
+
+    INCLUDEPATH += $$PWD
+
+    HEADERS += $$PWD/CameraMovementEventFilter.h
+
+    SOURCES += $$PWD/CameraMovementEventFilter.cpp
+}

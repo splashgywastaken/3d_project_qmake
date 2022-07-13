@@ -84,25 +84,41 @@ void CameraMovementEventFilter::mouseReleaseEvent(QMouseEvent *event)
 
 void CameraMovementEventFilter::mouseMoveEvent(QMouseEvent *event)
 {
-    if (m_navigationState == NavigationState::Zoom)
+    switch (m_navigationState)
     {
-        doZooming(event->pos());
-    }
-    if (m_navigationState == NavigationState::RotateCamera)
-    {
-        doCameraRotation(event->pos());
-    }
-    if (m_navigationState == NavigationState::PanXZ)
-    {
-        doPanningXZ(event->pos());
-    }
-    if (m_navigationState == NavigationState::PanXY)
-    {
-        doPanningXY(event->pos());
-    }
-    if (m_navigationState == NavigationState::RotateAroundObject)
-    {
-        doCameraRotationAroundObject(event->pos());
+        case NavigationState::Zoom:
+            {
+                doZooming(event->pos());
+            }
+            break;
+
+        case NavigationState::RotateCamera:
+            {
+                doCameraRotation(event->pos());
+            }
+            break;
+
+        case NavigationState::RotateAroundObject:
+            {
+                doCameraRotationAroundObject(event->pos());
+            }
+            break;
+
+        case NavigationState::PanXZ:
+            {
+                doPanningXZ(event->pos());
+            }
+            break;
+
+        case NavigationState::PanXY:
+            {
+                doPanningXY(event->pos());
+            }
+            break;
+
+        case NavigationState::None:
+        default:
+            break;
     }
 }
 

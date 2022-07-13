@@ -40,17 +40,27 @@ void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType s
 
     DrawableObjectTools:: ResourceManager *resourceManager = DrawableObjectTools::ResourceManager::getInstance();
 
-    if (m_shaderType == DrawableObjectTools::ShaderProgrammType::Standard)
+    switch (m_shaderType)
     {
-        m_shader = resourceManager->getShaderProgram("basicShader");
-    }
-    if (m_shaderType == DrawableObjectTools::ShaderProgrammType::Lightning)
-    {
-        m_shader = resourceManager->getShaderProgram("lightningShader");
-    }
-    if (m_shaderType == DrawableObjectTools::ShaderProgrammType::NormalMap)
-    {
-        m_shader = resourceManager->getShaderProgram("normalMapShader");
+        case DrawableObjectTools::ShaderProgrammType::Standard:
+            {
+                m_shader = resourceManager->getShaderProgram("basicShader");
+            }
+            break;
+        case DrawableObjectTools::ShaderProgrammType::Lightning:
+            {
+                m_shader = resourceManager->getShaderProgram("lightningShader");
+            }
+            break;
+        case DrawableObjectTools::ShaderProgrammType::LightningWithTextures:
+            {
+            }
+            break;
+        case DrawableObjectTools::ShaderProgrammType::NormalMap:
+            {
+                m_shader = resourceManager->getShaderProgram("normalMapShader");
+            }
+            break;
     }
 
     Q_ASSERT(m_shader != nullptr);

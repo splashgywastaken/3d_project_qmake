@@ -17,9 +17,10 @@ include($$PWD/src/models/models.pri)
 
 
 # Service and global state
-include($$PWD/src/widgets/widgets.pri)
 include($$PWD/src/service/service.pri)
 
+# Widgets
+include($$PWD/src/widgets/widgets.pri)
 
 # Tests
 include($$PWD/tests/tests.pri)
@@ -28,14 +29,3 @@ include($$PWD/tests/tests.pri)
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-DISTFILES += \
-    src/main/colorpicker/colorpicker.pri \
-    src/main/mainwindow/mainwindow.pri \
-    src/models/3D_obj_data/3D_obj_data.pri \
-    src/models/3D_obj_data/SceneObject/sceneobject.pri \
-    src/models/dto/ObjFileData/ObjFileData.pri \
-    src/models/dto/dto.pri \
-    src/models/models.pri \
-    tests/MeshTools/meshtoolstests.pri \
-    tests/tests.pri

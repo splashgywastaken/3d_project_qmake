@@ -14,4 +14,7 @@
 
     # Tests
     include($$PWD/../../tests/tests.pri)
+
+    # Misc. code playground files
+    include($$PWD/../../code playground/PlaygroundFiles.pri)
 }

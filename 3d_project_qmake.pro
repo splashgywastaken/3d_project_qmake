@@ -8,6 +8,9 @@ CONFIG += c++17
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
+# Misc. playground files
+include($$PWD/code playground/PlaygroundFiles.pri)
+
 # Main and forms
 include($$PWD/src/main/main.pri)
 

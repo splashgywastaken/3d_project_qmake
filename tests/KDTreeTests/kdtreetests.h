@@ -13,11 +13,19 @@ public:
 private slots:
     void testBuildTree01();
 
+    // Find nearest by distance
     void testFindNearestPoint01();
     void testFindNearestPoint02();
     void testFindNearestPoint03();
     void testFindNearestPoint04();
     void testFindNearestPoint05();
+
+    // Find nearest by radius
+    void testFindNearestPointInRadius06();
+    void testFindNearestPointInRadius07();
+    void testFindNearestPointInRadius08();
+    void testFindNearestPointInRadius09();
+    void testFindNearestPointInRadius10();
 };
 
 }

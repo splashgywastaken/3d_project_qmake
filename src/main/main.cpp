@@ -9,6 +9,7 @@
 #include "tests/MeshToolsTests/meshtoolstests.h"
 #include "tests/ObjReaderTests/objreadertests.h"
 #include "tests/KDTreeTests/kdtreetests.h"
+#include "code playground/KDTreeCompareMethods/timetester.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,4 +29,22 @@ int main(int argc, char *argv[])
     window->show();
 
     return app.exec();
+
+//    QString fileName = "E:/projects SSD/Qt/3d_project_qmake/res/obj/Car.obj";
+//    QVector3D pointToSearch = {-0.5, 0.5, -0.5};
+
+//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
+
+//    pointToSearch = {0.5, 0.5, 0.5};
+//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
+
+//    fileName = "E:/projects SSD/Qt/3d_project_qmake/res/obj/Datsun_280Z.obj";
+//    pointToSearch = {0.5, 0.5, 0.5};
+//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
+
+//    pointToSearch = {0.5, 0.5, -0.5};
+//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
+
+    return 0;
+
 }

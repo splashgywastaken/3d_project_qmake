@@ -63,6 +63,29 @@ void Utils::splitPointsByPlane(
     }
 }
 
+// Splits points by given values:
+// pointIndices - indices to split;
+// points - value of points to compare them with given indices;
+// splitAxis - values from 0 to 2, represents which axis would be used in comparison;
+// leftPointIndice and righPointIndices - Lists to split points into;
+void Utils::splitPointsByPoint(QList<int> &pointIndices, QVector<QVector3D> points, QVector3D point, int splitAxis, QList<int> &leftPointIndices, QList<int> &rightPointIndices)
+{
+    leftPointIndices.clear();
+    rightPointIndices.clear();
+
+    for (const int& index : pointIndices)
+    {
+        if (points[index][splitAxis] < point[splitAxis])
+        {
+            leftPointIndices << index;
+        }
+        else
+        {
+            rightPointIndices << index;
+        }
+    }
+}
+
 QList<int> Utils::buildEnumeratedList(int nElements)
 {
     QList<int> list;
@@ -71,4 +94,50 @@ QList<int> Utils::buildEnumeratedList(int nElements)
         list << elementInd;
     }
     return list;
+}
+
+void Utils::buildSortedLists(QList<int> &pointIndices, QVector<QVector3D> &points, int axisToSort)
+{
+    if (pointIndices.count() <= 1)
+    {
+        return;
+    }
+
+    quickSort(pointIndices, points, axisToSort, 0, pointIndices.count() - 1);
+}
+
+void Utils::swap(int* lvalue, int* rvalue)
+{
+    int t = *lvalue;
+    *lvalue = *rvalue;
+    *rvalue = t;
+}
+
+int partition(QList<int>& indices, QVector<QVector3D>& points, int axisToSort, int p, int r)
+{
+    float x = points[indices[r]][axisToSort];
+    int i = p - 1;
+
+    for (int j = p; j <= r - 1; j++)
+    {
+        if (points[indices[j]][axisToSort] <= x)
+        {
+            i++;
+            int temp = indices[j];
+            indices[j] = indices[i];
+            indices[i] = temp;
+        }
+    }
+    Utils::swap(&indices[i + 1], &indices[r]);
+    return (i + 1);
+}
+
+void Utils::quickSort(QList<int> &indices, QVector<QVector3D> &points, int axisToSort, int p, int r)
+{
+    if (p < r)
+    {
+        int q = partition(indices, points, axisToSort, p, r);
+        quickSort(indices, points, axisToSort, p, q - 1);
+        quickSort(indices, points, axisToSort, q + 1, r);
+    }
 }

@@ -1,7 +1,8 @@
 #include "nodeleaf.h"
 #include "float.h"
+using namespace KDTree;
 
-KDTree::NodeLeaf::NodeLeaf(const QList<int> &pointIndices, const QVector<QVector3D> &points)
+NodeLeaf::NodeLeaf(const QList<int> &pointIndices, const QVector<QVector3D> &points)
     : Node(),
       m_pointIndices(pointIndices.toVector())
 {
@@ -13,14 +14,14 @@ KDTree::NodeLeaf::NodeLeaf(const QList<int> &pointIndices, const QVector<QVector
     }
 }
 
-KDTree::NodeLeaf::NodeLeaf(const NodeLeaf &other) :
+NodeLeaf::NodeLeaf(const NodeLeaf &other) :
     Node(other),
     m_pointIndices(other.m_pointIndices),
     m_subsettedPoints(other.m_subsettedPoints)
 {
 }
 
-void KDTree::NodeLeaf::findNearestPoint(const QVector3D &point, const QVector<QVector3D> &points, int &nearestPointInd, float &nearestPointDistSquared) const
+void NodeLeaf::findNearestPoint(const QVector3D &point, const QVector<QVector3D> &points, int &nearestPointInd, float &nearestPointDistSquared) const
 {
     Q_UNUSED(points)
     const int nSubsettedPoints = m_pointIndices.size();
@@ -33,7 +34,7 @@ void KDTree::NodeLeaf::findNearestPoint(const QVector3D &point, const QVector<QV
     }
 }
 
-int KDTree::NodeLeaf::findNearestPointIndex(const QVector3D &point, const QVector<QVector3D> &points, float *nearestPointDistSquared) const
+int NodeLeaf::findNearestPointIndex(const QVector3D &point, const QVector<QVector3D> &points, float *nearestPointDistSquared) const
 {
     int nearestPointInd = -1;
     float distSquared = FLT_MAX;
@@ -43,7 +44,7 @@ int KDTree::NodeLeaf::findNearestPointIndex(const QVector3D &point, const QVecto
     return nearestPointInd;
 }
 
-void KDTree::NodeLeaf::findNearestPoint(int pointInd, const QVector<QVector3D> &points, int &nearestPointInd, float &nearestPointDistSquared) const
+void NodeLeaf::findNearestPoint(int pointInd, const QVector<QVector3D> &points, int &nearestPointInd, float &nearestPointDistSquared) const
 {
     const QVector3D &point = points[pointInd];
     const int nSubsettedPoints = m_pointIndices.size();
@@ -59,7 +60,7 @@ void KDTree::NodeLeaf::findNearestPoint(int pointInd, const QVector<QVector3D> &
     }
 }
 
-int KDTree::NodeLeaf::findNearestPointIndex(int pointInd, const QVector<QVector3D> &points, float *nearestPointDistSquared) const
+int NodeLeaf::findNearestPointIndex(int pointInd, const QVector<QVector3D> &points, float *nearestPointDistSquared) const
 {
     int nearestPointInd = -1;
     float distSquared = FLT_MAX;
@@ -69,12 +70,96 @@ int KDTree::NodeLeaf::findNearestPointIndex(int pointInd, const QVector<QVector3
     return nearestPointInd;
 }
 
+void NodeLeaf::findNearestPointIndexInRadius(
+        const QVector3D &point, const QVector<QVector3D> &points,
+        int &nearestPointIndex, float &radius, float& nearestPointDistSquared
+        ) const
+{
+    Q_UNUSED(points);
+    const int nSubsettedPoints = m_pointIndices.size();
+    for (int pointIndex = 0; pointIndex < nSubsettedPoints; pointIndex++)
+    {
+        const float distSquared = sqrt((m_subsettedPoints[pointIndex] - point).lengthSquared());
+        if (distSquared < nearestPointDistSquared && distSquared <= pow(radius, 2))
+        {
+            nearestPointDistSquared = distSquared;
+            nearestPointIndex = m_pointIndices[pointIndex];
+        }
+    }
+}
+
+int NodeLeaf::findNearestPointIndexInRadius(
+        const QVector3D &point, const QVector<QVector3D> &points,
+        float &radius, float* nearestPointDist
+        ) const
+{
+    int nearestPointIndex = -1;
+    if (radius <= 0.0f)
+    {
+        return nearestPointIndex;
+    }
+    float dist = FLT_MAX;
+    findNearestPointIndexInRadius(point, points, nearestPointIndex, radius, dist);
+    if (nearestPointDist != nullptr)
+    {
+        *nearestPointDist = dist;
+    }
+    return nearestPointIndex;
+}
+
+int NodeLeaf::findNearestPointIndexInRadius(
+        int pointInd, const QVector<QVector3D> &points,
+        float &radius, float *nearestPointDist
+        ) const
+{
+    int nearestPointIndex = -1;
+    if (radius <= 0.0f)
+    {
+        return nearestPointIndex;
+    }
+    float dist = FLT_MAX;
+    findNearestPointInRadius(pointInd, points, nearestPointIndex, radius, dist);
+    if (nearestPointDist)
+    {
+        *nearestPointDist = dist;
+    }
+    return nearestPointIndex;
+}
+
+void NodeLeaf::findNearestPointInRadius(
+        int pointIndex, const QVector<QVector3D> &points,
+        int &nearestPointIndex, float &radius, float &nearestPointDistSquared
+        ) const
+{
+    if (radius <= 0.0f)
+    {
+        nearestPointIndex = -1;
+        return;
+    }
+    const QVector3D &point = points[pointIndex];
+    const int nSubsettedPoints = m_pointIndices.size();
+    for (int otherPointIndex = 0; otherPointIndex < nSubsettedPoints; otherPointIndex++)
+    {
+        if (m_pointIndices[otherPointIndex] == pointIndex)
+        {
+            continue;
+        }
+
+        const float distSquared = (m_subsettedPoints[otherPointIndex] - point).lengthSquared();
+        if (distSquared < nearestPointDistSquared && distSquared <= pow(radius, 2))
+        {
+            nearestPointDistSquared = distSquared;
+            nearestPointIndex = m_pointIndices[otherPointIndex];
+        }
+    }
+}
+
 int KDTree::NodeLeaf::memUsage() const
 {
     return m_pointIndices.count() * static_cast<int>(sizeof(float)) + m_subsettedPoints.count() * static_cast<int>(sizeof(QVector3D));
 }
 
-KDTree::Node *KDTree::NodeLeaf::copy() const
+Node *KDTree::NodeLeaf::copy() const
 {
     return new NodeLeaf(*this);
 }

@@ -1,5 +1,6 @@
 #include "nodeinner.h"
 #include "float.h"
+#include "nodeleaf.h"
 using namespace KDTree;
 
 NodeInner::NodeInner(const Node *childLeft, const Node *childRight, int splitAxis, float splitPos) :
@@ -74,6 +75,83 @@ int NodeInner::findNearestPointIndex(int pointInd, const QVector<QVector3D> &poi
     return nearestPointInd;
 }
 
+void NodeInner::findNearestPointIndexInRadius(
+        const QVector3D &point, const QVector<QVector3D> &points,
+        int &nearestPointIndex, float &radius, float& nearestPointDistSquared
+        ) const
+{
+    const Child childToSearch = point[m_splitAxis] < m_splitPos ? Child_Left : Child_Right;
+    child(childToSearch)->findNearestPointIndexInRadius(point, points, nearestPointIndex, radius, nearestPointDistSquared);
+
+    const float distToSplitPlaneSquared = float(pow(m_splitPos - point[m_splitAxis], 2));
+    if (distToSplitPlaneSquared > pow(nearestPointDistSquared, 2))
+    {
+        return;
+    }
+    const Child otherChild = static_cast<Child>((childToSearch + 1) % 2);
+    child(otherChild)->findNearestPointIndexInRadius(point, points, nearestPointIndex, radius, nearestPointDistSquared);
+}
+
+int NodeInner::findNearestPointIndexInRadius(
+        const QVector3D &point, const QVector<QVector3D> &points,
+        float &radius, float* nearestPointDistSquared
+        ) const
+{
+    int nearestPointIndex = -1;
+    float distSquared = FLT_MAX;
+    if (radius <= 0.0f)
+    {
+        return nearestPointIndex;
+    }
+    findNearestPointIndexInRadius(point, points, nearestPointIndex, radius, distSquared);
+    if (nearestPointDistSquared != nullptr)
+    {
+        *nearestPointDistSquared = distSquared;
+    }
+    return nearestPointIndex;
+}
+
+int NodeInner::findNearestPointIndexInRadius(
+        int pointInd, const QVector<QVector3D> &points,
+        float &radius, float *nearestPointDistSquared
+        ) const
+{
+    int nearestPointIndex = -1;
+    float dist = FLT_MAX;
+    if (radius <= 0.0f)
+    {
+        return nearestPointIndex;
+    }
+    findNearestPointInRadius(pointInd, points, nearestPointIndex, radius, dist);
+    if (nearestPointDistSquared)
+    {
+        *nearestPointDistSquared = dist;
+    }
+    return nearestPointIndex;
+}
+
+void NodeInner::findNearestPointInRadius(
+        int pointIndex, const QVector<QVector3D> &points,
+        int &nearestPointIndex, float &radius, float &nearestPointDistSquared
+        ) const
+{
+    const QVector3D &point = points[pointIndex];
+
+    const Child childToSearch = point[m_splitAxis] < m_splitPos ? Child_Left : Child_Right;
+    child(childToSearch)->findNearestPointInRadius(pointIndex, points, nearestPointIndex, radius, nearestPointDistSquared);
+
+    if (nearestPointIndex != -1)
+    {
+        const float distToSplitPlaneSquared = float(pow(m_splitPos - point[m_splitAxis], 2));
+        if (distToSplitPlaneSquared > pow(nearestPointDistSquared, 2))
+        {
+            return;
+        }
+    }
+    const Child otherChild = static_cast<Child>((childToSearch + 1) % 2);
+    child(otherChild)->findNearestPointInRadius(pointIndex, points, nearestPointIndex, radius, nearestPointDistSquared);
+}
+
 int NodeInner::memUsage() const
 {
     return m_childLeft->memUsage() + m_childRight->memUsage();
@@ -84,7 +162,7 @@ Node *NodeInner::copy() const
     return new NodeInner(*this);
 }
 
-const Node *KDTree::NodeInner::child(Child child) const
+const Node *NodeInner::child(Child child) const
 {
     if (child == Child_Left)
     {

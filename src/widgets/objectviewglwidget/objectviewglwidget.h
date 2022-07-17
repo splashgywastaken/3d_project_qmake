@@ -26,6 +26,7 @@ public:
     ~ObjectViewGLWidget();
 
     void addObject(SceneObject* object);
+    void addPoint(QVector3D point);
     void deleteLastObject();
     void clearObjects();
 
@@ -44,7 +45,10 @@ protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
+
+    void drawPoints(QMatrix4x4 mvMatrix, QMatrix4x4 projectionMatrix);
 protected:
+    QVector<QVector3D>* m_selectedPoints = nullptr;
     QVector<SceneObject*>* m_objects = nullptr;
     SceneObject* m_grid = nullptr;
     Camera* m_camera = nullptr;

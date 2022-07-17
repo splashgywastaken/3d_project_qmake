@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "kdtree.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
@@ -7,6 +8,8 @@
 #include <src/service/GlobalState.h>
 
 #include <src/main/colorpicker/colorpicker.h>
+
+#include <findnearestpointdialog.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -151,6 +154,22 @@ void MainWindow::changeLastObjectColor()
     m_colorPickerDialog->activateWindow();
 }
 
+void MainWindow::findNearestPointInLastObject()
+{
+    QVector<QVector3D> points = m_fileData->getVertices();
+
+    KDTree::Node *kDTreeHead = KDTree::buildTree(points);
+    m_findNearestPointDialog = new FindNearestPointDialog(points, kDTreeHead);
+
+    connect(
+            this->m_findNearestPointDialog, &FindNearestPointDialog::foundNearest,
+            this, &MainWindow::nearestPointFound
+            );
+    m_findNearestPointDialog->show();
+    m_findNearestPointDialog->raise();
+    m_findNearestPointDialog->activateWindow();
+}
+
 void MainWindow::useNormalsCheckBoxClicked(bool checked)
 {
     m_useNormals = checked;
@@ -165,6 +184,11 @@ void MainWindow::useNormalMapCheckBoxClicked(bool checked)
     m_ui->useNormalsCheckBox->setChecked(m_useNormals);
 
     changeShader();
+}
+
+void MainWindow::nearestPointFound(QVector3D nearestPoint)
+{
+    m_glWidget->addPoint(nearestPoint);
 }
 
 void MainWindow::setLabelText(QLabel *label, QString text)
@@ -204,26 +228,32 @@ void MainWindow::createActions()
     m_openAction = new QAction(tr("Open file"), this);
     m_openAction->setShortcuts(QKeySequence::Open);
     m_openAction->setStatusTip(tr("Open a new file"));
-    connect(m_openAction, &QAction::triggered, this, &MainWindow::openObjFile);
+    QObject::connect(m_openAction, &QAction::triggered, this, &MainWindow::openObjFile);
 
     // Objects actions
     // Change object color
     m_changeObjectColorAction = new QAction(tr("Change object color"), this);
     m_changeObjectColorAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
     m_changeObjectColorAction->setToolTip(tr("Use color pallete to change object color"));
-    connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeLastObjectColor);
+    QObject::connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeLastObjectColor);
+
+    // Find nearest point index in last object
+    m_findNearestPointInLastObjectAction = new QAction(tr("Find nearest point"), this);
+    m_findNearestPointInLastObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_F));
+    m_findNearestPointInLastObjectAction->setToolTip(tr("Use dialog window to input data and find corresponding point in object"));
+    QObject::connect(m_findNearestPointInLastObjectAction, &QAction::triggered, this, &MainWindow::findNearestPointInLastObject);
 
     // Delete last object
     m_deleteLastObjectAction = new QAction(tr("Delete last object"), this);
     m_deleteLastObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X));
     m_deleteLastObjectAction->setToolTip(tr("Delete last object that you added on scene"));
-    connect(m_deleteLastObjectAction, &QAction::triggered, this, &MainWindow::deleteLastObject);
+    QObject::connect(m_deleteLastObjectAction, &QAction::triggered, this, &MainWindow::deleteLastObject);
 
     // Clear objects from scene
     m_clearObjectsAction = new QAction(tr("Clear scene"), this);
     m_clearObjectsAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_X));
     m_clearObjectsAction->setToolTip(tr("Clear all objects except "));
-    connect(m_clearObjectsAction, &QAction::triggered, this, &MainWindow::clearObjects);
+    QObject::connect(m_clearObjectsAction, &QAction::triggered, this, &MainWindow::clearObjects);
 }
 
 void MainWindow::createMenus()
@@ -233,6 +263,7 @@ void MainWindow::createMenus()
 
     m_objectMenu = menuBar()->addMenu(tr("&Object"));
     m_objectMenu->addAction(m_changeObjectColorAction);
+    m_objectMenu->addAction(m_findNearestPointInLastObjectAction);
 
     m_sceneMenu = menuBar()->addMenu(tr("&Scene"));
     m_sceneMenu->addAction(m_deleteLastObjectAction);

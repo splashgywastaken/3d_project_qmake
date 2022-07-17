@@ -11,6 +11,7 @@
 
     include($$PWD/colorpicker/colorpicker.pri)
     include($$PWD/mainwindow/mainwindow.pri)
+    include($$PWD/FindNearestPointDialog/FindNearestPointDialog.pri)
 
     # Tests
     include($$PWD/../../tests/tests.pri)

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <findnearestpointdialog.h>
 #include <qlabel.h>
 
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
@@ -22,6 +23,9 @@ public:
 
     void setObjectColor(QVector3D objectColor);
 
+public slots:
+    void nearestPointFound(QVector3D nearestPoint);
+
 protected slots:
     void openObjFile();
 
@@ -29,6 +33,7 @@ protected slots:
     void deleteLastObject();
     void clearObjects();
     void changeLastObjectColor();
+    void findNearestPointInLastObject();
 
     void useNormalsCheckBoxClicked(bool checked);
     void useNormalMapCheckBoxClicked(bool checked);
@@ -44,6 +49,7 @@ protected:
 protected:
     // Dialogs
     QDialog* m_colorPickerDialog = nullptr;
+    FindNearestPointDialog* m_findNearestPointDialog = nullptr;
 
     // Menu bar actions
     QMenu* m_fileMenu;
@@ -54,6 +60,7 @@ protected:
     QAction* m_openAction;
     // Objects
     QAction* m_changeObjectColorAction;
+    QAction* m_findNearestPointInLastObjectAction;
     // Scene
     QAction* m_deleteLastObjectAction;
     QAction* m_clearObjectsAction;

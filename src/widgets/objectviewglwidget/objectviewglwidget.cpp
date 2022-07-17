@@ -33,6 +33,17 @@ void ObjectViewGLWidget::addObject(SceneObject* object)
     m_objects->append(object);
 }
 
+void ObjectViewGLWidget::addPoint(QVector3D point)
+{
+    if (m_selectedPoints != nullptr)
+    {
+        delete m_selectedPoints;
+        m_selectedPoints = nullptr;
+    }
+    m_selectedPoints = new QVector<QVector3D>();
+    m_selectedPoints->append(point);
+}
+
 void ObjectViewGLWidget::deleteLastObject()
 {
     if (m_objects != nullptr)
@@ -48,6 +59,12 @@ void ObjectViewGLWidget::clearObjects()
         m_objects->clear();
         delete m_objects;
         m_objects = nullptr;
+    }
+    if (m_selectedPoints != nullptr)
+    {
+        m_selectedPoints->clear();
+        delete m_selectedPoints;
+        m_selectedPoints = nullptr;
     }
 }
 
@@ -155,6 +172,26 @@ void ObjectViewGLWidget::paintGL()
         for (SceneObject* object3D : *m_objects)
         {
             object3D->draw(modelViewMatrix, projectionMatrix, m_shader, m_shaderType);
+        }
+    }
+    drawPoints(modelViewMatrix, projectionMatrix);
+}
+
+void ObjectViewGLWidget::drawPoints(QMatrix4x4 mvMatrix, QMatrix4x4 projectionMatrix)
+{
+    if (m_selectedPoints != nullptr)
+    {
+        for (QVector3D point : *m_selectedPoints)
+        {
+            glMatrixMode(GL_MODELVIEW);
+            glLoadMatrixf(mvMatrix.data());
+            glMatrixMode(GL_PROJECTION);
+            glLoadMatrixf(projectionMatrix.data());
+            glColor3f(1, 0.6471, 0.0);
+            glPointSize(10.0f);
+            glBegin(GL_POINTS);
+                glVertex3f(point.x(), point.y(), point.z());
+            glEnd();
         }
     }
 }

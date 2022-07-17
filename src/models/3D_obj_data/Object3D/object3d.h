@@ -12,7 +12,7 @@
 
 #include <src/service/GlobalState.h>
 
-class Object3D : SceneObject
+class Object3D : public SceneObject
 {
 public:
     Object3D(

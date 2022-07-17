@@ -26,7 +26,9 @@ protected slots:
     void openObjFile();
 
     void addObject();
-    void changeObjectColor();
+    void deleteLastObject();
+    void clearObjects();
+    void changeLastObjectColor();
 
     void useNormalsCheckBoxClicked(bool checked);
     void useNormalMapCheckBoxClicked(bool checked);
@@ -40,15 +42,21 @@ protected:
     void createMenus();
 
 protected:
+    // Dialogs
+    QDialog* m_colorPickerDialog = nullptr;
+
     // Menu bar actions
     QMenu* m_fileMenu;
     QMenu* m_objectMenu;
+    QMenu* m_sceneMenu;
 
     // Files
     QAction* m_openAction;
     // Objects
-    QAction* m_addObjectAction;
     QAction* m_changeObjectColorAction;
+    // Scene
+    QAction* m_deleteLastObjectAction;
+    QAction* m_clearObjectsAction;
 
     // Custom widgets
     ObjectViewGLWidget * m_glWidget;

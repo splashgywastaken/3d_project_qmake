@@ -81,6 +81,8 @@ void MainWindow::openObjFile()
         setLabelText(m_ui->taskLabel, "File successfully read");
         setLabelText(m_ui->objectNameLabel, m_fileData->getObjectName());
     }
+
+    addObject();
 }
 
 void MainWindow::addObject()
@@ -114,6 +116,7 @@ void MainWindow::addObject()
                 );
 
     m_glWidget->addObject(object);
+    m_glWidget->setObjectColor(QVector3D(1, 0, 0));
 
     setLabelFontColor(m_ui->taskLabel, "green");
     setLabelText(m_ui->taskLabel, "Object added");
@@ -121,10 +124,31 @@ void MainWindow::addObject()
     m_glWidget->update();
 }
 
-void MainWindow::changeObjectColor()
+void MainWindow::deleteLastObject()
 {
-    static ColorPicker *colorPicker = new ColorPicker(this, this, m_glWidget->getObjectColor());
-    colorPicker->show();
+    m_glWidget->deleteLastObject();
+    m_glWidget->update();
+    m_glWidget->setObjectColor(m_glWidget->getObjectColor());
+}
+
+void MainWindow::clearObjects()
+{
+    m_glWidget->clearObjects();
+    m_glWidget->update();
+    m_glWidget->setObjectColor(m_glWidget->getObjectColor());
+}
+
+void MainWindow::changeLastObjectColor()
+{
+    QVector3D objectColor = m_glWidget->getObjectColor();
+    if (m_colorPickerDialog != nullptr)
+    {
+        delete m_colorPickerDialog;
+    }
+    m_colorPickerDialog = new ColorPicker(this, this, objectColor);
+    m_colorPickerDialog->show();
+    m_colorPickerDialog->raise();
+    m_colorPickerDialog->activateWindow();
 }
 
 void MainWindow::useNormalsCheckBoxClicked(bool checked)
@@ -183,17 +207,23 @@ void MainWindow::createActions()
     connect(m_openAction, &QAction::triggered, this, &MainWindow::openObjFile);
 
     // Objects actions
-    // Show object action
-    m_addObjectAction = new QAction(tr("Add object"), this);
-    m_addObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
-    m_addObjectAction->setStatusTip(tr("Add object that you got from a file to a scene"));
-    connect(m_addObjectAction, &QAction::triggered, this, &MainWindow::addObject);
-
     // Change object color
     m_changeObjectColorAction = new QAction(tr("Change object color"), this);
     m_changeObjectColorAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
     m_changeObjectColorAction->setToolTip(tr("Use color pallete to change object color"));
-    connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeObjectColor);
+    connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeLastObjectColor);
+
+    // Delete last object
+    m_deleteLastObjectAction = new QAction(tr("Delete last object"), this);
+    m_deleteLastObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X));
+    m_deleteLastObjectAction->setToolTip(tr("Delete last object that you added on scene"));
+    connect(m_deleteLastObjectAction, &QAction::triggered, this, &MainWindow::deleteLastObject);
+
+    // Clear objects from scene
+    m_clearObjectsAction = new QAction(tr("Clear scene"), this);
+    m_clearObjectsAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_X));
+    m_clearObjectsAction->setToolTip(tr("Clear all objects except "));
+    connect(m_clearObjectsAction, &QAction::triggered, this, &MainWindow::clearObjects);
 }
 
 void MainWindow::createMenus()
@@ -202,7 +232,10 @@ void MainWindow::createMenus()
     m_fileMenu->addAction(m_openAction);
 
     m_objectMenu = menuBar()->addMenu(tr("&Object"));
-    m_objectMenu->addAction(m_addObjectAction);
     m_objectMenu->addAction(m_changeObjectColorAction);
+
+    m_sceneMenu = menuBar()->addMenu(tr("&Scene"));
+    m_sceneMenu->addAction(m_deleteLastObjectAction);
+    m_sceneMenu->addAction(m_clearObjectsAction);
 }
 

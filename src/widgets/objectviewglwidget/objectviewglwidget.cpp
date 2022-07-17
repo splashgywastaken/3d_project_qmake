@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include <QQuaternion>
 
+#include <Grid/grid.h>
+
 ObjectViewGLWidget::ObjectViewGLWidget(QWidget* parent)
 {
     Q_UNUSED(parent);
@@ -14,24 +16,62 @@ ObjectViewGLWidget::ObjectViewGLWidget(QWidget* parent)
     // Camera movement filter:
     m_cameraMovementEventFilter = new CameraMovementEventFilter(m_camera);
     installEventFilter(m_cameraMovementEventFilter);
+
+    m_grid = new Grid(3.0f, 10, QVector3D(0.9, 0.9, 0.9));
 }
 
 ObjectViewGLWidget::~ObjectViewGLWidget()
 {
 }
 
-void ObjectViewGLWidget::addObject(Object3D *object)
+void ObjectViewGLWidget::addObject(SceneObject* object)
 {
-//    m_objects.append(object);
-    m_object = object;
+    if (m_objects == nullptr)
+    {
+        m_objects = new QVector<SceneObject*>();
+    }
+    m_objects->append(object);
+}
+
+void ObjectViewGLWidget::deleteLastObject()
+{
+    if (m_objects != nullptr)
+    {
+        m_objects->pop_back();
+    }
+}
+
+void ObjectViewGLWidget::clearObjects()
+{
+    if (m_objects != nullptr)
+    {
+        m_objects->clear();
+        delete m_objects;
+        m_objects = nullptr;
+    }
 }
 
 void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
 {
-    if (m_object != nullptr)
+    if (m_objects != nullptr)
     {
-        m_object->setObjectColor(objectColor.normalized());
+        if (m_objects->count() != 0)
+        {
+            m_objects->last()->setObjectColor(objectColor.normalized());
+        }
     }
+}
+
+QVector3D ObjectViewGLWidget::getObjectColor()
+{
+    if (m_objects != nullptr)
+    {
+        if (m_objects->count() != 0)
+        {
+            return m_objects->last()->getObjectColor();
+        }
+    }
+    return QVector3D(1, 0, 0);
 }
 
 void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType shaderType)
@@ -64,15 +104,6 @@ void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType s
     }
 
     Q_ASSERT(m_shader != nullptr);
-}
-
-QVector3D ObjectViewGLWidget::getObjectColor()
-{
-    if (m_object != nullptr)
-    {
-        return m_object->getObjectColor();
-    }
-    return QVector3D();
 }
 
 float ObjectViewGLWidget::getAspectRatio() const
@@ -118,14 +149,12 @@ void ObjectViewGLWidget::paintGL()
     // Create projection matrix
     QMatrix4x4 projectionMatrix = m_camera->projectionMatrix(getAspectRatio());
 
-//    for (Object3D * object3D : m_objects)
-//    {
-//        object3D->draw(modelViewMatrix, projectionMatrix);
-//    }
-
-    if (m_object != nullptr)
+    m_grid->draw(modelViewMatrix, projectionMatrix, m_shader, m_shaderType);
+    if (m_objects != nullptr)
     {
-        m_object->draw(modelViewMatrix, projectionMatrix, m_shader, m_shaderType);
+        for (SceneObject* object3D : *m_objects)
+        {
+            object3D->draw(modelViewMatrix, projectionMatrix, m_shader, m_shaderType);
+        }
     }
-
 }

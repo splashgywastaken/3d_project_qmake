@@ -7,7 +7,8 @@ Camera::Camera()
     m_fovY = 25;
     m_zNear = 0.01;
     m_zFar = 1000;
-    m_cameraPosition = {0, 0, 5};
+    m_cameraPosition = {3.6, 4, 7.67};
+    m_cameraRotation = QQuaternion(0.95, -0.25, 0.2, 0.05);
 }
 
 QMatrix4x4 Camera::cameraToWorldMatrix() const

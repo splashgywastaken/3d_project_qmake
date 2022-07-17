@@ -16,7 +16,7 @@
 
 #include <src/service/GlobalState.h>
 
-#include <CameraMovementEventFilter/CameraMovemEnteventFilter.h>
+#include <CameraMovementEventFilter/cameramovementeventfilter.h>
 
 class ObjectViewGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -25,7 +25,9 @@ public:
     explicit ObjectViewGLWidget(QWidget* parent = nullptr);
     ~ObjectViewGLWidget();
 
-    void addObject(Object3D* object);
+    void addObject(SceneObject* object);
+    void deleteLastObject();
+    void clearObjects();
 
     void setObjectColor(QVector3D objectColor);
     void setUseNormals(bool useNormals);
@@ -43,8 +45,8 @@ protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
 protected:
-//    QVector<Object3D>* m_objects;
-    Object3D* m_object = nullptr;
+    QVector<SceneObject*>* m_objects = nullptr;
+    SceneObject* m_grid = nullptr;
     Camera* m_camera = nullptr;
     CameraMovementEventFilter* m_cameraMovementEventFilter = nullptr;
     QOpenGLShaderProgram* m_shader = nullptr;

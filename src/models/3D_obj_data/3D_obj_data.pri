@@ -5,4 +5,5 @@
 
     include($$PWD/Object3D/object3d.pri)
     include($$PWD/SceneObject/sceneobject.pri)
+    include($$PWD/Grid/Grid.pri)
 }

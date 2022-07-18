@@ -1,5 +1,5 @@
 #include "kdtree.h"
-#include "utils.h"
+#include "kdtreeutils.h"
 
 KDTree::Node *KDTree::buildTreeWithIndices(const QList<int> &pointIndices, const QVector<QVector3D> &points, int nPointsInLeaf)
 {

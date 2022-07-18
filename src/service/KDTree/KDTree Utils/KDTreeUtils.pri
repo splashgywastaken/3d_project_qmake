@@ -4,8 +4,8 @@
     INCLUDEPATH += $$PWD
 
     HEADERS += \
-        $$PWD/utils.h
+    $$PWD/kdtreeutils.h
 
     SOURCES += \
-        $$PWD/utils.cpp
+    $$PWD/kdtreeutils.cpp
 }

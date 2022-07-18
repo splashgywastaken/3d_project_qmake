@@ -1,4 +1,4 @@
-#include "CameraMovemEnteventFilter.h"
+#include "cameramovementeventfilter.h"
 
 CameraMovementEventFilter::CameraMovementEventFilter(Camera* camera)
 {

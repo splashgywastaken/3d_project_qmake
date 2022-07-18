@@ -9,6 +9,7 @@
 #include "tests/MeshToolsTests/meshtoolstests.h"
 #include "tests/ObjReaderTests/objreadertests.h"
 #include "tests/KDTreeTests/kdtreetests.h"
+#include <tests/OptimizationTests/optimizationtests.h>
 #include "code playground/KDTreeCompareMethods/timetester.h"
 
 int main(int argc, char *argv[])
@@ -22,6 +23,8 @@ int main(int argc, char *argv[])
     QTest::qExec(&meshToolsTests);
     KDTree::KDTreeTests kdTreeTests;
     QTest::qExec(&kdTreeTests);
+    Optimization::Tests::OptimizationTests optimizationTests;
+    QTest::qExec(&optimizationTests);
 
     QApplication app(argc, argv);
     auto window = new MainWindow(nullptr);

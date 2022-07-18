@@ -37,19 +37,20 @@ QVector<double> Optimization::numericalGradient(
         const QVector<double> &variableValue,
         const double dx)
 {
-    const int nVars = variableValue.size();
-    QVector<double> res(nVars);
+    const int nVariables = variableValue.size();
+    QVector<double> result(nVariables);
     QVector<double> currentVars = variableValue;
 
-    Q_UNUSED(function);
-    Q_UNUSED(dx);
-    Q_UNUSED(currentVars);
+    for (int variableIndex = 0; variableIndex < nVariables; variableIndex++)
+    {
+        currentVars[variableIndex] = variableValue[variableIndex] + dx;
+        const double positiveValue = function(currentVars);
+        currentVars[variableIndex] = variableValue[variableIndex] - dx;
+        const double negativeValue = function(currentVars);
+        result[variableIndex] = (positiveValue - negativeValue) / (2 * dx);
+    }
 
-    /// Реализуйте расчет численного градиента здесь
-    /// Для того, чтобы вычислить значение функции в точке достаточно написать function(vars)
-    /// Где vars - значения переменных
-
-    return res;
+    return result;
 }
 
 #endif

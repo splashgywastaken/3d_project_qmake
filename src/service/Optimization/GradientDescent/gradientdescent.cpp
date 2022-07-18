@@ -16,7 +16,7 @@ QVector<double> Optimization::gradientDescent(
         for(int iterationInd = 0; iterationInd < nMaxIterations; ++iterationInd){
             const double error = problem.computeError(currentVariables);
             const QVector<double> gradient = problem.computeGradient(currentVariables);
-            const double gradNorm = Optimization::vectorNorm(gradient);
+            const double gradNorm = vectorNorm(gradient);
             if(verbose){
                 qDebug()
                         << "Iteration:" << iterationInd + 1 << "/" << nMaxIterations

@@ -151,7 +151,7 @@ void CameraMovementEventFilter::doCameraRotation(const QPoint &dstPosition)
     m_cameraRotation = dstRotation;
     m_camera->setRotation(dstRotation);
     m_screenPosition = dstPosition;
-    m_openGlWidget->update();
+    update();
 }
 
 void CameraMovementEventFilter::doPanningXZ(const QPoint &dstPosition)
@@ -167,7 +167,7 @@ void CameraMovementEventFilter::doPanningXZ(const QPoint &dstPosition)
     QVector3D shift = dstPosition3D - screenPosition3D;
     m_camera->setCameraPosition(m_camera->getCameraPosition() - shift);
     m_screenPosition = dstPosition;
-    m_openGlWidget->update();
+    update();
 }
 
 void CameraMovementEventFilter::doPanningXY(const QPoint &dstPosition)
@@ -179,7 +179,7 @@ void CameraMovementEventFilter::doPanningXY(const QPoint &dstPosition)
     QVector3D shift = dstPosition3D - screenPosition3D;
     m_camera->setCameraPosition(m_camera->getCameraPosition() - shift);
     m_screenPosition = dstPosition;
-    m_openGlWidget->update();
+    update();
 }
 
 void CameraMovementEventFilter::doZooming(const QPoint &dstPosition)
@@ -189,7 +189,7 @@ void CameraMovementEventFilter::doZooming(const QPoint &dstPosition)
     QVector3D cameraPosition = m_camera->getCameraPosition() * (1 + shift * 1e-3);
     m_camera->setCameraPosition(cameraPosition);
     m_screenPosition = dstPosition;
-    m_openGlWidget->update();
+    update();
 }
 
 void CameraMovementEventFilter::doWheelZooming(float delta)
@@ -198,7 +198,7 @@ void CameraMovementEventFilter::doWheelZooming(float delta)
     float speed = 1e-3f;
     cameraPosition += -delta * cameraPosition * speed;
     m_camera->setCameraPosition(cameraPosition);
-    m_openGlWidget->update();
+    update();
 }
 
 void CameraMovementEventFilter::doCameraRotationAroundObject(const QPoint &dstPosition)
@@ -214,5 +214,10 @@ void CameraMovementEventFilter::doCameraRotationAroundObject(const QPoint &dstPo
     m_cameraRotation = dstRotation;
     m_camera->setRotation(dstRotation);
     m_screenPosition = dstPosition;
+    update();
+}
+
+void CameraMovementEventFilter::update()
+{
     m_openGlWidget->update();
 }

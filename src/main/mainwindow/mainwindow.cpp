@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 
 #include <QFileDialog>
+#include <QList>
 #include <QMessageBox>
 #include <QThread>
 
@@ -23,16 +24,14 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->setupUi(this);
 
     // Variables setup
-    m_objDataCurrent = nullptr;
-    m_useNormals = m_ui->useNormalsCheckBox->isChecked();
 
     // MenuBar setup:
     createActions();
     createMenus();
+    createWidgetActions();
 
     // UI setup
     m_ui->taskProgressBar->setVisible(false);
-    m_ui->taskLabel->setVisible(false);
 
     // GlWidget inits
     m_glWidget = new ObjectViewGLWidget;
@@ -40,8 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->openGLLayout->addWidget(m_glWidget);
 
     // Slots connection
-    connect(m_ui->useNormalsCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalsCheckBoxClicked);
-    connect(m_ui->useNormalMapCheckBox, &QCheckBox::toggled, this, &MainWindow::useNormalMapCheckBoxClicked);
 }
 
 MainWindow::~MainWindow()
@@ -69,9 +66,6 @@ void MainWindow::openObjFile()
     }
 
     m_ui->taskProgressBar->setVisible(true);
-    m_ui->taskLabel->setVisible(true);
-    setLabelFontColor(m_ui->taskLabel, "yellow");
-    setLabelText(m_ui->taskLabel, "Reading file: " + filePath);
 
     ProgressNotifierSingleton::initialize(m_ui->taskProgressBar);
     AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
@@ -79,17 +73,9 @@ void MainWindow::openObjFile()
     QString errorMessage;
 
     if (!ObjReadingTools::readFile(filePath, *m_objDataCurrent, errorMessage, progressNotifier)){
-        setLabelFontColor(m_ui->taskLabel, "red");
-        setLabelText(m_ui->taskLabel, errorMessage);
         qDebug() << errorMessage;
         return;
-    } else {
-        // If reading was successfull
-        setLabelFontColor(m_ui->taskLabel, "green");
-        setLabelText(m_ui->taskLabel, "File successfully read");
-        setLabelText(m_ui->objectNameLabel, m_objDataCurrent->getObjectName());
     }
-
     addObject();
 }
 
@@ -108,9 +94,6 @@ void MainWindow::addObject()
     QMessageBox taskMessageBox;
     taskMessageBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    setLabelFontColor(m_ui->taskLabel, "yellow");
-    setLabelText(m_ui->taskLabel, "Processing Object");
-
     QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataCurrent->getPolygonVertexIndices());
     QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataCurrent->getPolygonNormalIndices());
     QVector<int> polygonStart = MeshTools::buildPolygonStartVector(m_objDataCurrent->getPolygonVertexIndices());
@@ -126,9 +109,6 @@ void MainWindow::addObject()
     m_glWidget->makeCurrent();
     m_glWidget->addObject(m_current3DObject);
     m_glWidget->setObjectColor(QVector3D(1, 0, 0));
-
-    setLabelFontColor(m_ui->taskLabel, "green");
-    setLabelText(m_ui->taskLabel, "Object added");
 
     m_glWidget->update();
 }
@@ -302,22 +282,6 @@ void MainWindow::performFittingforTarget()
     qDebug() << "Estimated transformation" << resultTranslation;
 }
 
-void MainWindow::useNormalsCheckBoxClicked(bool checked)
-{
-    m_useNormals = checked;
-    changeShader();
-}
-
-void MainWindow::useNormalMapCheckBoxClicked(bool checked)
-{
-    m_useNormalMap = checked;
-
-    m_ui->useNormalsCheckBox->setCheckable(!m_useNormalMap);
-    m_ui->useNormalsCheckBox->setChecked(m_useNormals);
-
-    changeShader();
-}
-
 void MainWindow::nearestPointFound(QVector3D nearestPoint)
 {
     m_glWidget->addPoint(nearestPoint);
@@ -333,20 +297,27 @@ void MainWindow::setLabelFontColor(QLabel *label, QString color)
     label->setStyleSheet("color: " + color);
 }
 
-void MainWindow::changeShader()
+void MainWindow::changeShader(const QString &shaderName)
 {
-    DrawableObjectTools::ShaderProgrammType shaderType;
-    if (m_useNormals && m_useNormalMap)
+    DrawableObjectTools::ShaderProgrammType shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
+
+    qDebug() << "Change shader triggered";
+
+    if (shaderName == "Basic shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::NormalMap;
+        shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
     }
-    else if (m_useNormals)
+    else if (shaderName == "Lightning shader")
     {
         shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
     }
-    else
+    else if (shaderName == "Normal map shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
+        shaderType = DrawableObjectTools::ShaderProgrammType::NormalMap;
+    }
+    else if (shaderName == "Lightning shader with textures")
+    {
+        shaderType = DrawableObjectTools::ShaderProgrammType::LightningWithTextures;
     }
 
     m_glWidget->switchShaders(shaderType);
@@ -402,6 +373,25 @@ void MainWindow::createActions()
     QObject::connect(m_performFittingAction, &QAction::triggered, this, &MainWindow::performFittingforTarget);
 }
 
+void MainWindow::createWidgetActions()
+{
+    m_shaderComboBox = new QComboBox(m_shaderMenu);
+    m_switchShaderAction = new QWidgetAction(m_shaderMenu);
+    using namespace DrawableObjectTools;
+    m_shaderComboBox->addItems(QStringList({
+                                          "Basic shader",
+                                          "Lightning shader",
+                                          "Normal map shader",
+                                          "Lightning shader with textures"
+                                      }));
+    m_shaderComboBox->setCurrentText("Lightning shader");
+
+    m_switchShaderAction->setDefaultWidget(m_shaderComboBox);
+    QObject::connect(m_shaderComboBox, &QComboBox::currentTextChanged, this, &MainWindow::changeShader);
+
+    m_shaderMenu->addAction(m_switchShaderAction);
+}
+
 void MainWindow::createMenus()
 {
     m_fileMenu = menuBar()->addMenu(tr("&File"));
@@ -410,6 +400,8 @@ void MainWindow::createMenus()
     m_objectMenu = menuBar()->addMenu(tr("&Object"));
     m_objectMenu->addAction(m_changeObjectColorAction);
     m_objectMenu->addAction(m_findNearestPointInLastObjectAction);
+
+    m_shaderMenu = menuBar()->addMenu(tr("&Shaders"));
 
     m_sceneMenu = menuBar()->addMenu(tr("&Scene"));
     m_sceneMenu->addAction(m_deleteLastObjectAction);

@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <findnearestpointdialog.h>
 #include <qlabel.h>
+#include <QWidgetAction>
+#include <QComboBox>
 
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
@@ -36,21 +38,21 @@ protected slots:
     void deleteLastObject();
     void clearObjects();
 
+    // Shaders
+    void changeShader(const QString &shader);
+
     // Objects
     void changeLastObjectColor();
     void findNearestPointInLastObject();
     void makeTargetObject();
     void performFittingforTarget();
-
-    void useNormalsCheckBoxClicked(bool checked);
-    void useNormalMapCheckBoxClicked(bool checked);
 protected:
     // Misc methods:
     void setLabelText(QLabel* label, QString text);
     void setLabelFontColor(QLabel* label, QString color);
-    void changeShader();
 
     void createActions();
+    void createWidgetActions();
     void createMenus();
 
 protected:
@@ -61,6 +63,7 @@ protected:
     // Menu bar actions
     QMenu* m_fileMenu;
     QMenu* m_objectMenu;
+    QMenu* m_shaderMenu;
     QMenu* m_sceneMenu;
     QMenu* m_instrumentsMenu;
 
@@ -69,6 +72,9 @@ protected:
     // Objects
     QAction* m_changeObjectColorAction;
     QAction* m_findNearestPointInLastObjectAction;
+    // Shaders
+    QWidgetAction* m_switchShaderAction;
+    QComboBox* m_shaderComboBox;
     // Scene
     QAction* m_deleteLastObjectAction;
     QAction* m_clearObjectsAction;
@@ -76,7 +82,7 @@ protected:
     QAction* m_makeTargetObjectAction;
     QAction* m_performFittingAction;
 
-    // Custom widgets
+    // OpenGL widget and corresponding data
     ObjectViewGLWidget * m_glWidget;
 
     // Event filters:
@@ -92,8 +98,5 @@ protected:
 
     Object3D* m_current3DObject = nullptr;
     Object3D* m_target3DObject = nullptr;
-
-    bool m_useNormals;
-    bool m_useNormalMap = false;
 };
 #endif // MAINWINDOW_H

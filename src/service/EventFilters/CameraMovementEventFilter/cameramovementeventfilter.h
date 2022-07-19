@@ -44,6 +44,8 @@ protected:
     void doWheelZooming(float delta);
     void doCameraRotationAroundObject(const QPoint &dstPosition);
 
+    void update();
+
 protected:
     Camera* m_camera;
     QOpenGLWidget* m_openGlWidget;

@@ -38,6 +38,7 @@ public:
     void setUseNormals(bool useNormals);
 
     void switchShaders(DrawableObjectTools::ShaderProgrammType shaderType);
+    void qglClearColor(QColor color);
 
     // Getters
     QVector3D getObjectColor();
@@ -59,6 +60,7 @@ protected:
     CameraMovementEventFilter* m_cameraMovementEventFilter = nullptr;
     QOpenGLShaderProgram* m_shader = nullptr;
     DrawableObjectTools::ShaderProgrammType m_shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
+    QColor m_backgroundColor = QColor(54, 57, 63);
 
     int m_nVertices;
     int m_fitToViewSpacing = 5;

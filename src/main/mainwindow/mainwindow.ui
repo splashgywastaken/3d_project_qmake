@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>0</y>
       <width>1261</width>
-      <height>581</height>
+      <height>651</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="openGLLayout"/>
@@ -29,68 +29,18 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>620</y>
-      <width>1261</width>
-      <height>56</height>
+      <y>650</y>
+      <width>621</width>
+      <height>26</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="progressBarLayout">
      <item>
-      <layout class="QVBoxLayout" name="currentObjectDataLayout">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Программа работает с объектом:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="objectNameLabel">
-         <property name="text">
-          <string>(данные об объекте пусты, загрузите объект для его обработки)</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="QCheckBox" name="useNormalsCheckBox">
-         <property name="text">
-          <string>Использовать значения нормалей</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QCheckBox" name="useNormalMapCheckBox">
-         <property name="text">
-          <string>Отрисовывать карту нормалей</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="taskLabel">
-         <property name="text">
-          <string>Прогресс работы над заданием</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QProgressBar" name="taskProgressBar">
-         <property name="value">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QProgressBar" name="taskProgressBar">
+       <property name="value">
+        <number>0</number>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

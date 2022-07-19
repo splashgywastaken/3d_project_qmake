@@ -130,6 +130,11 @@ void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType s
     Q_ASSERT(m_shader != nullptr);
 }
 
+void ObjectViewGLWidget::qglClearColor(QColor color)
+{
+    glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+}
+
 float ObjectViewGLWidget::getAspectRatio() const
 {
     return width() / float(height());
@@ -164,7 +169,7 @@ void ObjectViewGLWidget::resizeGL(int w, int h)
 
 void ObjectViewGLWidget::paintGL()
 {
-    glClearColor(0.5, 0.5, 0.5, 1);
+    qglClearColor(m_backgroundColor);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Create mv matrix

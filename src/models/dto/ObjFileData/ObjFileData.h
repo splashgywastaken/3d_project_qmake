@@ -55,6 +55,8 @@ public:
     // QVector<QVector<QString>>
     void addFace(QVector<QString> face);
 
+    void setVertices(const QVector<QVector3D>& vertices);
+
     // Getters
     ObjFileData &getObjFIleData();
     // QString
@@ -79,7 +81,7 @@ public:
     friend void swap(ObjReadingTools::ObjFileData& first, ObjReadingTools::ObjFileData& second)
     {
         // QString
-        std::swap(first.getObjectName(), second.getObjectName());
+        std::swap(first.m_objectName, second.m_objectName);
         // QVector<QVector3D>
         std::swap(first.getVertices(), second.getVertices());
         std::swap(first.getNormals(), second.getNormals());

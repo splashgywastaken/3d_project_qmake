@@ -22,6 +22,8 @@ public:
             );
     ~Object3D();
 
+    int nVertices();
+
     void draw(
             QMatrix4x4 viewMatrix,
             QMatrix4x4 projectionMatrix,

@@ -27,13 +27,20 @@ public slots:
     void nearestPointFound(QVector3D nearestPoint);
 
 protected slots:
+    // File menu:
+    // Files
     void openObjFile();
-
     void addObject();
+
+    // Scene
     void deleteLastObject();
     void clearObjects();
+
+    // Objects
     void changeLastObjectColor();
     void findNearestPointInLastObject();
+    void makeTargetObject();
+    void performFittingforTarget();
 
     void useNormalsCheckBoxClicked(bool checked);
     void useNormalMapCheckBoxClicked(bool checked);
@@ -55,6 +62,7 @@ protected:
     QMenu* m_fileMenu;
     QMenu* m_objectMenu;
     QMenu* m_sceneMenu;
+    QMenu* m_instrumentsMenu;
 
     // Files
     QAction* m_openAction;
@@ -64,6 +72,9 @@ protected:
     // Scene
     QAction* m_deleteLastObjectAction;
     QAction* m_clearObjectsAction;
+    // Instruments
+    QAction* m_makeTargetObjectAction;
+    QAction* m_performFittingAction;
 
     // Custom widgets
     ObjectViewGLWidget * m_glWidget;
@@ -75,7 +86,12 @@ protected:
     Ui::MainWindow *m_ui;
 
     // Other variables
-    ObjReadingTools::ObjFileData *m_fileData;
+    ObjReadingTools::ObjFileData *m_objDataCurrent = nullptr;
+    ObjReadingTools::ObjFileData *m_objDataTarget = nullptr;
+    ObjReadingTools::ObjFileData *m_objDataResult = nullptr;
+
+    Object3D* m_current3DObject = nullptr;
+    Object3D* m_target3DObject = nullptr;
 
     bool m_useNormals;
     bool m_useNormalMap = false;

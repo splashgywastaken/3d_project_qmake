@@ -25,10 +25,14 @@ public:
     explicit ObjectViewGLWidget(QWidget* parent = nullptr);
     ~ObjectViewGLWidget();
 
+    // Add methods
     void addObject(SceneObject* object);
     void addPoint(QVector3D point);
+
+    // Remove\delete methods
     void deleteLastObject();
     void clearObjects();
+    void removeObject(SceneObject* object);
 
     void setObjectColor(QVector3D objectColor);
     void setUseNormals(bool useNormals);

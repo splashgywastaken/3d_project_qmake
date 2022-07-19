@@ -52,6 +52,11 @@ Object3D::~Object3D()
     delete m_normalBuffer;
 }
 
+int Object3D::nVertices()
+{
+    return m_nVertices;
+}
+
 void Object3D::draw(
         QMatrix4x4 viewMatrix,
         QMatrix4x4 projectionMatrix,

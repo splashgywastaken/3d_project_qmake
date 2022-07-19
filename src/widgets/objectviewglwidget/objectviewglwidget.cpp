@@ -68,6 +68,13 @@ void ObjectViewGLWidget::clearObjects()
     }
 }
 
+void ObjectViewGLWidget::removeObject(SceneObject *object)
+{
+    int index = m_objects->indexOf(object);
+    Q_ASSERT(index != -1);
+    m_objects->removeAt(index);
+}
+
 void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
 {
     if (m_objects != nullptr)

@@ -10,6 +10,7 @@ class SceneObject
 {
 public:
     SceneObject() = default;
+    virtual ~SceneObject() = default;
     virtual void draw(
             QMatrix4x4 viewMatrix,
             QMatrix4x4 projectionMatrix,

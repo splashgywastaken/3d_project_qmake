@@ -44,6 +44,11 @@ void ObjReadingTools::ObjFileData::addFace(QVector<QString> face) {
     m_faces.append(face);
 }
 
+void ObjReadingTools::ObjFileData::setVertices(const QVector<QVector3D> &vertices)
+{
+    m_vertices = vertices;
+}
+
 QVector<QVector3D>& ObjReadingTools::ObjFileData::getVertices() {
     return m_vertices;
 }

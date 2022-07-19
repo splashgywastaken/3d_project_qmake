@@ -6,9 +6,9 @@
 #include <qlabel.h>
 #include <QWidgetAction>
 #include <QComboBox>
+#include <QColorDialog>
 
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
-
 #include <src/models/dto/ObjFileData/ObjFileData.h>
 
 QT_BEGIN_NAMESPACE
@@ -23,10 +23,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void setObjectColor(QVector3D objectColor);
-
 public slots:
     void nearestPointFound(QVector3D nearestPoint);
+    void setObjectColor(QColor objectColor);
+    void setBackgroundColor(QColor objectColor);
 
 protected slots:
     // File menu:
@@ -46,6 +46,9 @@ protected slots:
     void findNearestPointInLastObject();
     void makeTargetObject();
     void performFittingforTarget();
+
+    // View
+    void changeBackgroundColor();
 protected:
     // Misc methods:
     void setLabelText(QLabel* label, QString text);
@@ -57,7 +60,7 @@ protected:
 
 protected:
     // Dialogs
-    QDialog* m_colorPickerDialog = nullptr;
+    QColorDialog* m_colorPickerDialog = nullptr;
     FindNearestPointDialog* m_findNearestPointDialog = nullptr;
 
     // Menu bar actions
@@ -66,6 +69,7 @@ protected:
     QMenu* m_shaderMenu;
     QMenu* m_sceneMenu;
     QMenu* m_instrumentsMenu;
+    QMenu* m_viewMenu;
 
     // Files
     QAction* m_openAction;
@@ -73,7 +77,8 @@ protected:
     QAction* m_changeObjectColorAction;
     QAction* m_findNearestPointInLastObjectAction;
     // Shaders
-    QWidgetAction* m_switchShaderAction;
+    QMenu* m_switchShaderMenu;
+    QWidgetAction* m_switchShaderWidgetAction;
     QComboBox* m_shaderComboBox;
     // Scene
     QAction* m_deleteLastObjectAction;
@@ -81,6 +86,8 @@ protected:
     // Instruments
     QAction* m_makeTargetObjectAction;
     QAction* m_performFittingAction;
+    // View menu
+    QAction* m_changeBackgroundColorAction;
 
     // OpenGL widget and corresponding data
     ObjectViewGLWidget * m_glWidget;

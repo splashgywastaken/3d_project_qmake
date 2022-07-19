@@ -34,14 +34,17 @@ public:
     void clearObjects();
     void removeObject(SceneObject* object);
 
-    void setObjectColor(QVector3D objectColor);
+    void setObjectColor(const QColor& color);
+    void setBackgroundColor(const QColor& color);
     void setUseNormals(bool useNormals);
 
     void switchShaders(DrawableObjectTools::ShaderProgrammType shaderType);
     void qglClearColor(QColor color);
 
     // Getters
-    QVector3D getObjectColor();
+    QColor getObjectColor();
+    QColor getBackgroundColor();
+
     float getAspectRatio() const;
 
 protected:

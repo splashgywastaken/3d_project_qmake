@@ -17,8 +17,8 @@ public:
             QOpenGLShaderProgram* shader,
             DrawableObjectTools::ShaderProgrammType shaderType
             ) = 0;
-    virtual void setObjectColor(QVector3D objectColor) = 0;
-    virtual QVector3D& getObjectColor() = 0;
+    virtual void setObjectColor(QColor objectColor) = 0;
+    virtual QColor& getObjectColor() = 0;
 };
 
 #endif // SCENEOBJECT_H

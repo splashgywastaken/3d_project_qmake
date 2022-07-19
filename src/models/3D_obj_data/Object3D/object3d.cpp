@@ -71,7 +71,7 @@ void Object3D::draw(
     shader->setUniformValue("modelViewMatrix", viewMatrix);
     shader->setUniformValue("normalMatrix", normalMatrix);
     shader->setUniformValue("projectionMatrix", projectionMatrix);
-    shader->setUniformValue("u_objectColor", m_objectColor);
+    shader->setUniformValue("u_objectColor", QVector3D(m_objectColor.redF(), m_objectColor.greenF(), m_objectColor.blueF()));
 
     isBound = m_vertexBuffer->bind();
     Q_ASSERT(isBound);
@@ -106,12 +106,12 @@ void Object3D::draw(
     shader->release();
 }
 
-void Object3D::setObjectColor(QVector3D objectColor)
+void Object3D::setObjectColor(QColor objectColor)
 {
     m_objectColor = objectColor;
 }
 
-QVector3D& Object3D::getObjectColor()
+QColor& Object3D::getObjectColor()
 {
     return m_objectColor;
 }

@@ -17,7 +17,7 @@ ObjectViewGLWidget::ObjectViewGLWidget(QWidget* parent)
     m_cameraMovementEventFilter = new CameraMovementEventFilter(m_camera);
     installEventFilter(m_cameraMovementEventFilter);
 
-    m_grid = new Grid(3.0f, 10, QVector3D(0.9, 0.9, 0.9));
+    m_grid = new Grid(4.0f, 16, QColor(224, 224, 224));
 }
 
 ObjectViewGLWidget::~ObjectViewGLWidget()
@@ -75,27 +75,20 @@ void ObjectViewGLWidget::removeObject(SceneObject *object)
     m_objects->removeAt(index);
 }
 
-void ObjectViewGLWidget::setObjectColor(QVector3D objectColor)
+void ObjectViewGLWidget::setObjectColor(const QColor& objectColor)
 {
     if (m_objects != nullptr)
     {
         if (m_objects->count() != 0)
         {
-            m_objects->last()->setObjectColor(objectColor.normalized());
+            m_objects->last()->setObjectColor(objectColor);
         }
     }
 }
 
-QVector3D ObjectViewGLWidget::getObjectColor()
+void ObjectViewGLWidget::setBackgroundColor(const QColor &color)
 {
-    if (m_objects != nullptr)
-    {
-        if (m_objects->count() != 0)
-        {
-            return m_objects->last()->getObjectColor();
-        }
-    }
-    return QVector3D(1, 0, 0);
+    m_backgroundColor = color;
 }
 
 void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType shaderType)
@@ -133,6 +126,23 @@ void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType s
 void ObjectViewGLWidget::qglClearColor(QColor color)
 {
     glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+}
+
+QColor ObjectViewGLWidget::getObjectColor()
+{
+    if (m_objects != nullptr)
+    {
+        if (m_objects->count() != 0)
+        {
+            return  m_objects->last()->getObjectColor();
+        }
+    }
+    return QColor(255, 0, 0);
+}
+
+QColor ObjectViewGLWidget::getBackgroundColor()
+{
+    return m_backgroundColor;
 }
 
 float ObjectViewGLWidget::getAspectRatio() const

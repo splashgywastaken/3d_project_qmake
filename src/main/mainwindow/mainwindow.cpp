@@ -7,7 +7,6 @@
 #include <QThread>
 
 #include <src/service/GlobalState.h>
-#include <src/main/colorpicker/colorpicker.h>
 #include <src/main/FindNearestPointDialog/findnearestpointdialog.h>
 #include <src/service/Optimization/OptimizationUtils/optimizationutils.h>
 #include <src/service/Optimization/LambdaStepCallback/lambdastepcallback.h>
@@ -46,9 +45,16 @@ MainWindow::~MainWindow()
     delete m_ui;
 }
 
-void MainWindow::setObjectColor(QVector3D objectColor)
+void MainWindow::setObjectColor(QColor objectColor)
 {
     m_glWidget->setObjectColor(objectColor);
+    m_glWidget->update();
+    m_colorPickerDialog->disconnect();
+}
+
+void MainWindow::setBackgroundColor(QColor objectColor)
+{
+    m_glWidget->setBackgroundColor(objectColor);
     m_glWidget->update();
 }
 
@@ -108,7 +114,7 @@ void MainWindow::addObject()
 
     m_glWidget->makeCurrent();
     m_glWidget->addObject(m_current3DObject);
-    m_glWidget->setObjectColor(QVector3D(1, 0, 0));
+    m_glWidget->setObjectColor(QColor(51, 255, 255));
 
     m_glWidget->update();
 }
@@ -140,12 +146,12 @@ void MainWindow::clearObjects()
 
 void MainWindow::changeLastObjectColor()
 {
-    QVector3D objectColor = m_glWidget->getObjectColor();
-    if (m_colorPickerDialog != nullptr)
+    if (m_colorPickerDialog == nullptr)
     {
-        delete m_colorPickerDialog;
+        m_colorPickerDialog = new QColorDialog(this);
     }
-    m_colorPickerDialog = new ColorPicker(this, this, objectColor);
+    m_colorPickerDialog->setCurrentColor(m_glWidget->getObjectColor());
+    connect(m_colorPickerDialog, &QColorDialog::colorSelected, this, &MainWindow::setObjectColor);
     m_colorPickerDialog->show();
     m_colorPickerDialog->raise();
     m_colorPickerDialog->activateWindow();
@@ -282,6 +288,19 @@ void MainWindow::performFittingforTarget()
     qDebug() << "Estimated transformation" << resultTranslation;
 }
 
+void MainWindow::changeBackgroundColor()
+{
+    if (m_colorPickerDialog == nullptr)
+    {
+        m_colorPickerDialog = new QColorDialog(this);
+    }
+    m_colorPickerDialog->setCurrentColor(m_glWidget->getBackgroundColor());
+    connect(m_colorPickerDialog, &QColorDialog::colorSelected, this, &MainWindow::setBackgroundColor);
+    m_colorPickerDialog->show();
+    m_colorPickerDialog->raise();
+    m_colorPickerDialog->activateWindow();
+}
+
 void MainWindow::nearestPointFound(QVector3D nearestPoint)
 {
     m_glWidget->addPoint(nearestPoint);
@@ -371,12 +390,18 @@ void MainWindow::createActions()
     m_performFittingAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F));
     m_performFittingAction->setToolTip(tr("Perform fitting for current target object"));
     QObject::connect(m_performFittingAction, &QAction::triggered, this, &MainWindow::performFittingforTarget);
+
+    // View's menu actions
+    // Change background's color
+    m_changeBackgroundColorAction = new QAction(tr("Change background color"), this);
+    QObject::connect(m_changeBackgroundColorAction, &QAction::triggered, this, &MainWindow::changeBackgroundColor);
 }
 
 void MainWindow::createWidgetActions()
 {
+    // Shader combo box
     m_shaderComboBox = new QComboBox(m_shaderMenu);
-    m_switchShaderAction = new QWidgetAction(m_shaderMenu);
+    m_switchShaderWidgetAction = new QWidgetAction(m_shaderMenu);
     using namespace DrawableObjectTools;
     m_shaderComboBox->addItems(QStringList({
                                           "Basic shader",
@@ -386,10 +411,10 @@ void MainWindow::createWidgetActions()
                                       }));
     m_shaderComboBox->setCurrentText("Lightning shader");
 
-    m_switchShaderAction->setDefaultWidget(m_shaderComboBox);
+    m_switchShaderWidgetAction->setDefaultWidget(m_shaderComboBox);
     QObject::connect(m_shaderComboBox, &QComboBox::currentTextChanged, this, &MainWindow::changeShader);
 
-    m_shaderMenu->addAction(m_switchShaderAction);
+    m_switchShaderMenu->addAction(m_switchShaderWidgetAction);
 }
 
 void MainWindow::createMenus()
@@ -401,7 +426,12 @@ void MainWindow::createMenus()
     m_objectMenu->addAction(m_changeObjectColorAction);
     m_objectMenu->addAction(m_findNearestPointInLastObjectAction);
 
+    // Shader's menu actions
+    m_switchShaderMenu = new QMenu(tr("Change shader"), this);
+    m_switchShaderMenu->setToolTip(tr("Use list of shaders to switch your current one"));
+
     m_shaderMenu = menuBar()->addMenu(tr("&Shaders"));
+    m_shaderMenu->addMenu(m_switchShaderMenu);
 
     m_sceneMenu = menuBar()->addMenu(tr("&Scene"));
     m_sceneMenu->addAction(m_deleteLastObjectAction);
@@ -410,5 +440,7 @@ void MainWindow::createMenus()
     m_instrumentsMenu = menuBar()->addMenu(tr("&Instruments"));
     m_instrumentsMenu->addAction(m_makeTargetObjectAction);
     m_instrumentsMenu->addAction(m_performFittingAction);
-}
 
+    m_viewMenu = menuBar()->addMenu(tr("View"));
+    m_viewMenu->addAction(m_changeBackgroundColorAction);
+}

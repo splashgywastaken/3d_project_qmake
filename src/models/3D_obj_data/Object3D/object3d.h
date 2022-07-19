@@ -30,13 +30,13 @@ public:
             QOpenGLShaderProgram* shader,
             DrawableObjectTools::ShaderProgrammType shaderType
             ) override;
-    void setObjectColor(QVector3D objectColor) override;
-    QVector3D& getObjectColor() override;
+    void setObjectColor(QColor objectColor) override;
+    QColor& getObjectColor() override;
 private:
     QOpenGLBuffer* m_vertexBuffer = nullptr;
     QOpenGLBuffer* m_normalBuffer  = nullptr;
 
-    QVector3D m_objectColor = {1.0, 0.0, 0.0};
+    QColor m_objectColor = QColor(1.0, 0.0, 0.0);
 
     int m_nVertices = -1;
 };

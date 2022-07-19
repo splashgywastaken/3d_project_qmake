@@ -10,20 +10,20 @@ using namespace DrawableObjectTools;
 class Grid : public SceneObject
 {
 public:
-    Grid(double size, int nSegments, QVector3D objectColor = QVector3D(0.9, 0.9, 0.9));
+    Grid(double size, int nSegments, QColor objectColor = QColor(65, 27, 87));
 
     void draw(
             QMatrix4x4 viewMatrix, QMatrix4x4 projectionMatrix,
             QOpenGLShaderProgram *shader = nullptr, ShaderProgrammType shaderType = ShaderProgrammType::Standard
             ) override;
-    void setObjectColor(QVector3D objectColor) override;
-    QVector3D &getObjectColor() override;
+    void setObjectColor(QColor objectColor) override;
+    QColor &getObjectColor() override;
 
 private:
     QOpenGLBuffer* m_vertexBuffer;
     double m_size = 3.0;
     int m_nSegments;
-    QVector3D m_objectColor;
+    QColor m_objectColor;
 };
 
 #endif // GRID_H

@@ -36,6 +36,7 @@ public:
 
     void setObjectColor(const QColor& color);
     void setBackgroundColor(const QColor& color);
+    void setGridColor(const QColor& color);
     void setUseNormals(bool useNormals);
 
     void switchShaders(DrawableObjectTools::ShaderProgrammType shaderType);
@@ -44,6 +45,7 @@ public:
     // Getters
     QColor getObjectColor();
     QColor getBackgroundColor();
+    QColor getGridColor();
 
     float getAspectRatio() const;
 

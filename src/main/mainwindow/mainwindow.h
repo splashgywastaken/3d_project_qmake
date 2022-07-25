@@ -26,6 +26,7 @@ public:
 public slots:
     void nearestPointFound(QVector3D nearestPoint);
     void setObjectColor(QColor objectColor);
+    void setGridColor(QColor objectColor);
     void setBackgroundColor(QColor objectColor);
 
 protected slots:
@@ -49,6 +50,7 @@ protected slots:
 
     // View
     void changeBackgroundColor();
+    void changeGridColor();
 protected:
     // Misc methods:
     void setLabelText(QLabel* label, QString text);
@@ -88,6 +90,7 @@ protected:
     QAction* m_performFittingAction;
     // View menu
     QAction* m_changeBackgroundColorAction;
+    QAction* m_changeGridColorAction;
 
     // OpenGL widget and corresponding data
     ObjectViewGLWidget * m_glWidget;
@@ -104,6 +107,7 @@ protected:
     ObjReadingTools::ObjFileData *m_objDataResult = nullptr;
 
     Object3D* m_current3DObject = nullptr;
+    QColor* m_currentObjectColor = nullptr;
     Object3D* m_target3DObject = nullptr;
 };
 #endif // MAINWINDOW_H

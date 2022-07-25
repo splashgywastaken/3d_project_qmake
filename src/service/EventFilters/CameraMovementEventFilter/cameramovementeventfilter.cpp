@@ -9,32 +9,34 @@ CameraMovementEventFilter::CameraMovementEventFilter(Camera* camera)
 bool CameraMovementEventFilter::eventFilter(QObject *watched, QEvent *event)
 {
     m_openGlWidget = static_cast<QOpenGLWidget*>(watched);
-
     if (event->type() == QEvent::MouseButtonPress)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mousePressEvent(mouseEvent);
+        qDebug() << "mouse button pressed";
         return true;
     }
     if (event->type() == QEvent::MouseMove)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mouseMoveEvent(mouseEvent);
+        qDebug() << "mouse moved";
         return true;
     }
     if (event->type() == QEvent::MouseButtonRelease)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mouseReleaseEvent(mouseEvent);
+        qDebug() << "mouse button released";
         return true;
     }
     if (event->type() == QEvent::Wheel)
     {
         static QWheelEvent* mouseWheelEvent = static_cast<QWheelEvent*>(event);
         wheelEvent(mouseWheelEvent);
+        qDebug() << "wheel event";
         return true;
     }
-
     return false;
 }
 
@@ -46,6 +48,7 @@ void CameraMovementEventFilter::mousePressEvent(QMouseEvent *event)
     bool startPanningXY = (event->buttons() == Qt::MiddleButton) && ctrlPressed;
     bool startRotatingCamera = (event->buttons() == Qt::LeftButton) && altPressed;
     bool startRotatingAroundObject = (event->button() == Qt::LeftButton) && ctrlPressed;
+
     if (startPanningXZ)
     {
         m_navigationState = NavigationState::PanXZ;
@@ -201,18 +204,20 @@ void CameraMovementEventFilter::doWheelZooming(float delta)
     update();
 }
 
+// TODO:: Work more on this thing
 void CameraMovementEventFilter::doCameraRotationAroundObject(const QPoint &dstPosition)
 {
+    QVector3D cameraPositionNormalized = m_camera->getCameraPosition().normalized();
     QPoint shift = dstPosition - m_screenPosition;
     float rotationSpeed = 0.1f;
-    float angleX = -shift.y() * rotationSpeed;
     float angleY = -shift.x() * rotationSpeed;
     QQuaternion screenRotation = m_cameraRotation;
-    QQuaternion dstRotationX = QQuaternion::fromAxisAndAngle(1, 0, 0, angleX);
-    QQuaternion dstRotationY = QQuaternion::fromAxisAndAngle(0, 1, 0, angleY);
-    QQuaternion dstRotation = dstRotationY * screenRotation * dstRotationX;
+    QQuaternion dstRotationY = QQuaternion::fromAxisAndAngle(0, cameraPositionNormalized.y(), 0, angleY);
+    QQuaternion dstRotation = dstRotationY * screenRotation;
+    QVector3D cameraPosition = dstRotationY * m_camera->getCameraPosition();
     m_cameraRotation = dstRotation;
     m_camera->setRotation(dstRotation);
+    m_camera->setCameraPosition(cameraPosition);
     m_screenPosition = dstPosition;
     update();
 }

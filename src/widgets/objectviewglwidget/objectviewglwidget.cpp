@@ -18,6 +18,8 @@ ObjectViewGLWidget::ObjectViewGLWidget(QWidget* parent)
     installEventFilter(m_cameraMovementEventFilter);
 
     m_grid = new Grid(4.0f, 16, QColor(224, 224, 224));
+
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 ObjectViewGLWidget::~ObjectViewGLWidget()
@@ -91,6 +93,11 @@ void ObjectViewGLWidget::setBackgroundColor(const QColor &color)
     m_backgroundColor = color;
 }
 
+void ObjectViewGLWidget::setGridColor(const QColor &color)
+{
+    m_grid->setObjectColor(color);
+}
+
 void ObjectViewGLWidget::switchShaders(DrawableObjectTools::ShaderProgrammType shaderType)
 {
     m_shaderType = shaderType;
@@ -143,6 +150,16 @@ QColor ObjectViewGLWidget::getObjectColor()
 QColor ObjectViewGLWidget::getBackgroundColor()
 {
     return m_backgroundColor;
+}
+
+QColor ObjectViewGLWidget::getGridColor()
+{
+    if (m_grid != nullptr)
+    {
+        return m_grid->getObjectColor();
+    }
+
+    return QColor(255, 255, 255);
 }
 
 float ObjectViewGLWidget::getAspectRatio() const

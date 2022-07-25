@@ -47,7 +47,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::setObjectColor(QColor objectColor)
 {
+    m_currentObjectColor = new QColor(objectColor);
     m_glWidget->setObjectColor(objectColor);
+    m_glWidget->update();
+    m_colorPickerDialog->disconnect();
+}
+
+void MainWindow::setGridColor(QColor objectColor)
+{
+    m_glWidget->setGridColor(objectColor);
     m_glWidget->update();
     m_colorPickerDialog->disconnect();
 }
@@ -56,6 +64,7 @@ void MainWindow::setBackgroundColor(QColor objectColor)
 {
     m_glWidget->setBackgroundColor(objectColor);
     m_glWidget->update();
+    m_colorPickerDialog->disconnect();
 }
 
 void MainWindow::openObjFile()
@@ -114,7 +123,7 @@ void MainWindow::addObject()
 
     m_glWidget->makeCurrent();
     m_glWidget->addObject(m_current3DObject);
-    m_glWidget->setObjectColor(QColor(51, 255, 255));
+    setObjectColor(QColor(51, 255, 255));
 
     m_glWidget->update();
 }
@@ -181,9 +190,9 @@ void MainWindow::makeTargetObject()
     }
 
     QMatrix4x4 hardcodedTransformation;
-    hardcodedTransformation.translate(0, 1, 0);
-    hardcodedTransformation.rotate(90, QVector3D(1, 0, 0));
-    hardcodedTransformation.rotate(90, QVector3D(0, 0, 1));
+    hardcodedTransformation.translate(-2, -2, 3);
+//    hardcodedTransformation.rotate(90, QVector3D(1, 0, 0));
+//    hardcodedTransformation.rotate(90, QVector3D(0, 0, 1));
 
     if (m_objDataTarget == nullptr)
     {
@@ -216,6 +225,7 @@ void MainWindow::makeTargetObject()
                     polygonStart,
                     m_objDataTarget->getNormals(), polygonNormalIndices
                 );
+    m_target3DObject->setObjectColor(QColor(255, 0, 0));
     m_glWidget->addObject(m_target3DObject);
     m_glWidget->update();
 }
@@ -260,10 +270,9 @@ void MainWindow::performFittingforTarget()
                     polygonStart,
                     m_objDataResult->getNormals(), polygonNormalIndices
                 );
-
+        m_current3DObject->setObjectColor(*m_currentObjectColor);
         m_glWidget->addObject(m_current3DObject);
         m_glWidget->update();
-
         QApplication::processEvents();
         QThread::msleep(5);
     };
@@ -277,8 +286,8 @@ void MainWindow::performFittingforTarget()
 
     const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0};
     const double stepLength = 0.8;
-    const int nMaxIterations = 15000;
-    const double gradientNormThreshold = 1e-10;
+    const int nMaxIterations = 1500;
+    const double gradientNormThreshold = 1e-5;
 
     const QVector<double> resultTranslation = Optimization::gradientDescent(
                     problem, initialVariables,
@@ -296,6 +305,19 @@ void MainWindow::changeBackgroundColor()
     }
     m_colorPickerDialog->setCurrentColor(m_glWidget->getBackgroundColor());
     connect(m_colorPickerDialog, &QColorDialog::colorSelected, this, &MainWindow::setBackgroundColor);
+    m_colorPickerDialog->show();
+    m_colorPickerDialog->raise();
+    m_colorPickerDialog->activateWindow();
+}
+
+void MainWindow::changeGridColor()
+{
+    if (m_colorPickerDialog == nullptr)
+    {
+        m_colorPickerDialog = new QColorDialog(this);
+    }
+    m_colorPickerDialog->setCurrentColor(m_glWidget->getGridColor());
+    connect(m_colorPickerDialog, &QColorDialog::colorSelected, this, &MainWindow::setGridColor);
     m_colorPickerDialog->show();
     m_colorPickerDialog->raise();
     m_colorPickerDialog->activateWindow();
@@ -350,51 +372,54 @@ void MainWindow::createActions()
     m_openAction = new QAction(tr("Open file"), this);
     m_openAction->setShortcuts(QKeySequence::Open);
     m_openAction->setStatusTip(tr("Open a new file"));
-    QObject::connect(m_openAction, &QAction::triggered, this, &MainWindow::openObjFile);
+    connect(m_openAction, &QAction::triggered, this, &MainWindow::openObjFile);
 
     // Object's menu actions
     // Change object color
     m_changeObjectColorAction = new QAction(tr("Change object color"), this);
     m_changeObjectColorAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
     m_changeObjectColorAction->setToolTip(tr("Use color pallete to change object color"));
-    QObject::connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeLastObjectColor);
+    connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeLastObjectColor);
 
     // Find nearest point index in last object
     m_findNearestPointInLastObjectAction = new QAction(tr("Find nearest point"), this);
     m_findNearestPointInLastObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_F));
     m_findNearestPointInLastObjectAction->setToolTip(tr("Use dialog window to input data and find corresponding point in object"));
-    QObject::connect(m_findNearestPointInLastObjectAction, &QAction::triggered, this, &MainWindow::findNearestPointInLastObject);
+    connect(m_findNearestPointInLastObjectAction, &QAction::triggered, this, &MainWindow::findNearestPointInLastObject);
 
     // Scene's menu actions
     // Delete last object
     m_deleteLastObjectAction = new QAction(tr("Delete last object"), this);
     m_deleteLastObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X));
     m_deleteLastObjectAction->setToolTip(tr("Delete last object that you added on scene"));
-    QObject::connect(m_deleteLastObjectAction, &QAction::triggered, this, &MainWindow::deleteLastObject);
+    connect(m_deleteLastObjectAction, &QAction::triggered, this, &MainWindow::deleteLastObject);
 
     // Clear objects from scene
     m_clearObjectsAction = new QAction(tr("Clear scene"), this);
     m_clearObjectsAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_X));
     m_clearObjectsAction->setToolTip(tr("Clear all objects except "));
-    QObject::connect(m_clearObjectsAction, &QAction::triggered, this, &MainWindow::clearObjects);
+    connect(m_clearObjectsAction, &QAction::triggered, this, &MainWindow::clearObjects);
 
     // Instrument's menu actions
     // Make target to fit
     m_makeTargetObjectAction = new QAction(tr("Make target object"), this);
     m_makeTargetObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_T));
     m_makeTargetObjectAction->setToolTip(tr("Make target for object to fit"));
-    QObject::connect(m_makeTargetObjectAction, &QAction::triggered, this, &MainWindow::makeTargetObject);
+    connect(m_makeTargetObjectAction, &QAction::triggered, this, &MainWindow::makeTargetObject);
 
     // Perform fitting for current target
     m_performFittingAction = new QAction(tr("Perform fitting for object"), this);
     m_performFittingAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F));
     m_performFittingAction->setToolTip(tr("Perform fitting for current target object"));
-    QObject::connect(m_performFittingAction, &QAction::triggered, this, &MainWindow::performFittingforTarget);
+    connect(m_performFittingAction, &QAction::triggered, this, &MainWindow::performFittingforTarget);
 
     // View's menu actions
     // Change background's color
     m_changeBackgroundColorAction = new QAction(tr("Change background color"), this);
-    QObject::connect(m_changeBackgroundColorAction, &QAction::triggered, this, &MainWindow::changeBackgroundColor);
+    connect(m_changeBackgroundColorAction, &QAction::triggered, this, &MainWindow::changeBackgroundColor);
+
+    m_changeGridColorAction = new QAction(tr("Change grid color"), this);
+    connect(m_changeGridColorAction, &QAction::triggered, this, &MainWindow::changeGridColor);
 }
 
 void MainWindow::createWidgetActions()
@@ -443,4 +468,5 @@ void MainWindow::createMenus()
 
     m_viewMenu = menuBar()->addMenu(tr("View"));
     m_viewMenu->addAction(m_changeBackgroundColorAction);
+    m_viewMenu->addAction(m_changeGridColorAction);
 }

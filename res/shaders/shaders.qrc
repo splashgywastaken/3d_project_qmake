@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file>basicShader/basicShader.frag</file>
+        <file>basicShader/basicShader.vert</file>
+        <file>lightningShader/lightningShader.frag</file>
+        <file>lightningShader/lightningShader.vert</file>
+        <file>normalMapShader/normalMapShader.frag</file>
+        <file>normalMapShader/normalMapShader.vert</file>
+    </qresource>
+</RCC>

@@ -1,4 +1,6 @@
 #include "objectviewglwidget.h"
+#include "qapplication.h"
+#include "qdir.h"
 #include "qevent.h"
 
 #include <QMessageBox>
@@ -174,16 +176,16 @@ void ObjectViewGLWidget::initializeGL()
     // init for resource manager
     DrawableObjectTools::ResourceManager* resourceManager = DrawableObjectTools::ResourceManager::getInstance();
 
-    QString vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.vert";
-    QString fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/basicShader/basicShader.frag";
+    QString vertexShaderPath = ":/shaders/basicShader/basicShader.vert";
+    QString fragmentShaderPath = ":/shaders/basicShader/basicShader.frag";
     Q_ASSERT(resourceManager->createShaderProgram(vertexShaderPath, fragmentShaderPath, "basicShader"));
 
-    vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/lightningShader/lightningShader.vert";
-    fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/lightningShader/lightningShader.frag";
+    vertexShaderPath = ":/shaders/lightningShader/lightningShader.vert";
+    fragmentShaderPath = ":/shaders/lightningShader/lightningShader.frag";
     Q_ASSERT(resourceManager->createShaderProgram(vertexShaderPath, fragmentShaderPath, "lightningShader"));
 
-    vertexShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/normalMapShader/normalMapShader.vert";
-    fragmentShaderPath = "E:/projects SSD/Qt/3d_project_qmake/res/shaders/normalMapShader/normalMapShader.frag";
+    vertexShaderPath = ":/shaders/normalMapShader/normalMapShader.vert";
+    fragmentShaderPath = ":/shaders/normalMapShader/normalMapShader.frag";
     Q_ASSERT(resourceManager->createShaderProgram(vertexShaderPath, fragmentShaderPath, "normalMapShader"));
 
     switchShaders(m_shaderType);

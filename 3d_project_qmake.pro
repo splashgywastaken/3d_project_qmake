@@ -1,5 +1,4 @@
 QT += core gui testlib opengl openglwidgets
-
 LIBS += -lglu32 -lopengl32
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

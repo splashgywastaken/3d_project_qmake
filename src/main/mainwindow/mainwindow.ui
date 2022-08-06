@@ -34,15 +34,7 @@
       <height>26</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="progressBarLayout">
-     <item>
-      <widget class="QProgressBar" name="taskProgressBar">
-       <property name="value">
-        <number>0</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <layout class="QHBoxLayout" name="progressBarLayout"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

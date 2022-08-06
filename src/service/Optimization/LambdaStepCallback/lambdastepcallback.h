@@ -1,7 +1,7 @@
 #ifndef LAMBDASTEPCALLBACK_H
 #define LAMBDASTEPCALLBACK_H
 
-#include <src/service/Optimization/StepCallback/stepcallback.h>
+#include <src/service/Optimization/StepCallBack/stepcallback.h>
 
 namespace Optimization {
 

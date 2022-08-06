@@ -2,7 +2,7 @@
 #define GRADIENTDESCENT_H
 
 #include "src/service/Optimization/Problem/problem.h"
-#include "src/service/Optimization/StepCallback/stepcallback.h"
+#include "src/service/Optimization/StepCallBack/stepcallback.h"
 #include "src/service/Optimization/OptimizationUtils/optimizationutils.h"
 
 namespace Optimization
@@ -20,4 +20,4 @@ QVector<double> gradientDescent(
 
 }
 
-#endif // GRADIENTDESCENT_H
+#endif

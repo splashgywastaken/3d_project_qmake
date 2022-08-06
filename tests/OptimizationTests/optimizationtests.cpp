@@ -1,6 +1,8 @@
 #include "optimizationtests.h"
 
 #include <cmath>
+#include <rigidalignmentscalingproblem.h>
+#include "qmatrix4x4.h"
 #include "src/service/Optimization/Problem/problem.h"
 #include "src/service/Optimization/OptimizationUtils/optimizationutils.h"
 #include "src/service/Optimization/GradientDescent/gradientdescent.h"
@@ -273,3 +275,4 @@ void Optimization::Tests::OptimizationTests::testGradientDescent07()
     QVERIFY(std::abs(res[0] + 1.6) < epsilonWeak);
     QVERIFY(std::abs(res[1] + 0.4) < epsilonWeak);
 }
+

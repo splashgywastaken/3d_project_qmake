@@ -3,8 +3,8 @@ using namespace KDTree;
 
 void Utils::findPointsRange(const QList<int> &pointIndices, const QVector<QVector3D> &points, QVector3D &min, QVector3D &max)
 {
-    QVector<float> minPoint = MAX_POINT;
-    QVector<float> maxPoint = MIN_POINT;
+    QVector<float> minPoint = MAX_POINT->toVector();
+    QVector<float> maxPoint = MIN_POINT->toVector();
     for (const int &pointInd : pointIndices)
     {
         for (int dim = 0; dim < 3; ++dim)

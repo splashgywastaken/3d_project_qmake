@@ -1,16 +1,15 @@
-#ifndef OPTIMIZATION_RIGIDALIGNMENTPROBLEM_H
-#define OPTIMIZATION_RIGIDALIGNMENTPROBLEM_H
+#ifndef OPTIMIZATION_RIGIDALIGNMENTSCALINGPROBLEM_H
+#define OPTIMIZATION_RIGIDALIGNMENTSCALINGPROBLEM_H
 
-#include <QVector3D>
-#include <src/service/Optimization/Problem/problem.h>
-#include <QMatrix4x4>
+#include <problem.h>
+#include <qvector2d.h>
 
 namespace Optimization {
 
-class RigidAlignmentProblem : public Problem
+class RigidAlignmentScalingProblem : public Problem
 {
 public:
-    RigidAlignmentProblem(
+    RigidAlignmentScalingProblem(
             const QVector<QVector3D>& baseVertices,
             const QVector<QVector3D>& targetVertices
             );
@@ -26,6 +25,6 @@ private:
     QVector<QVector3D> m_baseVertices;
     QVector<QVector3D> m_targetVertices;
 };
-}
 
+}
 #endif

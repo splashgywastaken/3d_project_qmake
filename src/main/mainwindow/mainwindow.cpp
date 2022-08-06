@@ -12,6 +12,7 @@
 #include <src/service/Optimization/LambdaStepCallback/lambdastepcallback.h>
 #include <src/service/Optimization/GradientDescent/gradientdescent.h>
 #include <src/service/RigidAlignment/RigidAlignmentProblem/rigidalignmentproblem.h>
+#include <src/service/RigidAlignment/RigidAlignmentScalingProblem/rigidalignmentscalingproblem.h>
 #include "src/service/KDTree/kdtree.h"
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
@@ -30,7 +31,9 @@ MainWindow::MainWindow(QWidget *parent)
     createWidgetActions();
 
     // UI setup
-    m_ui->taskProgressBar->setVisible(false);
+    m_taskProgressBar = new QProgressBar();
+    m_ui->progressBarLayout->addWidget(m_taskProgressBar);
+    m_taskProgressBar->hide();
 
     // GlWidget inits
     m_glWidget = new ObjectViewGLWidget;
@@ -71,7 +74,7 @@ void MainWindow::openObjFile()
 {
     QString filePath(
                 QFileDialog::getOpenFileName(this, tr("Choose file"),
-                "E:/projects SSD/Qt/3d_project_qmake/res/obj/cube.obj",
+                QDir::homePath(),
                 tr("Object (*.obj)")
             ));
 
@@ -80,14 +83,12 @@ void MainWindow::openObjFile()
         return;
     }
 
-    m_ui->taskProgressBar->setVisible(true);
-
-    ProgressNotifierSingleton::initialize(m_ui->taskProgressBar);
+    ProgressNotifierSingleton::initialize(m_taskProgressBar);
     AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
-    m_objDataCurrent = new ObjReadingTools::ObjFileData();
+    m_objDataBase = new ObjReadingTools::ObjFileData();
     QString errorMessage;
 
-    if (!ObjReadingTools::readFile(filePath, *m_objDataCurrent, errorMessage, progressNotifier)){
+    if (!ObjReadingTools::readFile(filePath, *m_objDataBase, errorMessage, progressNotifier)){
         qDebug() << errorMessage;
         return;
     }
@@ -96,7 +97,9 @@ void MainWindow::openObjFile()
 
 void MainWindow::addObject()
 {
-    if (m_objDataCurrent == nullptr)
+    qDebug() << "Добавление объекта";
+
+    if (m_objDataBase == nullptr)
     {
         QMessageBox::warning(
                     this,
@@ -106,24 +109,21 @@ void MainWindow::addObject()
         return;
     }
 
-    QMessageBox taskMessageBox;
-    taskMessageBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataCurrent->getPolygonVertexIndices());
-    QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataCurrent->getPolygonNormalIndices());
-    QVector<int> polygonStart = MeshTools::buildPolygonStartVector(m_objDataCurrent->getPolygonVertexIndices());
+    QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataBase->getPolygonVertexIndices());
+    QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataBase->getPolygonNormalIndices());
+    QVector<int> polygonStart = MeshTools::buildPolygonStartVector(m_objDataBase->getPolygonVertexIndices());
 
     m_current3DObject = new Object3D(
-                m_objDataCurrent->getVertices(),
+                m_objDataBase->getVertices(),
                 polygonVertexIndices,
                 polygonStart,
-                m_objDataCurrent->getNormals(),
+                m_objDataBase->getNormals(),
                 polygonNormalIndices
                 );
 
     m_glWidget->makeCurrent();
     m_glWidget->addObject(m_current3DObject);
-    setObjectColor(QColor(51, 255, 255));
+    setObjectColor(QColor(85, 170, 255));
 
     m_glWidget->update();
 }
@@ -141,8 +141,8 @@ void MainWindow::clearObjects()
     m_target3DObject = nullptr;
     delete m_current3DObject;
     m_current3DObject = nullptr;
-    delete m_objDataCurrent;
-    m_objDataCurrent = nullptr;
+    delete m_objDataBase;
+    m_objDataBase = nullptr;
     delete m_objDataTarget;
     m_objDataTarget = nullptr;
     delete m_objDataResult;
@@ -168,7 +168,7 @@ void MainWindow::changeLastObjectColor()
 
 void MainWindow::findNearestPointInLastObject()
 {
-    QVector<QVector3D> points = m_objDataCurrent->getVertices();
+    QVector<QVector3D> points = m_objDataBase->getVertices();
 
     KDTree::Node *kDTreeHead = KDTree::buildTree(points);
     m_findNearestPointDialog = new FindNearestPointDialog(points, kDTreeHead);
@@ -190,9 +190,14 @@ void MainWindow::makeTargetObject()
     }
 
     QMatrix4x4 hardcodedTransformation;
-    hardcodedTransformation.translate(-2, -2, 3);
-//    hardcodedTransformation.rotate(90, QVector3D(1, 0, 0));
-//    hardcodedTransformation.rotate(90, QVector3D(0, 0, 1));
+    hardcodedTransformation.setToIdentity();
+
+    hardcodedTransformation.scale(1.2);
+
+    hardcodedTransformation.translate(QVector3D(0, 1, 0));
+
+    hardcodedTransformation.rotate(90, QVector3D(1, 0, 0));
+    hardcodedTransformation.rotate(90, QVector3D(0, 0, 1));
 
     if (m_objDataTarget == nullptr)
     {
@@ -200,10 +205,10 @@ void MainWindow::makeTargetObject()
         m_objDataTarget = nullptr;
     }
     m_objDataTarget = new ObjReadingTools::ObjFileData();
-    *m_objDataTarget = *m_objDataCurrent;
+    *m_objDataTarget = *m_objDataBase;
 
     int size = m_objDataTarget->getVertices().size();
-    QVector<QVector3D> targetVertices = m_objDataTarget->getVertices();
+    QVector<QVector3D> targetVertices = (m_objDataTarget->getVertices());
     for (int index = 0; index < size; index++)
     {
        targetVertices[index] = hardcodedTransformation.mapVector(targetVertices[index]);
@@ -241,13 +246,13 @@ void MainWindow::performFittingforTarget()
         m_objDataResult = nullptr;
     }
     m_objDataResult = new ObjReadingTools::ObjFileData();
-    *m_objDataResult = *m_objDataCurrent;
 
     const auto stepFunction = [&](const QVector<double>& variables)
     {
-        const QMatrix4x4 transformation = Optimization::RigidAlignmentProblem::transformationMatrixFromVars(variables);
+        *m_objDataResult = *m_objDataBase;
+        const QMatrix4x4 transformation = Optimization::RigidAlignmentScalingProblem::transformationMatrixFromVars(variables);
         const int resultSize = m_objDataResult->getVertices().size();
-        QVector<QVector3D> resultVertices = m_objDataResult->getVertices();
+        QVector<QVector3D> resultVertices = m_objDataResult->getVertices().toVector();
         for (int index = 0; index < resultSize; index++)
         {
             resultVertices[index] = transformation.mapVector(resultVertices[index]);
@@ -266,9 +271,9 @@ void MainWindow::performFittingforTarget()
             m_current3DObject = nullptr;
         }
         m_current3DObject = new Object3D(
-                    m_objDataResult->getVertices(), polygonVertexIndices,
+                    m_objDataResult->getVertices().toVector(), polygonVertexIndices,
                     polygonStart,
-                    m_objDataResult->getNormals(), polygonNormalIndices
+                    m_objDataResult->getNormals().toVector(), polygonNormalIndices
                 );
         m_current3DObject->setObjectColor(*m_currentObjectColor);
         m_glWidget->addObject(m_current3DObject);
@@ -277,24 +282,25 @@ void MainWindow::performFittingforTarget()
         QThread::msleep(5);
     };
 
-    Optimization::RigidAlignmentProblem problem(
-                m_objDataCurrent->getVertices(),
-                m_objDataCurrent->getVertices()
+    Optimization::RigidAlignmentScalingProblem problem(
+                m_objDataBase->getVertices(),
+                m_objDataTarget->getVertices()
                 );
 
     Optimization::LambdaStepCallback callback(stepFunction);
 
-    const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0};
-    const double stepLength = 0.8;
-    const int nMaxIterations = 1500;
-    const double gradientNormThreshold = 1e-5;
+    const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0, 1};
+    const double stepLength = 0.4;
+    const int nMaxIterations = 2500;
+    const double gradientNormThreshold = 1e-10;
 
-    const QVector<double> resultTranslation = Optimization::gradientDescent(
+    QVector<double> resultTranslation = Optimization::gradientDescent(
                     problem, initialVariables,
                     stepLength, nMaxIterations, gradientNormThreshold,
                     true, &callback
                 );
-    qDebug() << "Estimated transformation" << resultTranslation;
+
+    qDebug() << "Estimated transformation" << Optimization::RigidAlignmentScalingProblem::transformationVectorFromVars(resultTranslation);
 }
 
 void MainWindow::changeBackgroundColor()
@@ -342,7 +348,9 @@ void MainWindow::changeShader(const QString &shaderName)
 {
     DrawableObjectTools::ShaderProgrammType shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
 
-    qDebug() << "Change shader triggered";
+    #ifndef QT_NO_DEBUG
+        qDebug() << "Change shader triggered";
+    #endif
 
     if (shaderName == "Basic shader")
     {

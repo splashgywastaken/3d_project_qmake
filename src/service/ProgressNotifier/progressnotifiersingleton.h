@@ -19,10 +19,14 @@ public:
 
 protected:
     ProgressNotifierSingleton() {};
+    void setProgressBar(QProgressBar *progressBar);
+    bool isInitialized() const;
+    bool isRunning() const;
 
 protected:
     static ProgressNotifierSingleton *m_instance;
     QProgressBar *m_progressBar = nullptr;
+    bool m_isRunning = false;
 };
 
 #endif // PROGRESSNOTIFIERSINGLETON_H

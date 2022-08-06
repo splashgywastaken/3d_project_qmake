@@ -1,6 +1,11 @@
 #include "src/service/Optimization/GradientDescent/gradientdescent.h"
 
 #include <QDebug>
+#include <rigidalignmentscalingproblem.h>
+#include "rigidalignmentproblem.h"
+
+const double epsilonHard = 1e-7;
+double previousError = 0;
 
 QVector<double> Optimization::gradientDescent(
         Optimization::Problem &problem,
@@ -13,22 +18,37 @@ QVector<double> Optimization::gradientDescent(
         )
 {
     QVector<double> currentVariables = initialVars;
-        for(int iterationInd = 0; iterationInd < nMaxIterations; ++iterationInd){
+        for (int iterationInd = 0; iterationInd < nMaxIterations; ++iterationInd)
+        {
             const double error = problem.computeError(currentVariables);
+            if (std::abs(error - previousError) < epsilonHard && previousError != 0){
+                if (verbose)
+                {
+                    qDebug() << "Stopped by low error change";
+                }
+                break;
+            }
+            previousError = error;
+
             const QVector<double> gradient = problem.computeGradient(currentVariables);
             const double gradNorm = vectorNorm(gradient);
-            if(verbose){
+            if (verbose)
+            {
                 qDebug()
                         << "Iteration:" << iterationInd + 1 << "/" << nMaxIterations
                         << "error:" << error
-                        << "gradient norm" << gradNorm;
+                        << "gradient norm" << gradNorm
+                        << "current transform" << RigidAlignmentScalingProblem::transformationVectorFromVars(currentVariables);
             }
 
-            if(callback != nullptr)
+            if (callback != nullptr)
+            {
                 callback->call(currentVariables);
+            }
 
-            if(gradNorm < gradientNormThreshold){
-                if(verbose)
+            if (gradNorm < gradientNormThreshold)
+            {
+                if (verbose)
                     qDebug() << "Stopped by gradient norm";
                 break;
             }

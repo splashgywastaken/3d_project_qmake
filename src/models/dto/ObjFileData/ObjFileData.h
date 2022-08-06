@@ -60,17 +60,17 @@ public:
     // Getters
     ObjFileData &getObjFIleData();
     // QString
-    QString& getObjectName();
+    const QString& getObjectName();
     // QVector<QVector3D>
-    QVector<QVector3D>& getVertices();
-    QVector<QVector3D>& getNormals();
-    QVector<QVector<QString>>& getFaces();
+    const QVector<QVector3D>& getVertices();
+    const QVector<QVector3D>& getNormals();
+    const QVector<QVector<QString>>& getFaces();
     // QVector<QVector2D>
-    QVector<QVector2D>& getVertexTextureCoordinates();
+    const QVector<QVector2D>& getVertexTextureCoordinates();
     // QVector<int>
-    QVector<QVector<int>>& getPolygonVertexIndices();
-    QVector<QVector<int>>& getPolygonVertexTextureCoordinateIndices();
-    QVector<QVector<int>>& getPolygonNormalIndices();
+    const QVector<QVector<int>>& getPolygonVertexIndices();
+    const QVector<QVector<int>>& getPolygonVertexTextureCoordinateIndices();
+    const QVector<QVector<int>>& getPolygonNormalIndices();
 
     // Getting file description
     QString getDescription();
@@ -83,15 +83,15 @@ public:
         // QString
         std::swap(first.m_objectName, second.m_objectName);
         // QVector<QVector3D>
-        std::swap(first.getVertices(), second.getVertices());
-        std::swap(first.getNormals(), second.getNormals());
-        std::swap(first.getFaces(), second.getFaces());
+        std::swap(first.m_vertices, second.m_vertices);
+        std::swap(first.m_normals, second.m_normals);
+        std::swap(first.m_faces, second.m_faces);
         // QVector<QVector2D>
-        std::swap(first.getVertexTextureCoordinates(), second.getVertexTextureCoordinates());
+        std::swap(first.m_vertexTextureCoordinates, second.m_vertexTextureCoordinates);
         // QVector<QVector<int>>
-        std::swap(first.getPolygonVertexIndices(), second.getPolygonVertexIndices());
-        std::swap(first.getPolygonNormalIndices(), second.getPolygonNormalIndices());
-        std::swap(first.getPolygonVertexTextureCoordinateIndices(), second.getPolygonVertexTextureCoordinateIndices());
+        std::swap(first.m_polygonVertexIndices, second.m_polygonVertexIndices);
+        std::swap(first.m_polygonNormalIndices, second.m_polygonNormalIndices);
+        std::swap(first.m_polygonVertexTextureCoordinateIndices, second.m_polygonVertexTextureCoordinateIndices);
     }
 };
 

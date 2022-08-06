@@ -13,28 +13,36 @@ bool CameraMovementEventFilter::eventFilter(QObject *watched, QEvent *event)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mousePressEvent(mouseEvent);
-        qDebug() << "mouse button pressed";
+    #ifndef QT_NO_DEBUG
+//       qDebug() << "mouse button pressed";
+    #endif
         return true;
     }
     if (event->type() == QEvent::MouseMove)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mouseMoveEvent(mouseEvent);
-        qDebug() << "mouse moved";
+    #ifndef QT_NO_DEBUG
+//        qDebug() << "mouse moved";
+    #endif
         return true;
     }
     if (event->type() == QEvent::MouseButtonRelease)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mouseReleaseEvent(mouseEvent);
-        qDebug() << "mouse button released";
+    #ifndef QT_NO_DEBUG
+//        qDebug() << "mouse button released";
+    #endif
         return true;
     }
     if (event->type() == QEvent::Wheel)
     {
         static QWheelEvent* mouseWheelEvent = static_cast<QWheelEvent*>(event);
         wheelEvent(mouseWheelEvent);
-        qDebug() << "wheel event";
+    #ifndef QT_NO_DEBUG
+//        qDebug() << "wheel event";
+    #endif
         return true;
     }
     return false;

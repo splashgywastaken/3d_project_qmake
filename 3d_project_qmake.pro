@@ -14,10 +14,8 @@ include($$PWD/code playground/PlaygroundFiles.pri)
 # Main and forms
 include($$PWD/src/main/main.pri)
 
-
 # Models
 include($$PWD/src/models/models.pri)
-
 
 # Service and global state
 include($$PWD/src/service/service.pri)
@@ -25,8 +23,12 @@ include($$PWD/src/service/service.pri)
 # Widgets
 include($$PWD/src/widgets/widgets.pri)
 
-# Tests
-include($$PWD/tests/tests.pri)
+# If running in debug then include tests
+CONFIG(debug, debug|release)
+{
+    # Tests
+    include($$PWD/tests/tests.pri)
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

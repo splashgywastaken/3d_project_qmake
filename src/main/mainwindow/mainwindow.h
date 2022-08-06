@@ -100,9 +100,10 @@ protected:
 
     // UI
     Ui::MainWindow *m_ui;
+    QProgressBar* m_taskProgressBar;
 
     // Other variables
-    ObjReadingTools::ObjFileData *m_objDataCurrent = nullptr;
+    ObjReadingTools::ObjFileData *m_objDataBase = nullptr;
     ObjReadingTools::ObjFileData *m_objDataTarget = nullptr;
     ObjReadingTools::ObjFileData *m_objDataResult = nullptr;
 

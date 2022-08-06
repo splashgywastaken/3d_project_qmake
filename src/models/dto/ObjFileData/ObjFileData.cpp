@@ -49,31 +49,31 @@ void ObjReadingTools::ObjFileData::setVertices(const QVector<QVector3D> &vertice
     m_vertices = vertices;
 }
 
-QVector<QVector3D>& ObjReadingTools::ObjFileData::getVertices() {
+const QVector<QVector3D>& ObjReadingTools::ObjFileData::getVertices() {
     return m_vertices;
 }
 
-QVector<QVector3D>& ObjReadingTools::ObjFileData::getNormals() {
+const QVector<QVector3D>& ObjReadingTools::ObjFileData::getNormals() {
     return m_normals;
 }
 
-QVector<QVector<QString>>& ObjReadingTools::ObjFileData::getFaces() {
+const QVector<QVector<QString>>& ObjReadingTools::ObjFileData::getFaces() {
     return m_faces;
 }
 
-QVector<QVector2D>& ObjReadingTools::ObjFileData::getVertexTextureCoordinates() {
+const QVector<QVector2D>& ObjReadingTools::ObjFileData::getVertexTextureCoordinates() {
     return m_vertexTextureCoordinates;
 }
 
-QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonVertexIndices() {
+const QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonVertexIndices() {
     return m_polygonVertexIndices;
 }
 
-QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonVertexTextureCoordinateIndices() {
+const QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonVertexTextureCoordinateIndices() {
     return m_polygonVertexTextureCoordinateIndices;
 }
 
-QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonNormalIndices() {
+const QVector<QVector<int>>& ObjReadingTools::ObjFileData::getPolygonNormalIndices() {
     return m_polygonNormalIndices;
 }
 
@@ -143,7 +143,7 @@ ObjReadingTools::ObjFileData &ObjReadingTools::ObjFileData::getObjFIleData() {
     return *this;
 }
 
-QString& ObjReadingTools::ObjFileData::getObjectName()
+const QString& ObjReadingTools::ObjFileData::getObjectName()
 {
     return m_objectName;
 }
@@ -154,16 +154,16 @@ ObjReadingTools::ObjFileData::ObjFileData(ObjReadingTools::ObjFileData &other)
     // QString*
     m_objectName = other.getObjectName();
     // QVector<QVector3D*>*
-    m_vertices = other.getVertices();
-    m_normals = other.getNormals();
+    m_vertices = other.getVertices().toVector();
+    m_normals = other.getNormals().toVector();
     // QVector<QVector2D*>*
-    m_vertexTextureCoordinates = other.getVertexTextureCoordinates();
+    m_vertexTextureCoordinates = other.getVertexTextureCoordinates().toVector();
     // QVector<QVector<int*>*>*
-    m_polygonVertexIndices = other.getPolygonVertexIndices();
-    m_polygonVertexTextureCoordinateIndices = other.getPolygonVertexTextureCoordinateIndices();
-    m_polygonNormalIndices = other.getPolygonNormalIndices();
+    m_polygonVertexIndices = other.getPolygonVertexIndices().toVector();
+    m_polygonVertexTextureCoordinateIndices = other.getPolygonVertexTextureCoordinateIndices().toVector();
+    m_polygonNormalIndices = other.getPolygonNormalIndices().toVector();
     // QVector<QVector<QString*>*>*
-    m_faces = other.getFaces();
+    m_faces = other.getFaces().toVector();
 }
 
 ObjReadingTools::ObjFileData::ObjFileData(ObjReadingTools::ObjFileData &&other)  noexcept

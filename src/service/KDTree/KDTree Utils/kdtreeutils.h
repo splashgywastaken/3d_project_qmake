@@ -36,8 +36,8 @@ void quickSort(QList<int>& indices, QVector<QVector3D>& points, int axisToSort, 
 // Array sorting helper functions:
 int findSmallestIndex(QList<int> indices, QVector<QVector3D>& points, int index);
 
-const QVector<float> MAX_POINT = QVector<float>() << FLT_MAX << FLT_MAX << FLT_MAX;
-const QVector<float> MIN_POINT = QVector<float>() << -FLT_MAX << -FLT_MAX << -FLT_MAX;
+Q_GLOBAL_STATIC_WITH_ARGS(const QVector<float>, MAX_POINT, (QVector<float>() << FLT_MAX << FLT_MAX << FLT_MAX));
+Q_GLOBAL_STATIC_WITH_ARGS(const QVector<float>, MIN_POINT, (QVector<float>() << -FLT_MAX << -FLT_MAX << -FLT_MAX));
 
 }
 }

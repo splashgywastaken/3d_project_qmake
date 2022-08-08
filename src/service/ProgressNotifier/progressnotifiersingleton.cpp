@@ -8,20 +8,15 @@ ProgressNotifierSingleton *ProgressNotifierSingleton::m_instance = nullptr;
 ProgressNotifierSingleton *ProgressNotifierSingleton::getInstance()
 {
     if (m_instance == nullptr){
-        m_instance = new ProgressNotifierSingleton;
+        m_instance = new ProgressNotifierSingleton();
     }
     return ProgressNotifierSingleton::m_instance;
 }
 
 void ProgressNotifierSingleton::initialize(QProgressBar *progressBar)
 {
-    if (m_instance != nullptr)
-    {
-        m_instance = new ProgressNotifierSingleton;
-    }
-
-    getInstance()->m_progressBar = progressBar;
-    getInstance()->m_progressBar->setVisible(true);
+    m_instance = new ProgressNotifierSingleton();
+    m_instance->setProgressBar(progressBar);
 }
 
 void ProgressNotifierSingleton::start(int minValue, int maxValue)
@@ -49,6 +44,7 @@ void ProgressNotifierSingleton::finish()
     Q_ASSERT(isRunning());
     m_isRunning = false;
     m_progressBar->hide();
+    m_progressBar = nullptr;
 }
 
 void ProgressNotifierSingleton::setProgressBar(QProgressBar *progressBar)

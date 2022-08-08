@@ -275,4 +275,3 @@ void Optimization::Tests::OptimizationTests::testGradientDescent07()
     QVERIFY(std::abs(res[0] + 1.6) < epsilonWeak);
     QVERIFY(std::abs(res[1] + 0.4) < epsilonWeak);
 }
-

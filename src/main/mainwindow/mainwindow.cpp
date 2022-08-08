@@ -5,6 +5,7 @@
 #include <QList>
 #include <QMessageBox>
 #include <QThread>
+#include "qlayout.h"
 
 #include <src/service/GlobalState.h>
 #include <src/main/FindNearestPointDialog/findnearestpointdialog.h>
@@ -16,6 +17,8 @@
 #include "src/service/KDTree/kdtree.h"
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
+const QColor defaultSceneObjectColor(85, 170, 255);
+const QColor defaultTargetObjectColor(255, 0, 0);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -30,17 +33,21 @@ MainWindow::MainWindow(QWidget *parent)
     createMenus();
     createWidgetActions();
 
+    // Layout inits
+    m_centralLayout = new QVBoxLayout(m_ui->centralwidget);
+
+    m_openGLLayout = new QHBoxLayout();
+    m_centralLayout->addLayout(m_openGLLayout);
+
     // UI setup
     m_taskProgressBar = new QProgressBar();
-    m_ui->progressBarLayout->addWidget(m_taskProgressBar);
+    statusBar()->addPermanentWidget(m_taskProgressBar);
+    m_taskProgressBar->disconnect();
     m_taskProgressBar->hide();
 
     // GlWidget inits
     m_glWidget = new ObjectViewGLWidget;
-
-    m_ui->openGLLayout->addWidget(m_glWidget);
-
-    // Slots connection
+    m_openGLLayout->addWidget(m_glWidget);
 }
 
 MainWindow::~MainWindow()
@@ -72,60 +79,23 @@ void MainWindow::setBackgroundColor(QColor objectColor)
 
 void MainWindow::openObjFile()
 {
-    QString filePath(
-                QFileDialog::getOpenFileName(this, tr("Choose file"),
-                QDir::homePath(),
-                tr("Object (*.obj)")
-            ));
-
-    if (filePath.isEmpty())
-    {
-        return;
-    }
-
-    ProgressNotifierSingleton::initialize(m_taskProgressBar);
-    AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
     m_objDataBase = new ObjReadingTools::ObjFileData();
-    QString errorMessage;
-
-    if (!ObjReadingTools::readFile(filePath, *m_objDataBase, errorMessage, progressNotifier)){
-        qDebug() << errorMessage;
-        return;
+    if (readObjectFromFile(*m_objDataBase, tr("Choose file"), tr("Object (*.obj)"), QDir::homePath()))
+    {
+        addObjectSlot();
     }
-    addObject();
 }
 
-void MainWindow::addObject()
+void MainWindow::addObjectSlot()
 {
-    qDebug() << "Добавление объекта";
-
-    if (m_objDataBase == nullptr)
-    {
-        QMessageBox::warning(
-                    this,
-                    "Объект не прочитан",
-                    "Данные об объекте пусты"
-                    );
-        return;
-    }
-
-    QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataBase->getPolygonVertexIndices());
-    QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataBase->getPolygonNormalIndices());
-    QVector<int> polygonStart = MeshTools::buildPolygonStartVector(m_objDataBase->getPolygonVertexIndices());
-
-    m_current3DObject = new Object3D(
-                m_objDataBase->getVertices(),
-                polygonVertexIndices,
-                polygonStart,
-                m_objDataBase->getNormals(),
-                polygonNormalIndices
+    addToSceneObject3DFromObjData(
+                *m_objDataBase,
+                m_current3DObject,
+                defaultSceneObjectColor,
+                m_glWidget
                 );
-
-    m_glWidget->makeCurrent();
-    m_glWidget->addObject(m_current3DObject);
-    setObjectColor(QColor(85, 170, 255));
-
-    m_glWidget->update();
+    delete m_currentObjectColor;
+    m_currentObjectColor = new QColor(defaultSceneObjectColor);
 }
 
 void MainWindow::deleteLastObject()
@@ -215,24 +185,18 @@ void MainWindow::makeTargetObject()
     }
     m_objDataTarget->setVertices(targetVertices);
 
-    QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataTarget->getPolygonVertexIndices());
-    QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataTarget->getPolygonNormalIndices());
-    QVector<int> polygonStart = MeshTools::buildPolygonStartVector(m_objDataTarget->getPolygonVertexIndices());
-    m_glWidget->makeCurrent();
     if (m_target3DObject != nullptr)
     {
         m_glWidget->removeObject(m_target3DObject);
         delete m_target3DObject;
         m_target3DObject = nullptr;
     }
-    m_target3DObject = new Object3D(
-                    m_objDataTarget->getVertices(), polygonVertexIndices,
-                    polygonStart,
-                    m_objDataTarget->getNormals(), polygonNormalIndices
+    addToSceneObject3DFromObjData(
+                *m_objDataTarget,
+                m_target3DObject,
+                defaultTargetObjectColor,
+                m_glWidget
                 );
-    m_target3DObject->setObjectColor(QColor(255, 0, 0));
-    m_glWidget->addObject(m_target3DObject);
-    m_glWidget->update();
 }
 
 void MainWindow::performFittingforTarget()
@@ -259,10 +223,6 @@ void MainWindow::performFittingforTarget()
         }
         m_objDataResult->setVertices(resultVertices);
 
-        QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataResult->getPolygonVertexIndices());
-        QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(m_objDataResult->getPolygonNormalIndices());
-        QVector<int> polygonStart = MeshTools::buildPolygonStartVector(m_objDataResult->getPolygonVertexIndices());
-
         m_glWidget->makeCurrent();
         if (m_current3DObject != nullptr)
         {
@@ -270,14 +230,12 @@ void MainWindow::performFittingforTarget()
             delete m_current3DObject;
             m_current3DObject = nullptr;
         }
-        m_current3DObject = new Object3D(
-                    m_objDataResult->getVertices().toVector(), polygonVertexIndices,
-                    polygonStart,
-                    m_objDataResult->getNormals().toVector(), polygonNormalIndices
-                );
-        m_current3DObject->setObjectColor(*m_currentObjectColor);
-        m_glWidget->addObject(m_current3DObject);
-        m_glWidget->update();
+        addToSceneObject3DFromObjData(
+                    *m_objDataResult,
+                    m_current3DObject,
+                    *m_currentObjectColor,
+                    m_glWidget
+                    );
         QApplication::processEvents();
         QThread::msleep(5);
     };
@@ -327,6 +285,66 @@ void MainWindow::changeGridColor()
     m_colorPickerDialog->show();
     m_colorPickerDialog->raise();
     m_colorPickerDialog->activateWindow();
+}
+
+bool MainWindow::readObjectFromFile(
+        ObjReadingTools::ObjFileData &destObj,
+        const QString &caption,
+        const QString &fileFilter,
+        const QString &dir
+        )
+{
+    QFileDialog *fileDialog = new QFileDialog();
+    QString resultFilePath(fileDialog->getOpenFileName(
+                        this, caption,
+                        dir,
+                        fileFilter,
+                        nullptr,
+                        QFileDialog::DontUseNativeDialog
+                    ));
+    if (resultFilePath.isEmpty())
+    {
+        delete fileDialog;
+        return false;
+    }
+
+    ProgressNotifierSingleton::initialize(m_taskProgressBar);
+    AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
+    QString errorMessage;
+
+    if (!ObjReadingTools::readFile(resultFilePath, destObj, errorMessage, progressNotifier)){
+        delete fileDialog;
+        qDebug() << errorMessage;
+        return false;
+    }
+
+    delete fileDialog;
+    return true;
+}
+
+void MainWindow::addToSceneObject3DFromObjData(
+        ObjReadingTools::ObjFileData& obj,
+        SceneObject*& object,
+        const QColor& color,
+        ObjectViewGLWidget* glWidget
+        )
+{
+    QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(obj.getPolygonVertexIndices());
+    QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(obj.getPolygonNormalIndices());
+    QVector<int> polygonStart = MeshTools::buildPolygonStartVector(obj.getPolygonVertexIndices());
+
+    object = new Object3D(
+                obj.getVertices(),
+                polygonVertexIndices,
+                polygonStart,
+                obj.getNormals(),
+                polygonNormalIndices
+                );
+
+    glWidget->makeCurrent();
+    glWidget->addObject(object);
+    glWidget->setObjectColor(color);
+    glWidget->update();
 }
 
 void MainWindow::nearestPointFound(QVector3D nearestPoint)

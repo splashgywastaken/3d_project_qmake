@@ -9,7 +9,9 @@
 #include "tests/MeshToolsTests/meshtoolstests.h"
 #include "tests/ObjReaderTests/objreadertests.h"
 #include "tests/KDTreeTests/kdtreetests.h"
-#include <tests/OptimizationTests/optimizationtests.h>
+#include "tests/OptimizationTests/optimizationtests.h"
+#include "tests/GeomToolsTests/geomtoolstests.h"
+#include "tests/QVectorToolsTests/qvectortoolstests.h"
 #include "code playground/KDTreeCompareMethods/timetester.h"
 #include "code playground/OptimizationPlayground/GradientDescentSolve/gradientdescentsolve.h"
 
@@ -27,6 +29,10 @@ int main(int argc, char *argv[])
     QTest::qExec(&kdTreeTests);
     Optimization::Tests::OptimizationTests optimizationTests;
     QTest::qExec(&optimizationTests);
+    QVectorTools::Tests::QVectorToolsTests qVectorToolsTests;
+    QTest::qExec(&qVectorToolsTests);
+    GeomTools::Tests::GeomToolsTests geomToolsTests;
+    QTest::qExec(&geomToolsTests);
     #else
     #endif
 

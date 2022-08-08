@@ -47,7 +47,7 @@ bool ObjReadingTools::readFile(QTextStream &textStream, ObjFileData &fileData, Q
     while (!textStream.atEnd())
     {
         lineIndex++;
-        if ((progressNotifier != nullptr) && (lineIndex && 100 == 0))
+        if ((progressNotifier != nullptr) && (lineIndex % 100 == 0))
         {
             progressNotifier->setProgress(lineIndex);
         }

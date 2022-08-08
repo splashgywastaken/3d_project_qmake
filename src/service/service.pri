@@ -8,4 +8,7 @@
     include($$PWD/EventFilters/EventFilters.pri)
     include($$PWD/StateMachines/StateMachines.pri)
     include($$PWD/KDTree/KDTree.pri)
+    include($$PWD/GeomTools/GeomTools.pri)
+    include($$PWD/QVectorTools/QVectorTools.pri)
+    include($$PWD/Registration/Registration.pri)
 }

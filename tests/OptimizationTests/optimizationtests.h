@@ -32,8 +32,6 @@ private slots:
     void testGradientDescent05();
     void testGradientDescent06();
     void testGradientDescent07();
-
-
 };
 
 }

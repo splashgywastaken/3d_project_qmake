@@ -7,4 +7,6 @@
     include($$PWD/ObjReaderTests/objreadertests.pri)
     include($$PWD/KDTreeTests/KDTreeTests.pri)
     include($$PWD/OptimizationTests/OptimizationTests.pri)
+    include($$PWD/GeomToolsTests/GeomToolsTests.pri)
+    include($$PWD/QVectorToolsTests/QVectorToolsTests.pri)
 }

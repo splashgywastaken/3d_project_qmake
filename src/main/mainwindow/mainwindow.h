@@ -1,12 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "qdir.h"
 #include <QMainWindow>
 #include <findnearestpointdialog.h>
 #include <qlabel.h>
 #include <QWidgetAction>
 #include <QComboBox>
 #include <QColorDialog>
+#include <qboxlayout.h>
 
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 #include <src/models/dto/ObjFileData/ObjFileData.h>
@@ -33,7 +35,7 @@ protected slots:
     // File menu:
     // Files
     void openObjFile();
-    void addObject();
+    void addObjectSlot();
 
     // Scene
     void deleteLastObject();
@@ -53,6 +55,19 @@ protected slots:
     void changeGridColor();
 protected:
     // Misc methods:
+    bool readObjectFromFile(
+            ObjReadingTools::ObjFileData& destObj,
+            const QString& caption,
+            const QString& fileFilter,
+            const QString& dir = QDir::homePath()
+            );
+    void addToSceneObject3DFromObjData(
+            ObjReadingTools::ObjFileData& obj,
+            SceneObject*& object,
+            const QColor& color,
+            ObjectViewGLWidget* glWidget
+            );
+
     void setLabelText(QLabel* label, QString text);
     void setLabelFontColor(QLabel* label, QString color);
 
@@ -92,6 +107,10 @@ protected:
     QAction* m_changeBackgroundColorAction;
     QAction* m_changeGridColorAction;
 
+    // Layouts
+    QVBoxLayout* m_centralLayout;
+    QHBoxLayout* m_openGLLayout;
+
     // OpenGL widget and corresponding data
     ObjectViewGLWidget * m_glWidget;
 
@@ -107,8 +126,8 @@ protected:
     ObjReadingTools::ObjFileData *m_objDataTarget = nullptr;
     ObjReadingTools::ObjFileData *m_objDataResult = nullptr;
 
-    Object3D* m_current3DObject = nullptr;
     QColor* m_currentObjectColor = nullptr;
-    Object3D* m_target3DObject = nullptr;
+    SceneObject* m_current3DObject = nullptr;
+    SceneObject* m_target3DObject = nullptr;
 };
 #endif // MAINWINDOW_H

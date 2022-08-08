@@ -18,6 +18,18 @@ QVector<double> gradientDescent(
         StepCallback* callback = nullptr
         );
 
+QVector<double> gradientDescentWithBackTrackingLineSearch(
+        Problem &problem,
+        const QVector<double> &initialVars,
+        const double stepLength,
+        const int nMaxIterations = 100,
+        const double gradientNormThreshold = 1e-7,
+        const int nLineSearchIteration = 10,
+        const double stepLengthMax = 10,
+        const bool verbose = true,
+        StepCallback *callback = nullptr,
+        double *outComputedStepLength = nullptr
+        );
 }
 
 #endif

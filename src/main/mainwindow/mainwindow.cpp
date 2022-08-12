@@ -6,14 +6,26 @@
 #include <QMessageBox>
 #include <QThread>
 #include "qlayout.h"
+#include <QtConcurrent/QtConcurrent>
 
 #include <src/service/GlobalState.h>
 #include <src/main/FindNearestPointDialog/findnearestpointdialog.h>
+
 #include <src/service/Optimization/OptimizationUtils/optimizationutils.h>
 #include <src/service/Optimization/LambdaStepCallback/lambdastepcallback.h>
 #include <src/service/Optimization/GradientDescent/gradientdescent.h>
+
 #include <src/service/RigidAlignment/RigidAlignmentProblem/rigidalignmentproblem.h>
 #include <src/service/RigidAlignment/RigidAlignmentScalingProblem/rigidalignmentscalingproblem.h>
+
+#include <src/service/GeomTools/GeomTools.h>
+#include <src/service/QVectorTools/QVectorTools.h>
+#include <src/service/Registration/RegistrationClasses/registration.h>
+#include <src/service/Registration/ClosestPointsFinderKDTree/closestpointsfinderkdtree.h>
+#include <src/service/Registration/FitterClasses/LambdaStepCallback/lambdastepcallback.h>
+#include <src/service/Registration/FitterClasses/RigidFitter/rigidfitter.h>
+#include <QFuture>
+
 #include "src/service/KDTree/kdtree.h"
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
@@ -77,54 +89,85 @@ void MainWindow::setBackgroundColor(QColor objectColor)
     m_colorPickerDialog->disconnect();
 }
 
-void MainWindow::openObjFile()
+void MainWindow::loadObjectFromObjFile(bool value)
 {
+    Q_UNUSED(value);
+
     m_objDataBase = new ObjReadingTools::ObjFileData();
-    if (readObjectFromFile(*m_objDataBase, tr("Choose file"), tr("Object (*.obj)"), QDir::homePath()))
+    QString errorMessage;
+    if (readObjectFromFile(*m_objDataBase, tr("Choose file"), tr("Object (*.obj)"), errorMessage, QDir::homePath()))
     {
-        addObjectSlot();
+        addSceneObjectFromObjData(
+                    *m_objDataBase,
+                    m_baseSceneObject,
+                    defaultSceneObjectColor,
+                    m_glWidget
+                    );
+        delete m_currentObjectColor;
+        m_currentObjectColor = new QColor(defaultSceneObjectColor);
+        return;
+    }
+    if (!errorMessage.isEmpty())
+    {
+        QMessageBox::warning(this, tr("Failed to load mesh"), errorMessage);
     }
 }
 
-void MainWindow::addObjectSlot()
+void MainWindow::deleteLastObject(bool value)
 {
-    addToSceneObject3DFromObjData(
-                *m_objDataBase,
-                m_current3DObject,
-                defaultSceneObjectColor,
-                m_glWidget
-                );
-    delete m_currentObjectColor;
-    m_currentObjectColor = new QColor(defaultSceneObjectColor);
-}
+    Q_UNUSED(value);
 
-void MainWindow::deleteLastObject()
-{
     m_glWidget->deleteLastObject();
     m_glWidget->update();
     m_glWidget->setObjectColor(m_glWidget->getObjectColor());
 }
 
-void MainWindow::clearObjects()
+void MainWindow::clearObjects(bool value)
 {
-    delete m_target3DObject;
-    m_target3DObject = nullptr;
-    delete m_current3DObject;
-    m_current3DObject = nullptr;
+    Q_UNUSED(value);
+
+    // Base objects
+    delete m_baseSceneObject;
+    m_baseSceneObject = nullptr;
+    // Base obj data
     delete m_objDataBase;
     m_objDataBase = nullptr;
-    delete m_objDataTarget;
-    m_objDataTarget = nullptr;
-    delete m_objDataResult;
-    m_objDataResult = nullptr;
+
+    // Fitting objects
+    delete m_fittingBaseSceneObject;
+    m_fittingBaseSceneObject = nullptr;
+    delete m_fittingTargetSceneObject;
+    m_fittingTargetSceneObject = nullptr;
+    // Fitting data
+    delete m_fittingObjDataBase;
+    m_fittingObjDataBase = nullptr;
+    delete m_fittingObjDataTarget;
+    m_fittingObjDataTarget = nullptr;
+    delete m_fittingObjDataResult;
+    m_fittingObjDataResult = nullptr;
+
+    // Registration scene objects
+    delete m_registrationBaseMeshSceneObject;
+    m_registrationBaseMeshSceneObject = nullptr;
+    delete m_registrationTargetMeshSceneObject;
+    m_registrationTargetMeshSceneObject = nullptr;
+    // Registration obj data
+    delete m_registrationObjDataBase;
+    m_registrationObjDataBase = nullptr;
+    delete m_registrationObjDataTarget;
+    m_registrationObjDataTarget = nullptr;
+    delete m_registrationObjDataResult;
+    m_registrationObjDataResult = nullptr;
 
     m_glWidget->clearObjects();
     m_glWidget->update();
     m_glWidget->setObjectColor(m_glWidget->getObjectColor());
 }
 
-void MainWindow::changeLastObjectColor()
+void MainWindow::changeLastObjectColor(bool value)
 {
+    Q_UNUSED(value);
+
     if (m_colorPickerDialog == nullptr)
     {
         m_colorPickerDialog = new QColorDialog(this);
@@ -136,8 +179,10 @@ void MainWindow::changeLastObjectColor()
     m_colorPickerDialog->activateWindow();
 }
 
-void MainWindow::findNearestPointInLastObject()
+void MainWindow::findNearestPointInLastObject(bool value)
 {
+    Q_UNUSED(value);
+
     QVector<QVector3D> points = m_objDataBase->getVertices();
 
     KDTree::Node *kDTreeHead = KDTree::buildTree(points);
@@ -152,10 +197,45 @@ void MainWindow::findNearestPointInLastObject()
     m_findNearestPointDialog->activateWindow();
 }
 
-void MainWindow::makeTargetObject()
+void MainWindow::loadFittingBaseObject(bool value)
 {
-    if (m_current3DObject == nullptr)
+    Q_UNUSED(value);
+
+    m_fittingObjDataBase = new ObjReadingTools::ObjFileData();
+    QString errorMessage;
+    if (!readObjectFromFile(*m_fittingObjDataBase, tr("Choose base mesh file"), tr("Object (*.obj)"), errorMessage, QDir::homePath()))
     {
+        if (!errorMessage.isEmpty())
+        {
+            QMessageBox::warning(
+                        this,
+                        tr("Failed to load mesh"),
+                        errorMessage
+                        );
+        }
+        return;
+    }
+
+    addSceneObjectFromObjData(
+                *m_fittingObjDataBase,
+                m_fittingBaseSceneObject,
+                defaultSceneObjectColor,
+                m_glWidget
+                );
+    m_currentObjectColor = new QColor(defaultSceneObjectColor);
+}
+
+void MainWindow::makeFittingTargetObject(bool value)
+{
+    Q_UNUSED(value);
+
+    if (m_fittingBaseSceneObject == nullptr)
+    {
+        QMessageBox::warning(
+                    this,
+                    tr("Failed to make target"),
+                    tr("Base object was not loaded.")
+                    );
         return;
     }
 
@@ -164,75 +244,77 @@ void MainWindow::makeTargetObject()
 
     hardcodedTransformation.scale(1.2);
 
-    hardcodedTransformation.translate(QVector3D(0, 1, 0));
+    hardcodedTransformation.translate(QVector3D(3, 3, 0));
 
     hardcodedTransformation.rotate(90, QVector3D(1, 0, 0));
     hardcodedTransformation.rotate(90, QVector3D(0, 0, 1));
 
-    if (m_objDataTarget == nullptr)
+    if (m_fittingObjDataTarget == nullptr)
     {
-        delete m_objDataTarget;
-        m_objDataTarget = nullptr;
+        delete m_fittingObjDataTarget;
+        m_fittingObjDataTarget = nullptr;
     }
-    m_objDataTarget = new ObjReadingTools::ObjFileData();
-    *m_objDataTarget = *m_objDataBase;
+    m_fittingObjDataTarget = new ObjReadingTools::ObjFileData();
+    *m_fittingObjDataTarget = *m_fittingObjDataBase;
 
-    int size = m_objDataTarget->getVertices().size();
-    QVector<QVector3D> targetVertices = (m_objDataTarget->getVertices());
+    int size = m_fittingObjDataTarget->getVertices().size();
+    QVector<QVector3D> targetVertices = (m_fittingObjDataTarget->getVertices());
     for (int index = 0; index < size; index++)
     {
        targetVertices[index] = hardcodedTransformation.mapVector(targetVertices[index]);
     }
-    m_objDataTarget->setVertices(targetVertices);
+    m_fittingObjDataTarget->setVertices(targetVertices);
 
-    if (m_target3DObject != nullptr)
+    if (m_fittingTargetSceneObject != nullptr)
     {
-        m_glWidget->removeObject(m_target3DObject);
-        delete m_target3DObject;
-        m_target3DObject = nullptr;
+        m_glWidget->removeObject(m_fittingTargetSceneObject);
+        delete m_fittingTargetSceneObject;
+        m_fittingTargetSceneObject = nullptr;
     }
-    addToSceneObject3DFromObjData(
-                *m_objDataTarget,
-                m_target3DObject,
+    addSceneObjectFromObjData(
+                *m_fittingObjDataTarget,
+                m_fittingTargetSceneObject,
                 defaultTargetObjectColor,
                 m_glWidget
                 );
 }
 
-void MainWindow::performFittingforTarget()
+void MainWindow::performFittingforTarget(bool value)
 {
-    if (m_current3DObject == nullptr || m_target3DObject == nullptr)
-        return;
+    Q_UNUSED(value);
 
-    if (m_objDataResult != nullptr)
+    if (m_fittingBaseSceneObject == nullptr || m_fittingTargetSceneObject == nullptr)
     {
-        delete m_objDataResult;
-        m_objDataResult = nullptr;
+        QMessageBox::warning(
+                    this,
+                    tr("Failed to make fitting"),
+                    tr("Either base object was not loaded or there is no target object.\nPlease load base object and make target in order to perform fitting.")
+                    );
+        return;
     }
-    m_objDataResult = new ObjReadingTools::ObjFileData();
+
+    if (m_fittingObjDataResult != nullptr)
+    {
+        delete m_fittingObjDataResult;
+        m_fittingObjDataResult = nullptr;
+    }
+    m_fittingObjDataResult = new ObjReadingTools::ObjFileData();
 
     const auto stepFunction = [&](const QVector<double>& variables)
     {
-        *m_objDataResult = *m_objDataBase;
+        *m_fittingObjDataResult = *m_fittingObjDataBase;
         const QMatrix4x4 transformation = Optimization::RigidAlignmentScalingProblem::transformationMatrixFromVars(variables);
-        const int resultSize = m_objDataResult->getVertices().size();
-        QVector<QVector3D> resultVertices = m_objDataResult->getVertices().toVector();
+        const int resultSize = m_fittingObjDataResult->getVertices().size();
+        QVector<QVector3D> resultVertices = m_fittingObjDataResult->getVertices().toVector();
         for (int index = 0; index < resultSize; index++)
         {
             resultVertices[index] = transformation.mapVector(resultVertices[index]);
         }
-        m_objDataResult->setVertices(resultVertices);
+        m_fittingObjDataResult->setVertices(resultVertices);
 
-        m_glWidget->makeCurrent();
-        if (m_current3DObject != nullptr)
-        {
-            m_glWidget->removeObject(m_current3DObject);
-            delete m_current3DObject;
-            m_current3DObject = nullptr;
-        }
-        addToSceneObject3DFromObjData(
-                    *m_objDataResult,
-                    m_current3DObject,
+        addSceneObjectFromObjData(
+                    *m_fittingObjDataResult,
+                    m_fittingBaseSceneObject,
                     *m_currentObjectColor,
                     m_glWidget
                     );
@@ -240,29 +322,163 @@ void MainWindow::performFittingforTarget()
         QThread::msleep(5);
     };
 
-    Optimization::RigidAlignmentScalingProblem problem(
-                m_objDataBase->getVertices(),
-                m_objDataTarget->getVertices()
+    Optimization::Problem *problem = new Optimization::RigidAlignmentScalingProblem(
+                m_fittingObjDataBase->getVertices(),
+                m_fittingObjDataTarget->getVertices()
                 );
-
     Optimization::LambdaStepCallback callback(stepFunction);
 
     const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0, 1};
     const double stepLength = 0.4;
-    const int nMaxIterations = 2500;
-    const double gradientNormThreshold = 1e-10;
+    const int nMaxIterations = 750;
+    const double gradientNormThreshold = 9e-7;
 
-    QVector<double> resultTranslation = Optimization::gradientDescent(
-                    problem, initialVariables,
-                    stepLength, nMaxIterations, gradientNormThreshold,
-                    true, &callback
+    QVector<double> result = Optimization::gradientDescent(
+                problem, initialVariables,
+                stepLength, nMaxIterations, gradientNormThreshold,
+                true, &callback
                 );
 
-    qDebug() << "Estimated transformation" << Optimization::RigidAlignmentScalingProblem::transformationVectorFromVars(resultTranslation);
+    result = Optimization::RigidAlignmentScalingProblem::transformationVectorFromVars(result);
+
+    QMessageBox yesNoMessageBox(this);
+    yesNoMessageBox.setWindowTitle(tr("Fitting is finished"));
+    yesNoMessageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    yesNoMessageBox.setText(
+                QString(tr("Estimated transformation:\nTranslation (%1, %2, %3)\nRotation (%4, %5, %6)"))
+                .arg(result[0]).arg(result[1]).arg(result[2])
+                .arg(result[3]).arg(result[4]).arg(result[5])
+            );
+    if (result.size() == 7)
+    {
+        yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling %7")
+                                .arg(result[6]));
+    }
+    else if (result.size() == 9)
+    {
+        yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling (%7, %8, %9)")
+                                .arg(result[6]).arg(result[7]).arg(result[8]));
+    }
+    yesNoMessageBox.setText(yesNoMessageBox.text() + tr("\n\nDo you want to remove target object?"));
+
+    if (yesNoMessageBox.exec() == QMessageBox::Yes)
+    {
+        m_glWidget->removeObject(m_fittingTargetSceneObject);
+        delete m_fittingTargetSceneObject;
+        m_fittingTargetSceneObject = nullptr;
+    }
 }
 
-void MainWindow::changeBackgroundColor()
+void MainWindow::loadRegistrationBaseMeshObject(bool value)
 {
+    Q_UNUSED(value);
+
+    m_registrationObjDataBase = new ObjReadingTools::ObjFileData();
+    QString errorMessage;
+    if (!readObjectFromFile(*m_registrationObjDataBase, tr("Choose base mesh file"), tr("Object (*.obj)"), errorMessage, QDir::homePath()))
+    {
+        QMessageBox::warning(this, tr("Failed to load mesh"), errorMessage);
+        return;
+    }
+    bool hasNormals =
+            !m_registrationObjDataBase->getNormals().isEmpty() &&
+            !m_registrationObjDataBase->getPolygonNormalIndices().isEmpty();
+    if (!hasNormals)
+    {
+        addNormalsToObjData(*m_registrationObjDataBase);
+    }
+
+    addSceneObjectFromObjData(
+                *m_registrationObjDataBase,
+                m_registrationBaseMeshSceneObject,
+                defaultSceneObjectColor,
+                m_glWidget
+                );
+    m_currentObjectColor = new QColor(defaultSceneObjectColor);
+}
+
+void MainWindow::loadRegistrationTargetMeshObject(bool value)
+{
+    Q_UNUSED(value);
+
+    m_registrationObjDataTarget = new ObjReadingTools::ObjFileData();
+    QString errorMessage;
+    if (!readObjectFromFile(*m_registrationObjDataTarget, tr("Choose target mesh file"), tr("Object (*.obj)"), errorMessage, QDir::homePath()))
+    {
+        QMessageBox::warning(this, tr("Failed to load mesh"), errorMessage);
+        return;
+    }
+    bool hasNormals =
+            !m_registrationObjDataTarget->getNormals().isEmpty() &&
+            !m_registrationObjDataTarget->getPolygonNormalIndices().isEmpty();
+    if (!hasNormals)
+    {
+        addNormalsToObjData(*m_registrationObjDataTarget);
+    }
+
+    addSceneObjectFromObjData(
+                *m_registrationObjDataTarget,
+                m_registrationTargetMeshSceneObject,
+                defaultTargetObjectColor,
+                m_glWidget
+                );
+}
+
+void MainWindow::performRigidRegistration(bool value)
+{
+    Q_UNUSED(value);
+
+    if (m_registrationBaseMeshSceneObject == nullptr || m_registrationTargetMeshSceneObject == nullptr)
+    {
+        return;
+    }
+    m_registrationObjDataResult = new ObjReadingTools::ObjFileData();
+    *m_registrationObjDataResult = *m_registrationObjDataBase;
+
+    const double optimalStepLength = 0.02;
+    const int optimalNMaxSteps = 10;
+    const int nIcpIterations = 75;
+    const float minCosBetweenNormals = 0.3f;
+
+    const auto stepFunction = [&](const QVector<QVector3D> &newVertices)
+    {
+        m_registrationObjDataResult->setVertices(newVertices);
+        addSceneObjectFromObjData(
+                    *m_registrationObjDataResult,
+                    m_registrationBaseMeshSceneObject,
+                    *m_currentObjectColor,
+                    m_glWidget
+                    );
+
+        QApplication::processEvents();
+        QThread::msleep(5);
+    };
+
+    Registration::LambdaStepCallback callback(stepFunction);
+
+    Registration::RigidFitter fitter(
+                m_registrationObjDataBase->getVertices(),
+                optimalStepLength, optimalNMaxSteps
+                );
+    Registration::ClosestPointsFinderKDTree closestPointsFinder(m_registrationObjDataTarget->getVertices());
+
+    const QVector<int> basePolygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_registrationObjDataBase->getPolygonVertexIndices());
+    const QVector<int> basePolygonStart = MeshTools::buildPolygonStartVector(m_registrationObjDataBase->getPolygonVertexIndices());
+    const QVector<int> baseTriangleVertexIndices = MeshTools::buildTriangleVertexIndices(basePolygonVertexIndices, basePolygonStart);
+    const QVector<QVector3D> baseVertices = m_registrationObjDataBase->getVertices();
+    const QVector<QVector3D> targetVertices = m_registrationObjDataTarget->getVertices();
+    const QVector<QVector3D> targetNormals = m_registrationObjDataTarget->getNormals();
+
+    Registration::performIcp(
+                fitter, closestPointsFinder,
+                baseTriangleVertexIndices, baseVertices, targetVertices, targetNormals,
+                nIcpIterations, minCosBetweenNormals, true, &callback);
+}
+
+void MainWindow::changeBackgroundColor(bool value)
+{
+    Q_UNUSED(value);
+
     if (m_colorPickerDialog == nullptr)
     {
         m_colorPickerDialog = new QColorDialog(this);
@@ -274,8 +490,10 @@ void MainWindow::changeBackgroundColor()
     m_colorPickerDialog->activateWindow();
 }
 
-void MainWindow::changeGridColor()
+void MainWindow::changeGridColor(bool value)
 {
+    Q_UNUSED(value);
+
     if (m_colorPickerDialog == nullptr)
     {
         m_colorPickerDialog = new QColorDialog(this);
@@ -291,6 +509,7 @@ bool MainWindow::readObjectFromFile(
         ObjReadingTools::ObjFileData &destObj,
         const QString &caption,
         const QString &fileFilter,
+        QString& errorMessage,
         const QString &dir
         )
 {
@@ -310,11 +529,11 @@ bool MainWindow::readObjectFromFile(
 
     ProgressNotifierSingleton::initialize(m_taskProgressBar);
     AbstractProgressNotifier* progressNotifier = ProgressNotifierSingleton::getInstance();
-    QString errorMessage;
-
     if (!ObjReadingTools::readFile(resultFilePath, destObj, errorMessage, progressNotifier)){
         delete fileDialog;
+        #ifdef QT_DEBUG
         qDebug() << errorMessage;
+        #endif
         return false;
     }
 
@@ -322,7 +541,7 @@ bool MainWindow::readObjectFromFile(
     return true;
 }
 
-void MainWindow::addToSceneObject3DFromObjData(
+void MainWindow::addSceneObjectFromObjData(
         ObjReadingTools::ObjFileData& obj,
         SceneObject*& object,
         const QColor& color,
@@ -332,7 +551,12 @@ void MainWindow::addToSceneObject3DFromObjData(
     QVector<int> polygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(obj.getPolygonVertexIndices());
     QVector<int> polygonNormalIndices = MeshTools::buildPolygonVertexIndicesVector(obj.getPolygonNormalIndices());
     QVector<int> polygonStart = MeshTools::buildPolygonStartVector(obj.getPolygonVertexIndices());
-
+    glWidget->makeCurrent();
+    if (object != nullptr )
+    {
+        glWidget->removeObject(object);
+        delete object;
+    }
     object = new Object3D(
                 obj.getVertices(),
                 polygonVertexIndices,
@@ -340,11 +564,18 @@ void MainWindow::addToSceneObject3DFromObjData(
                 obj.getNormals(),
                 polygonNormalIndices
                 );
-
-    glWidget->makeCurrent();
     glWidget->addObject(object);
     glWidget->setObjectColor(color);
     glWidget->update();
+}
+
+void MainWindow::addNormalsToObjData(ObjReadingTools::ObjFileData &objData)
+{
+    const QVector<int> basePolygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(objData.getPolygonVertexIndices());
+    const QVector<int> basePolygonStart = MeshTools::buildPolygonStartVector(objData.getPolygonVertexIndices());
+    const QVector<int> baseTriangleVertexIndices = MeshTools::buildTriangleVertexIndices(basePolygonVertexIndices, basePolygonStart);
+    objData.setNormals(GeomTools::computeNormals(baseTriangleVertexIndices, objData.getVertices()));
+    objData.setPolygonNormalIndices(objData.getPolygonVertexIndices());
 }
 
 void MainWindow::nearestPointFound(QVector3D nearestPoint)
@@ -393,59 +624,167 @@ void MainWindow::changeShader(const QString &shaderName)
 
 void MainWindow::createActions()
 {
-    // File's menu actions
+    // File menu actions
     // Open file Action
-    m_openAction = new QAction(tr("Open file"), this);
-    m_openAction->setShortcuts(QKeySequence::Open);
-    m_openAction->setStatusTip(tr("Open a new file"));
-    connect(m_openAction, &QAction::triggered, this, &MainWindow::openObjFile);
+    setupAction(
+                m_loadObjectFromObjFileAction,
+                this,
+                tr("Open file"),
+                QKeySequence::Open,
+                tr("Open a new file"),
+                this,
+                SLOT(loadObjectFromObjFile(bool))
+                );
 
-    // Object's menu actions
+    // Object menu actions
     // Change object color
-    m_changeObjectColorAction = new QAction(tr("Change object color"), this);
-    m_changeObjectColorAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
-    m_changeObjectColorAction->setToolTip(tr("Use color pallete to change object color"));
-    connect(m_changeObjectColorAction, &QAction::triggered, this, &MainWindow::changeLastObjectColor);
+    setupAction(
+                m_changeObjectColorAction,
+                this,
+                tr("Change object color"),
+                QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C),
+                tr("Use color pallete to change object color"),
+                this,
+                SLOT(changeLastObjectColor(bool))
+                );
 
     // Find nearest point index in last object
-    m_findNearestPointInLastObjectAction = new QAction(tr("Find nearest point"), this);
-    m_findNearestPointInLastObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_F));
-    m_findNearestPointInLastObjectAction->setToolTip(tr("Use dialog window to input data and find corresponding point in object"));
-    connect(m_findNearestPointInLastObjectAction, &QAction::triggered, this, &MainWindow::findNearestPointInLastObject);
+    setupAction(
+                m_findNearestPointInLastObjectAction,
+                this,
+                tr("Find nearest point"),
+                QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_F),
+                tr("Use dialog window to input data and find corresponding point in object"),
+                this,
+                SLOT(findNearestPointInLastObject(bool))
+                );
 
-    // Scene's menu actions
+    // Scene menu actions
     // Delete last object
-    m_deleteLastObjectAction = new QAction(tr("Delete last object"), this);
-    m_deleteLastObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X));
-    m_deleteLastObjectAction->setToolTip(tr("Delete last object that you added on scene"));
-    connect(m_deleteLastObjectAction, &QAction::triggered, this, &MainWindow::deleteLastObject);
+    setupAction(
+                m_deleteLastObjectAction,
+                this,
+                tr("Delete last object"),
+                QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X),
+                tr("Delete last object that you added on scene"),
+                this,
+                SLOT(deleteLastObject(bool))
+                );
 
     // Clear objects from scene
-    m_clearObjectsAction = new QAction(tr("Clear scene"), this);
-    m_clearObjectsAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_X));
-    m_clearObjectsAction->setToolTip(tr("Clear all objects except "));
-    connect(m_clearObjectsAction, &QAction::triggered, this, &MainWindow::clearObjects);
+    setupAction(
+                m_clearObjectsAction,
+                this,
+                tr("Clear scene"),
+                QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_X),
+                tr("Clear all objects except "),
+                this,
+                SLOT(clearObjects(bool))
+                );
 
-    // Instrument's menu actions
+    // Fitting menu actions
+    // Load base object to make target and perform fitting
+    setupAction(
+                m_loadFittingBaseObjectActon,
+                this,
+                tr("Load base object"),
+                QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_B),
+                tr("Load base object to make target and perform fitting"),
+                this,
+                SLOT(loadFittingBaseObject(bool))
+                );
+
     // Make target to fit
-    m_makeTargetObjectAction = new QAction(tr("Make target object"), this);
-    m_makeTargetObjectAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_T));
-    m_makeTargetObjectAction->setToolTip(tr("Make target for object to fit"));
-    connect(m_makeTargetObjectAction, &QAction::triggered, this, &MainWindow::makeTargetObject);
+    setupAction(
+                m_makeFittingTargetObjectAction,
+                this,
+                tr("Make target object"),
+                QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_T),
+                tr("Make target for object to fit"),
+                this,
+                SLOT(makeFittingTargetObject(bool))
+                );
 
     // Perform fitting for current target
-    m_performFittingAction = new QAction(tr("Perform fitting for object"), this);
-    m_performFittingAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F));
-    m_performFittingAction->setToolTip(tr("Perform fitting for current target object"));
-    connect(m_performFittingAction, &QAction::triggered, this, &MainWindow::performFittingforTarget);
+    setupAction(
+                m_performFittingAction,
+                this,
+                tr("Perform fitting for object"),
+                QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F),
+                tr("Perform fitting for current target object"),
+                this,
+                SLOT(performFittingforTarget(bool))
+                );
 
-    // View's menu actions
+    // Registration menu actions
+    // Load base mesh to a scene
+    setupAction(
+                m_loadRegistrationBaseMeshObjectAction,
+                this,
+                tr("Load base mesh"),
+                QKeyCombination(Qt::ControlModifier | Qt::AltModifier, Qt::Key_B),
+                tr("Load an object for base mesh for registration from .obj file"),
+                this,
+                SLOT(loadRegistrationBaseMeshObject(bool))
+                );
+    // Load target mesh to a scene
+    setupAction(
+                m_loadRegistrationTargetObjectAction,
+                this,
+                tr("Load target mesh"),
+                QKeyCombination(Qt::ControlModifier | Qt::AltModifier, Qt::Key_T),
+                tr("Load an object for target mesh for registration from .obj file"),
+                this,
+                SLOT(loadRegistrationTargetMeshObject(bool))
+                );
+    // Perform fitting
+    setupAction(
+                m_performRigidRegistrationAction,
+                this,
+                tr("Perform rigid registration"),
+                QKeyCombination(Qt::ControlModifier | Qt::AltModifier, Qt::Key_R),
+                tr("Perform rigid registration for BaseMesh and Target objects.\n(requires base mesh object and target mesh object to be loaded)"),
+                this,
+                SLOT(performRigidRegistration(bool))
+                );
+
+    // View menu actions
     // Change background's color
-    m_changeBackgroundColorAction = new QAction(tr("Change background color"), this);
-    connect(m_changeBackgroundColorAction, &QAction::triggered, this, &MainWindow::changeBackgroundColor);
+    setupAction(
+                m_changeBackgroundColorAction,
+                this,
+                tr("Change background color"),
+                QKeySequence(),
+                tr("Change background color with color picker dialog"),
+                this,
+                SLOT(changeBackgroundColor(bool))
+                );
 
-    m_changeGridColorAction = new QAction(tr("Change grid color"), this);
-    connect(m_changeGridColorAction, &QAction::triggered, this, &MainWindow::changeGridColor);
+    setupAction(
+                m_changeGridColorAction,
+                this,
+                tr("Change grid color"),
+                QKeySequence(),
+                tr("Change grid color with color picker dialog"),
+                this,
+                SLOT(changeGridColor(bool))
+                );
+}
+
+void MainWindow::setupAction(
+        QAction*& action,
+        QObject* actionsParent,
+        const QString& caption,
+        const QKeySequence& keySequence,
+        const QString& toolTip,
+        QObject* connectionReciever,
+        const char* connectionSlot
+        )
+{
+    action = new QAction(caption, actionsParent);
+    action->setShortcut(keySequence);
+    action->setToolTip(toolTip);
+    connect(action, SIGNAL(triggered(bool)), connectionReciever, connectionSlot);
 }
 
 void MainWindow::createWidgetActions()
@@ -470,29 +809,78 @@ void MainWindow::createWidgetActions()
 
 void MainWindow::createMenus()
 {
-    m_fileMenu = menuBar()->addMenu(tr("&File"));
-    m_fileMenu->addAction(m_openAction);
+    setupMenu(
+                m_fileMenu,
+                tr("File"),
+                tr("Files related stuff"),
+                { m_loadObjectFromObjFileAction }
+                );
 
-    m_objectMenu = menuBar()->addMenu(tr("&Object"));
-    m_objectMenu->addAction(m_changeObjectColorAction);
-    m_objectMenu->addAction(m_findNearestPointInLastObjectAction);
+    setupMenu(
+                m_objectMenu,
+                tr("Object"),
+                tr("Objects related stuff"),
+                { m_changeObjectColorAction, m_findNearestPointInLastObjectAction }
+                );
 
     // Shader's menu actions
     m_switchShaderMenu = new QMenu(tr("Change shader"), this);
     m_switchShaderMenu->setToolTip(tr("Use list of shaders to switch your current one"));
-
     m_shaderMenu = menuBar()->addMenu(tr("&Shaders"));
     m_shaderMenu->addMenu(m_switchShaderMenu);
 
-    m_sceneMenu = menuBar()->addMenu(tr("&Scene"));
-    m_sceneMenu->addAction(m_deleteLastObjectAction);
-    m_sceneMenu->addAction(m_clearObjectsAction);
+    setupMenu(
+                m_sceneMenu,
+                tr("Scene"),
+                tr("Clear and delete objects"),
+                { m_deleteLastObjectAction, m_clearObjectsAction }
+                );
 
-    m_instrumentsMenu = menuBar()->addMenu(tr("&Instruments"));
-    m_instrumentsMenu->addAction(m_makeTargetObjectAction);
-    m_instrumentsMenu->addAction(m_performFittingAction);
+    setupMenu(
+                m_fittingMenu,
+                tr("Fitting"),
+                tr("Make target and perform fitting"),
+                {
+                    m_loadFittingBaseObjectActon,
+                    m_makeFittingTargetObjectAction,
+                    m_performFittingAction
+                }
+                );
 
-    m_viewMenu = menuBar()->addMenu(tr("View"));
-    m_viewMenu->addAction(m_changeBackgroundColorAction);
-    m_viewMenu->addAction(m_changeGridColorAction);
+    setupMenu(
+                m_registrationMenu,
+                tr("Registration"),
+                tr("Load base and target meshes, perform ICP registration"),
+                {
+                    m_loadRegistrationBaseMeshObjectAction,
+                    m_loadRegistrationTargetObjectAction,
+                    m_performRigidRegistrationAction
+                });
+
+    setupMenu(
+                m_viewMenu,
+                tr("View"),
+                tr("Change colors of scene's background and grid"),
+                { m_changeBackgroundColorAction, m_changeGridColorAction }
+                );
+}
+
+void MainWindow::setupMenu(
+        QMenu *&menu,
+        const QString &caption,
+        const QString &toolTip,
+        QList<QAction *> actionsList
+        )
+{
+    menu = menuBar()->addMenu(caption);
+    menu->setToolTip(toolTip);
+    if (!actionsList.empty())
+    {
+        int nActions = actionsList.size();
+
+        for (int index = 0; index < nActions; index++)
+        {
+            menu->addAction(actionsList[index]);
+        }
+    }
 }

@@ -46,6 +46,32 @@ Object3D::Object3D(
     m_normalBuffer->release();
 }
 
+Object3D::Object3D(
+        QOpenGLBuffer *vertexBuffer, QOpenGLBuffer *normalBuffer,
+        QVector<QVector3D> vertices, QVector<int> polygonVertexIndices,
+        QVector<int> polygonStart,
+        QVector<QVector3D> normals, QVector<int> polygonNormalIndices
+        )
+{
+    QVector<int> triangleVertexIndices = MeshTools::buildTriangleVertexIndices(polygonVertexIndices, polygonStart);
+    QVector<float> triangleVertexCoords = MeshTools::packTriangleVertexCoords(vertices, triangleVertexIndices);
+    m_nVertices = triangleVertexCoords.size() / 3;
+    int dataSize = triangleVertexCoords.size() * static_cast<int>(sizeof(float));
+
+
+
+    m_vertexBuffer = vertexBuffer;
+    m_vertexBuffer->write(0, triangleVertexCoords.constData(), dataSize);
+    m_vertexBuffer->release();
+
+    QVector<int> triangleNormalIndices = MeshTools::buildTriangleVertexIndices(polygonNormalIndices, polygonStart);
+    QVector<float> triangleNormalCoords = MeshTools::packTriangleVertexCoords(normals, triangleNormalIndices);
+
+    m_normalBuffer = normalBuffer;
+    m_normalBuffer->write(0, triangleNormalCoords.constData(), dataSize);
+    m_normalBuffer->release();
+}
+
 Object3D::~Object3D()
 {
     delete m_vertexBuffer;

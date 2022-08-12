@@ -147,7 +147,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent01()
         Q_ASSERT(vars.size() == 1);
         return {2 * vars[0]};
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVars = {6};
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
@@ -167,7 +167,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent02()
         Q_ASSERT(vars.size() == 1);
         return numericalGradient(errorFunc, vars, 1e-8);
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVars = {6};
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
@@ -187,7 +187,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent03()
         Q_ASSERT(vars.size() == 1);
         return numericalGradient(errorFunc, vars, 1e-8);
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVars = {-6};
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
@@ -207,7 +207,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent04()
         Q_ASSERT(vars.size() == 1);
         return numericalGradient(errorFunc, vars, 1e-8);
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVars = {0.1};
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
@@ -226,7 +226,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent05()
     const auto gradientFunc = [=](const QVector<double> &vars) -> QVector<double> {
         return numericalGradient(errorFunc, vars, 1e-8);
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVars = {-6, -3};
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
@@ -246,7 +246,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent06()
     const auto gradientFunc = [=](const QVector<double> &vars) -> QVector<double> {
         return numericalGradient(errorFunc, vars, 1e-8);
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVars = {-6, -3};
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
@@ -266,7 +266,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent07()
     const auto gradientFunc = [=](const QVector<double> &vars) -> QVector<double> {
         return numericalGradient(errorFunc, vars, 1e-8);
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVars = {-6, -3};
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);

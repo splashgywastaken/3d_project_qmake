@@ -20,7 +20,7 @@ void Optimization::GradientDescentSolve::solveMinimizeFunction()
     const auto gradientFunc = [=](const QVector<double> &vars) -> QVector<double> {
         return numericalGradient(errorFunc, vars, 1e-8);
     };
-    Optimization::LambdaProblem problem(errorFunc, gradientFunc);
+    Optimization::Problem *problem = new Optimization::LambdaProblem(errorFunc, gradientFunc);
 
     const QVector<double> initialVariables = {-6, -3};
     const QVector<double> result = Optimization::gradientDescent(problem, initialVariables, 1e-1, 1500, 1e-7, true);

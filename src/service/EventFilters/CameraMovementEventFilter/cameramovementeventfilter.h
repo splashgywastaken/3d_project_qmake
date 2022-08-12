@@ -5,7 +5,10 @@
 #include <QObject>
 #include <QOpenGLWidget>
 #include <camera.h>
+#include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
+class CameraMovementEventFilter;
+class ObjectViewGLWidget;
 
 class CameraMovementEventFilter : public QObject
 {
@@ -48,7 +51,7 @@ protected:
 
 protected:
     Camera* m_camera;
-    QOpenGLWidget* m_openGlWidget;
+    ObjectViewGLWidget* m_openGlWidget;
 
     NavigationState m_navigationState;
     QPoint m_screenPosition;

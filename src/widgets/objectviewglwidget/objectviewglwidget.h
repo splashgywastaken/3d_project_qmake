@@ -11,12 +11,14 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
+#include <QThread>
+#include <QOffscreenSurface>
 
 #include <src/models/3D_obj_data/Object3D/object3d.h>
-
 #include <src/service/GlobalState.h>
+#include <src/service/EventFilters/CameraMovementEventFilter/cameramovementeventfilter.h>
 
-#include <CameraMovementEventFilter/cameramovementeventfilter.h>
+class CameraMovementEventFilter;
 
 class ObjectViewGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {

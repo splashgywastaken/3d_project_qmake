@@ -5,7 +5,7 @@
 
 namespace Registration {
 
-class LambdaStepCallback : StepCallback
+class LambdaStepCallback : public StepCallback
 {
 public:
     using Function = std::function<void(const QVector<QVector3D>&)>;

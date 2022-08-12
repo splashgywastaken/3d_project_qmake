@@ -34,46 +34,72 @@ public slots:
 protected slots:
     // File menu:
     // Files
-    void openObjFile();
-    void addObjectSlot();
+    void loadObjectFromObjFile(bool value);
 
     // Scene
-    void deleteLastObject();
-    void clearObjects();
+    void deleteLastObject(bool value);
+    void clearObjects(bool value);
 
     // Shaders
     void changeShader(const QString &shader);
 
     // Objects
-    void changeLastObjectColor();
-    void findNearestPointInLastObject();
-    void makeTargetObject();
-    void performFittingforTarget();
+    void changeLastObjectColor(bool value);
+    void findNearestPointInLastObject(bool value);
+
+    // Fitting
+    void loadFittingBaseObject(bool value);
+    void makeFittingTargetObject(bool value);
+    void performFittingforTarget(bool value);
+
+    // Registration
+    void loadRegistrationBaseMeshObject(bool value);
+    void loadRegistrationTargetMeshObject(bool value);
+    void performRigidRegistration(bool value);
 
     // View
-    void changeBackgroundColor();
-    void changeGridColor();
+    void changeBackgroundColor(bool value);
+    void changeGridColor(bool value);
 protected:
     // Misc methods:
     bool readObjectFromFile(
             ObjReadingTools::ObjFileData& destObj,
             const QString& caption,
             const QString& fileFilter,
+            QString& errorMessage,
             const QString& dir = QDir::homePath()
             );
-    void addToSceneObject3DFromObjData(
+    void addSceneObjectFromObjData(
             ObjReadingTools::ObjFileData& obj,
             SceneObject*& object,
             const QColor& color,
             ObjectViewGLWidget* glWidget
             );
+    void addNormalsToObjData(ObjReadingTools::ObjFileData& objData);
 
     void setLabelText(QLabel* label, QString text);
     void setLabelFontColor(QLabel* label, QString color);
 
     void createActions();
+    void setupAction(
+            QAction*& action,
+            QObject* actionsParent,
+            const QString& caption,
+            const QKeySequence& keySequence,
+            const QString& toolTip,
+            QObject* connectionReciever,
+            const char* connectionSlot
+            );
+
     void createWidgetActions();
+
     void createMenus();
+    void setupMenu(
+            QMenu*& menu,
+            const QString& caption,
+            const QString& toolTip,
+            QList<QAction*> actionsList
+            );
 
 protected:
     // Dialogs
@@ -85,11 +111,12 @@ protected:
     QMenu* m_objectMenu;
     QMenu* m_shaderMenu;
     QMenu* m_sceneMenu;
-    QMenu* m_instrumentsMenu;
+    QMenu* m_fittingMenu;
+    QMenu* m_registrationMenu;
     QMenu* m_viewMenu;
 
     // Files
-    QAction* m_openAction;
+    QAction* m_loadObjectFromObjFileAction;
     // Objects
     QAction* m_changeObjectColorAction;
     QAction* m_findNearestPointInLastObjectAction;
@@ -100,9 +127,14 @@ protected:
     // Scene
     QAction* m_deleteLastObjectAction;
     QAction* m_clearObjectsAction;
-    // Instruments
-    QAction* m_makeTargetObjectAction;
+    // Fitting
+    QAction* m_loadFittingBaseObjectActon;
+    QAction* m_makeFittingTargetObjectAction;
     QAction* m_performFittingAction;
+    // Registration
+    QAction* m_loadRegistrationBaseMeshObjectAction;
+    QAction* m_loadRegistrationTargetObjectAction;
+    QAction* m_performRigidRegistrationAction;
     // View menu
     QAction* m_changeBackgroundColorAction;
     QAction* m_changeGridColorAction;
@@ -114,20 +146,37 @@ protected:
     // OpenGL widget and corresponding data
     ObjectViewGLWidget * m_glWidget;
 
-    // Event filters:
-    CameraMovementEventFilter* m_cameraMovementEventFilter = nullptr;
-
     // UI
     Ui::MainWindow *m_ui;
     QProgressBar* m_taskProgressBar;
 
+    // Event filters:
+    CameraMovementEventFilter* m_cameraMovementEventFilter = nullptr;
+
     // Other variables
+    // Base scene object data
     ObjReadingTools::ObjFileData *m_objDataBase = nullptr;
-    ObjReadingTools::ObjFileData *m_objDataTarget = nullptr;
-    ObjReadingTools::ObjFileData *m_objDataResult = nullptr;
+
+    // Fitting object data
+    ObjReadingTools::ObjFileData *m_fittingObjDataBase = nullptr;
+    ObjReadingTools::ObjFileData *m_fittingObjDataTarget = nullptr;
+    ObjReadingTools::ObjFileData *m_fittingObjDataResult = nullptr;
+    // Registration object data
+    ObjReadingTools::ObjFileData *m_registrationObjDataBase = nullptr;
+    ObjReadingTools::ObjFileData *m_registrationObjDataTarget = nullptr;
+    ObjReadingTools::ObjFileData *m_registrationObjDataResult = nullptr;
+
+    // Base scene object
+    SceneObject* m_baseSceneObject = nullptr;
+
+    // Fitting objects
+    SceneObject* m_fittingBaseSceneObject = nullptr;
+    SceneObject* m_fittingTargetSceneObject = nullptr;
+
+    // Registration objects
+    SceneObject* m_registrationBaseMeshSceneObject = nullptr;
+    SceneObject* m_registrationTargetMeshSceneObject = nullptr;
 
     QColor* m_currentObjectColor = nullptr;
-    SceneObject* m_current3DObject = nullptr;
-    SceneObject* m_target3DObject = nullptr;
 };
 #endif // MAINWINDOW_H

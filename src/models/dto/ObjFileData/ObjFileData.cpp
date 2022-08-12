@@ -49,6 +49,16 @@ void ObjReadingTools::ObjFileData::setVertices(const QVector<QVector3D> &vertice
     m_vertices = vertices;
 }
 
+void ObjReadingTools::ObjFileData::setNormals(const QVector<QVector3D> &normals)
+{
+    m_normals = normals;
+}
+
+void ObjReadingTools::ObjFileData::setPolygonNormalIndices(const QVector<QVector<int> > &polygonNormalIndices)
+{
+    m_polygonNormalIndices = polygonNormalIndices;
+}
+
 const QVector<QVector3D>& ObjReadingTools::ObjFileData::getVertices() {
     return m_vertices;
 }

@@ -9,7 +9,7 @@ namespace Optimization
 {
 
 QVector<double> gradientDescent(
-        Problem &problem,
+        Problem *problem,
         const QVector<double> &initialVars,
         const double stepLength,
         const int nMaxIterations = 100,

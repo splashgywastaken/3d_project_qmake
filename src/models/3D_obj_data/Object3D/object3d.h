@@ -20,6 +20,12 @@ public:
             QVector<int> polygonStart,
             QVector<QVector3D> normals, QVector<int> polygonNormalIndices
             );
+    Object3D(
+            QOpenGLBuffer *vertexBuffer, QOpenGLBuffer *normalBuffer,
+            QVector<QVector3D> vertices, QVector<int> polygonVertexIndices,
+            QVector<int> polygonStart,
+            QVector<QVector3D> normals, QVector<int> polygonNormalIndices
+            );
     ~Object3D();
 
     int nVertices();

@@ -1,4 +1,5 @@
 #include "cameramovementeventfilter.h"
+#include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
 CameraMovementEventFilter::CameraMovementEventFilter(Camera* camera)
 {
@@ -8,12 +9,12 @@ CameraMovementEventFilter::CameraMovementEventFilter(Camera* camera)
 
 bool CameraMovementEventFilter::eventFilter(QObject *watched, QEvent *event)
 {
-    m_openGlWidget = static_cast<QOpenGLWidget*>(watched);
+    m_openGlWidget = static_cast<ObjectViewGLWidget*>(watched);
     if (event->type() == QEvent::MouseButtonPress)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mousePressEvent(mouseEvent);
-    #ifndef QT_NO_DEBUG
+    #ifdef QT_DEBUG
 //       qDebug() << "mouse button pressed";
     #endif
         return true;
@@ -22,8 +23,8 @@ bool CameraMovementEventFilter::eventFilter(QObject *watched, QEvent *event)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mouseMoveEvent(mouseEvent);
-    #ifndef QT_NO_DEBUG
-//        qDebug() << "mouse moved";
+    #ifdef QT_DEBUG
+//       qDebug() << "mouse moved";
     #endif
         return true;
     }
@@ -31,7 +32,7 @@ bool CameraMovementEventFilter::eventFilter(QObject *watched, QEvent *event)
     {
         static QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         mouseReleaseEvent(mouseEvent);
-    #ifndef QT_NO_DEBUG
+    #ifdef QT_DEBUG
 //        qDebug() << "mouse button released";
     #endif
         return true;
@@ -40,7 +41,7 @@ bool CameraMovementEventFilter::eventFilter(QObject *watched, QEvent *event)
     {
         static QWheelEvent* mouseWheelEvent = static_cast<QWheelEvent*>(event);
         wheelEvent(mouseWheelEvent);
-    #ifndef QT_NO_DEBUG
+    #ifdef QT_DEBUG
 //        qDebug() << "wheel event";
     #endif
         return true;

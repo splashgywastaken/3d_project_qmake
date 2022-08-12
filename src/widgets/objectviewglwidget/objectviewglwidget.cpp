@@ -5,6 +5,7 @@
 
 #include <QMessageBox>
 #include <QQuaternion>
+#include <QTimer>
 
 #include <Grid/grid.h>
 

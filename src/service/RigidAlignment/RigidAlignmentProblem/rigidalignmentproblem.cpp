@@ -18,7 +18,7 @@ double Optimization::RigidAlignmentProblem::computeError(const QVector<double> &
     double resultError = 0;
     for (int i = 0; i < nVertices(); i++)
     {
-        const QVector3D newVertex = transformation.mapVector(m_baseVertices[i]);
+        const QVector3D newVertex = transformation.map(m_baseVertices[i]);
         resultError += (newVertex - m_targetVertices[i]).lengthSquared() / nVertices();
     }
 

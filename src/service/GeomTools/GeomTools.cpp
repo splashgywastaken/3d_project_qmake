@@ -7,7 +7,7 @@ QVector<QVector3D> GeomTools::transformVertices3D(const QMatrix4x4 &transformati
     QVector<QVector3D> result;
     for (const auto vertex : vertices)
     {
-        result << transformation.mapVector(vertex);
+        result << transformation.map(vertex);
     }
 
     return result;

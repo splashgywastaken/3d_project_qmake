@@ -12,6 +12,7 @@
 
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 #include <src/models/dto/ObjFileData/ObjFileData.h>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -51,6 +52,7 @@ protected slots:
     void loadFittingBaseObject(bool value);
     void makeFittingTargetObject(bool value);
     void performFittingforTarget(bool value);
+    void performClosestPointsBasedFitting(bool value);
 
     // Registration
     void loadRegistrationBaseMeshObject(bool value);
@@ -101,6 +103,15 @@ protected:
             QList<QAction*> actionsList
             );
 
+    // Fills message box with data to display. Writes values from result vector to display transformation info
+    // Main text is the text that goes after info about transformation
+    void setupYesNoTransformMessageBox(
+            QMessageBox& yesNoMessageBox,
+            QString windowTitle,
+            QString mainText,
+            QVector<double> resultVector = {}
+            );
+
 protected:
     // Dialogs
     QColorDialog* m_colorPickerDialog = nullptr;
@@ -131,6 +142,7 @@ protected:
     QAction* m_loadFittingBaseObjectActon;
     QAction* m_makeFittingTargetObjectAction;
     QAction* m_performFittingAction;
+    QAction* m_performClosestPointsBasedFitting;
     // Registration
     QAction* m_loadRegistrationBaseMeshObjectAction;
     QAction* m_loadRegistrationTargetObjectAction;

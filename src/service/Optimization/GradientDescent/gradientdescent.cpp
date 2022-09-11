@@ -4,7 +4,7 @@
 #include <rigidalignmentscalingproblem.h>
 #include "rigidalignmentproblem.h"
 
-const double epsilonHard = 1e-7;
+const double epsilonHard = 1e-9;
 double previousError = 0;
 
 QVector<double> Optimization::gradientDescent(
@@ -21,13 +21,13 @@ QVector<double> Optimization::gradientDescent(
         for (int iterationInd = 0; iterationInd < nMaxIterations; ++iterationInd)
         {
             const double error = problem->computeError(currentVariables);
-//            if (std::abs(error - previousError) < epsilonHard && previousError != 0){
-//                if (verbose)
-//                {
-//                    qDebug() << "Stopped by low error change";
-//                }
-//                break;
-//            }
+            if (std::abs(error - previousError) < epsilonHard && previousError != 0){
+                if (verbose)
+                {
+                    qDebug() << "Stopped by low error change";
+                }
+                break;
+            }
             previousError = error;
 
             const QVector<double> gradient = problem->computeGradient(currentVariables);

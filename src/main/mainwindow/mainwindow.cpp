@@ -17,14 +17,15 @@
 
 #include <src/service/RigidAlignment/RigidAlignmentProblem/rigidalignmentproblem.h>
 #include <src/service/RigidAlignment/RigidAlignmentScalingProblem/rigidalignmentscalingproblem.h>
+#include <src/service/RigidAlignment/ClosestPointsBasedAlignmentProblem/closestpointsbasedalignmentproblem.h>
 
 #include <src/service/GeomTools/GeomTools.h>
 #include <src/service/QVectorTools/QVectorTools.h>
-#include <src/service/Registration/RegistrationClasses/registration.h>
+
+#include <src/service/Registration/RegistrationClasses/Registration/registration.h>
 #include <src/service/Registration/ClosestPointsFinderKDTree/closestpointsfinderkdtree.h>
 #include <src/service/Registration/FitterClasses/LambdaStepCallback/lambdastepcallback.h>
 #include <src/service/Registration/FitterClasses/RigidFitter/rigidfitter.h>
-#include <QFuture>
 
 #include "src/service/KDTree/kdtree.h"
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
@@ -242,9 +243,9 @@ void MainWindow::makeFittingTargetObject(bool value)
     QMatrix4x4 hardcodedTransformation;
     hardcodedTransformation.setToIdentity();
 
-    hardcodedTransformation.scale(1.2);
+    hardcodedTransformation.scale(1);
 
-    hardcodedTransformation.translate(QVector3D(3, 3, 0));
+    hardcodedTransformation.translate(2.0f, 0.0f, 2.0f);
 
     hardcodedTransformation.rotate(90, QVector3D(1, 0, 0));
     hardcodedTransformation.rotate(90, QVector3D(0, 0, 1));
@@ -261,7 +262,7 @@ void MainWindow::makeFittingTargetObject(bool value)
     QVector<QVector3D> targetVertices = (m_fittingObjDataTarget->getVertices());
     for (int index = 0; index < size; index++)
     {
-       targetVertices[index] = hardcodedTransformation.mapVector(targetVertices[index]);
+       targetVertices[index] = hardcodedTransformation.map(targetVertices[index]);
     }
     m_fittingObjDataTarget->setVertices(targetVertices);
 
@@ -288,7 +289,8 @@ void MainWindow::performFittingforTarget(bool value)
         QMessageBox::warning(
                     this,
                     tr("Failed to make fitting"),
-                    tr("Either base object was not loaded or there is no target object.\nPlease load base object and make target in order to perform fitting.")
+                    tr("Either base object was not loaded or there is no target object."
+                       "\nPlease load base object and make target in order to perform fitting.")
                     );
         return;
     }
@@ -308,7 +310,7 @@ void MainWindow::performFittingforTarget(bool value)
         QVector<QVector3D> resultVertices = m_fittingObjDataResult->getVertices().toVector();
         for (int index = 0; index < resultSize; index++)
         {
-            resultVertices[index] = transformation.mapVector(resultVertices[index]);
+            resultVertices[index] = transformation.map(resultVertices[index]);
         }
         m_fittingObjDataResult->setVertices(resultVertices);
 
@@ -330,7 +332,7 @@ void MainWindow::performFittingforTarget(bool value)
 
     const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0, 1};
     const double stepLength = 0.4;
-    const int nMaxIterations = 750;
+    const int nMaxIterations = 1500;
     const double gradientNormThreshold = 9e-7;
 
     QVector<double> result = Optimization::gradientDescent(
@@ -342,24 +344,12 @@ void MainWindow::performFittingforTarget(bool value)
     result = Optimization::RigidAlignmentScalingProblem::transformationVectorFromVars(result);
 
     QMessageBox yesNoMessageBox(this);
-    yesNoMessageBox.setWindowTitle(tr("Fitting is finished"));
-    yesNoMessageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    yesNoMessageBox.setText(
-                QString(tr("Estimated transformation:\nTranslation (%1, %2, %3)\nRotation (%4, %5, %6)"))
-                .arg(result[0]).arg(result[1]).arg(result[2])
-                .arg(result[3]).arg(result[4]).arg(result[5])
-            );
-    if (result.size() == 7)
-    {
-        yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling %7")
-                                .arg(result[6]));
-    }
-    else if (result.size() == 9)
-    {
-        yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling (%7, %8, %9)")
-                                .arg(result[6]).arg(result[7]).arg(result[8]));
-    }
-    yesNoMessageBox.setText(yesNoMessageBox.text() + tr("\n\nDo you want to remove target object?"));
+    setupYesNoTransformMessageBox(
+                yesNoMessageBox,
+                tr("Fitting is finished"),
+                tr("Do you want to remove target object?"),
+                result
+                );
 
     if (yesNoMessageBox.exec() == QMessageBox::Yes)
     {
@@ -377,7 +367,14 @@ void MainWindow::loadRegistrationBaseMeshObject(bool value)
     QString errorMessage;
     if (!readObjectFromFile(*m_registrationObjDataBase, tr("Choose base mesh file"), tr("Object (*.obj)"), errorMessage, QDir::homePath()))
     {
-        QMessageBox::warning(this, tr("Failed to load mesh"), errorMessage);
+        if (!errorMessage.isEmpty())
+        {
+            QMessageBox::warning(
+                        this,
+                        tr("Failed to load mesh"),
+                        errorMessage
+                        );
+        }
         return;
     }
     bool hasNormals =
@@ -397,6 +394,98 @@ void MainWindow::loadRegistrationBaseMeshObject(bool value)
     m_currentObjectColor = new QColor(defaultSceneObjectColor);
 }
 
+void MainWindow::performClosestPointsBasedFitting(bool value)
+{
+    Q_UNUSED(value);
+
+    if (m_fittingBaseSceneObject == nullptr || m_fittingTargetSceneObject == nullptr)
+    {
+        QMessageBox::warning(
+                    this,
+                    tr("Failed to make fitting"),
+                    tr("Either base object was not loaded or there is no target object."
+                       "\nPlease load base object and make target in order to perform fitting.")
+                    );
+        return;
+    }
+
+    if (m_fittingObjDataResult != nullptr)
+    {
+        delete m_fittingObjDataResult;
+        m_fittingObjDataResult = nullptr;
+    }
+    m_fittingObjDataResult = new ObjReadingTools::ObjFileData();
+
+    const auto stepFunction = [&](const QVector<double>& variables)
+    {
+        *m_fittingObjDataResult = *m_fittingObjDataBase;
+        const QMatrix4x4 transformation = Optimization::ClosestPointsBasedAlignmentProblem::transformationMatrixFromVariables(variables);
+        const int resultSize = m_fittingObjDataResult->getVertices().size();
+        QVector<QVector3D> resultVertices = m_fittingObjDataResult->getVertices().toVector();
+        for (int index = 0; index < resultSize; index++)
+        {
+            resultVertices[index] = transformation.map(resultVertices[index]);
+        }
+        m_fittingObjDataResult->setVertices(resultVertices);
+
+        addSceneObjectFromObjData(
+                    *m_fittingObjDataResult,
+                    m_fittingBaseSceneObject,
+                    *m_currentObjectColor,
+                    m_glWidget
+                    );
+        QApplication::processEvents();
+        QThread::msleep(5);
+    };
+
+    Registration::ClosestPointsFinderKDTree closestPointsFinder(m_fittingObjDataTarget->getVertices());
+
+    const QVector<int> basePolygonVertexIndices = MeshTools::buildPolygonVertexIndicesVector(m_fittingObjDataBase->getPolygonVertexIndices());
+    const QVector<int> basePolygonStart = MeshTools::buildPolygonStartVector(m_fittingObjDataBase->getPolygonVertexIndices());
+    const QVector<int> baseTriangleVertexIndices = MeshTools::buildTriangleVertexIndices(basePolygonVertexIndices, basePolygonStart);
+    const QVector<QVector3D> baseVertices = m_fittingObjDataBase->getVertices();
+    const QVector<QVector3D> targetVertices = m_fittingObjDataTarget->getVertices();
+    const QVector<QVector3D> targetNormals = m_fittingObjDataTarget->getNormals();
+
+    Optimization::Problem* problem = new Optimization::ClosestPointsBasedAlignmentProblem(
+                baseTriangleVertexIndices,
+                baseVertices,
+                targetVertices,
+                targetNormals,
+                closestPointsFinder
+                );
+    Optimization::LambdaStepCallback callback(stepFunction);
+
+    const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0};
+    const double stepLength = 0.4;
+    const int nMaxIterations = 1500;
+    const double gradientNormThreshold = 9e-7;
+    const int nLineSearchIterations = 10;
+    const double stepLengthMax = 10;
+    const bool verbose = true;
+
+    QVector<double> result = Optimization::gradientDescentWithBackTrackingLineSearch(
+                *problem, initialVariables,
+                stepLength, nMaxIterations, gradientNormThreshold, nLineSearchIterations, stepLengthMax, verbose,
+                &callback
+                );
+
+    QMessageBox yesNoMessageBox(this);
+    setupYesNoTransformMessageBox(
+                yesNoMessageBox,
+                tr("Fitting is finished"),
+                tr("Do you want to remove target object?"),
+                result
+                );
+
+    if (yesNoMessageBox.exec() == QMessageBox::Yes)
+    {
+        m_glWidget->removeObject(m_fittingTargetSceneObject);
+        delete m_fittingTargetSceneObject;
+        m_fittingTargetSceneObject = nullptr;
+    }
+}
+
 void MainWindow::loadRegistrationTargetMeshObject(bool value)
 {
     Q_UNUSED(value);
@@ -405,7 +494,14 @@ void MainWindow::loadRegistrationTargetMeshObject(bool value)
     QString errorMessage;
     if (!readObjectFromFile(*m_registrationObjDataTarget, tr("Choose target mesh file"), tr("Object (*.obj)"), errorMessage, QDir::homePath()))
     {
-        QMessageBox::warning(this, tr("Failed to load mesh"), errorMessage);
+        if (!errorMessage.isEmpty())
+        {
+            QMessageBox::warning(
+                        this,
+                        tr("Failed to load mesh"),
+                        errorMessage
+                        );
+        }
         return;
     }
     bool hasNormals =
@@ -430,6 +526,12 @@ void MainWindow::performRigidRegistration(bool value)
 
     if (m_registrationBaseMeshSceneObject == nullptr || m_registrationTargetMeshSceneObject == nullptr)
     {
+        QMessageBox::warning(
+                    this,
+                    tr("Failed to make resgitration"),
+                    tr("Either base object was not loaded or there is no target object."
+                       "\nPlease load base object and make target in order to perform registration.")
+                    );
         return;
     }
     m_registrationObjDataResult = new ObjReadingTools::ObjFileData();
@@ -473,6 +575,20 @@ void MainWindow::performRigidRegistration(bool value)
                 fitter, closestPointsFinder,
                 baseTriangleVertexIndices, baseVertices, targetVertices, targetNormals,
                 nIcpIterations, minCosBetweenNormals, true, &callback);
+
+    QMessageBox yesNoMessageBox(this);
+    setupYesNoTransformMessageBox(
+                yesNoMessageBox,
+                tr("Registration is finished"),
+                tr("Do yo want to remove target object?")
+                );
+
+    if (yesNoMessageBox.exec() == QMessageBox::Yes)
+    {
+        m_glWidget->removeObject(m_registrationTargetMeshSceneObject);
+        delete m_registrationTargetMeshSceneObject;
+        m_registrationTargetMeshSceneObject = nullptr;
+    }
 }
 
 void MainWindow::changeBackgroundColor(bool value)
@@ -532,7 +648,7 @@ bool MainWindow::readObjectFromFile(
     if (!ObjReadingTools::readFile(resultFilePath, destObj, errorMessage, progressNotifier)){
         delete fileDialog;
         #ifdef QT_DEBUG
-        qDebug() << errorMessage;
+            qDebug() << errorMessage;
         #endif
         return false;
     }
@@ -716,6 +832,17 @@ void MainWindow::createActions()
                 SLOT(performFittingforTarget(bool))
                 );
 
+    // Perform fitting with use of closest points in model instead of regular fitting with all points
+    setupAction(
+                m_performClosestPointsBasedFitting,
+                this,
+                tr("Perform fitting based on closest points"),
+                QKeyCombination(Qt::ControlModifier | Qt::AltModifier, Qt::Key_R),
+                tr("Perform closest points based fitting for base and target objects."),
+                this,
+                SLOT(performClosestPointsBasedFitting(bool))
+                );
+
     // Registration menu actions
     // Load base mesh to a scene
     setupAction(
@@ -737,13 +864,13 @@ void MainWindow::createActions()
                 this,
                 SLOT(loadRegistrationTargetMeshObject(bool))
                 );
-    // Perform fitting
+    // Perform resgitration
     setupAction(
                 m_performRigidRegistrationAction,
                 this,
                 tr("Perform rigid registration"),
                 QKeyCombination(Qt::ControlModifier | Qt::AltModifier, Qt::Key_R),
-                tr("Perform rigid registration for BaseMesh and Target objects.\n(requires base mesh object and target mesh object to be loaded)"),
+                tr("Perform rigid registration for BaseMesh and Target objects."),
                 this,
                 SLOT(performRigidRegistration(bool))
                 );
@@ -783,7 +910,7 @@ void MainWindow::setupAction(
 {
     action = new QAction(caption, actionsParent);
     action->setShortcut(keySequence);
-    action->setToolTip(toolTip);
+    action->setStatusTip(toolTip);
     connect(action, SIGNAL(triggered(bool)), connectionReciever, connectionSlot);
 }
 
@@ -843,7 +970,8 @@ void MainWindow::createMenus()
                 {
                     m_loadFittingBaseObjectActon,
                     m_makeFittingTargetObjectAction,
-                    m_performFittingAction
+                    m_performFittingAction,
+                    m_performClosestPointsBasedFitting
                 }
                 );
 
@@ -883,4 +1011,34 @@ void MainWindow::setupMenu(
             menu->addAction(actionsList[index]);
         }
     }
+}
+
+void MainWindow::setupYesNoTransformMessageBox(
+        QMessageBox& yesNoMessageBox,
+        QString windowTitle,
+        QString mainText,
+        QVector<double> transformationVector
+        )
+{
+    yesNoMessageBox.setWindowTitle(windowTitle);
+    yesNoMessageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    if (!transformationVector.isEmpty())
+    {
+        yesNoMessageBox.setText(
+                    QString(tr("Estimated transformation:\nTranslation (%1, %2, %3)\nRotation (%4, %5, %6)"))
+                    .arg(transformationVector[0]).arg(transformationVector[1]).arg(transformationVector[2])
+                .arg(transformationVector[3]).arg(transformationVector[4]).arg(transformationVector[5])
+                );
+        if (transformationVector.size() == 7)
+        {
+            yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling %7")
+                                    .arg(transformationVector[6]));
+        }
+        else if (transformationVector.size() == 9)
+        {
+            yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling (%7, %8, %9)")
+                                    .arg(transformationVector[6]).arg(transformationVector[7]).arg(transformationVector[8]));
+        }
+    }
+    yesNoMessageBox.setText(yesNoMessageBox.text() + "\n" + mainText);
 }

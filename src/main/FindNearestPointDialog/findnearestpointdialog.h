@@ -42,7 +42,10 @@ protected:
     bool m_useRadius;
     float m_radius;
 
+    // Ui
     Ui::FindNearestPointDialog *m_ui;
+    QPushButton* m_acceptButton;
+
 };
 
 #endif // FINDNEARESTPOINTDIALOG_H

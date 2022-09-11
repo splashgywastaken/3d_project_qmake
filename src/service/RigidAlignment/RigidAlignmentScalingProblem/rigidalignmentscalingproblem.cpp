@@ -21,7 +21,7 @@ double Optimization::RigidAlignmentScalingProblem::computeError(const QVector<do
     double resultError = 0;
     for (int i = 0; i < nVertices(); i++)
     {
-        const QVector3D newVertex = transformation.mapVector(m_baseVertices[i]);
+        const QVector3D newVertex = transformation.map(m_baseVertices[i]);
         resultError += (newVertex - m_targetVertices[i]).lengthSquared() / nVertices();
     }
 
@@ -38,9 +38,9 @@ QVector<double> Optimization::RigidAlignmentScalingProblem::computeGradient(cons
     return numericalGradient(function, variables, dx);
 }
 
-const double rotationScale = 10;
-const double translationScale = 1;
-const double scalingScale = 0.5;
+const double rotationScale = 20;
+const double translationScale = 1.006;
+const double scalingScale = 0.12925;
 
 QMatrix4x4 Optimization::RigidAlignmentScalingProblem::transformationMatrixFromVars(const QVector<double> &variables)
 {

@@ -38,7 +38,7 @@ QVector<QVector3D> Registration::RigidFitter::fit(
         for (int loopIndex = 0; loopIndex < nVerticesToFit; loopIndex++)
         {
             const int index = verticesToFitIndices[loopIndex];
-            const QVector3D newVertex = transformation.mapVector(m_baseVertices[index]);
+            const QVector3D newVertex = transformation.map(m_baseVertices[index]);
             resultError += (newVertex * rescaleConstant - verticesToFit[loopIndex] * rescaleConstant).lengthSquared();
         }
 
@@ -95,4 +95,23 @@ QMatrix4x4 Registration::RigidFitter::transformationMatrixFromVariables(const QV
     transformation.rotate(rotationScale * variables[5], QVector3D(0, 0, 1));
 
     return transformation;
+}
+
+QVector<double> Registration::RigidFitter::getScaledTransformationVariables(const QVector<double> &variables)
+{
+    const int nVariables = variables.size();
+    Q_ASSERT(nVariables == 6);
+    QVector<double> scaledVariables = variables;
+
+    for (int index = 3; index < nVariables; index++)
+    {
+        scaledVariables[index] *= rotationScale;
+    }
+
+    return scaledVariables;
+}
+
+QVector<double> Registration::RigidFitter::getTransformationVariablesVector()
+{
+    return m_variableValues;
 }

@@ -153,7 +153,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent01()
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
 
     QCOMPARE(1, res.size());
-    QVERIFY(std::abs(res[0]) < epsilonHard);
+    QVERIFY(std::abs(res[0]) < epsilonWeak);
 }
 
 void Optimization::Tests::OptimizationTests::testGradientDescent02()
@@ -173,7 +173,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent02()
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
 
     QCOMPARE(1, res.size());
-    QVERIFY(std::abs(res[0]) < epsilonHard);
+    QVERIFY(std::abs(res[0]) < epsilonWeak);
 }
 
 void Optimization::Tests::OptimizationTests::testGradientDescent03()
@@ -193,7 +193,7 @@ void Optimization::Tests::OptimizationTests::testGradientDescent03()
     const QVector<double> res = Optimization::gradientDescent(problem, initialVars, 1e-1, 100, 1e-7, false);
 
     QCOMPARE(1, res.size());
-    QVERIFY(std::abs(res[0] - 1.5) < epsilonHard);
+    QVERIFY(std::abs(res[0] - 1.5) < epsilonWeak);
 }
 
 void Optimization::Tests::OptimizationTests::testGradientDescent04()

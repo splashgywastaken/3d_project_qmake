@@ -11,6 +11,7 @@
 
     include($$PWD/mainwindow/mainwindow.pri)
     include($$PWD/FindNearestPointDialog/FindNearestPointDialog.pri)
+    include($$PWD/GradientParamsDialog/GradientParamsDialog.pri)
 
     # Tests
     include($$PWD/../../tests/tests.pri)

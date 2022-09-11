@@ -17,6 +17,8 @@ public:
             const double fitWieght,
             StepCallback* callback = nullptr
             ) = 0;
+
+    virtual QVector<double> getTransformationVariablesVector() = 0;
 };
 
 }

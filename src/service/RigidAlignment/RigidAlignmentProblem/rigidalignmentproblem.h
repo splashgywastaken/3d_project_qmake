@@ -2,8 +2,8 @@
 #define OPTIMIZATION_RIGIDALIGNMENTPROBLEM_H
 
 #include <QVector3D>
-#include <src/service/Optimization/Problem/problem.h>
 #include <QMatrix4x4>
+#include <src/service/Optimization/Problem/problem.h>
 
 namespace Optimization {
 
@@ -16,7 +16,7 @@ public:
             );
 
     double computeError(const QVector<double>& variables) override;
-    virtual QVector<double> computeGradient(const QVector<double>& variables) override;
+    QVector<double> computeGradient(const QVector<double>& variables) override;
 
     static QMatrix4x4 transformationMatrixFromVars(const QVector<double>& variables);
     static QVector<double> transformationVectorFromVars(const QVector<double>& variables);

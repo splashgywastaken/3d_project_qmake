@@ -28,19 +28,19 @@ QVector<QVector3D> Registration::performIcp(
             qDebug() << "ICP Iteration:" << iterInd + 1 << "/" << nIterations;
         }
         const QVector<int> targetVerticesIndices = closestPointsFinder.findClosestPointsIndices(currentVertices);
-        QVector<QVector3D> targetVerticesSubseted = QVectorTools::subset(targetVerticesIndices, targetVertices);
-        QVector<QVector3D> targetNormalsSubseted = QVectorTools::subset(targetVerticesIndices, targetNormals);
+        QVector<QVector3D> targetVerticesSubsetted = QVectorTools::subset(targetVerticesIndices, targetVertices);
+        QVector<QVector3D> targetNormalsSubsetted = QVectorTools::subset(targetVerticesIndices, targetNormals);
 
         QVector<int> verticesIndicesToFit = QVectorTools::range(nVertices);
         const QVector<QVector3D> baseNormals = GeomTools::computeNormals(baseTriangleVertexIndices, currentVertices);
         QVector<QVector3D> baseNormalsSubseted = QVectorTools::subset(verticesIndicesToFit, baseNormals);
 
         const QVector<int> filteredCorrespondencesIndices = filterCorrespondencesByNormals(
-                    baseNormalsSubseted, targetNormalsSubseted, minCosBetweenNormals);
+                    baseNormalsSubseted, targetNormalsSubsetted, minCosBetweenNormals);
         verticesIndicesToFit = QVectorTools::subset(filteredCorrespondencesIndices, verticesIndicesToFit);
-        targetVerticesSubseted = QVectorTools::subset(filteredCorrespondencesIndices, targetVerticesSubseted);
+        targetVerticesSubsetted = QVectorTools::subset(filteredCorrespondencesIndices, targetVerticesSubsetted);
 
-        currentVertices = fitter.fit(verticesIndicesToFit, targetVerticesSubseted, fitWeight, stepCallback);
+        currentVertices = fitter.fit(verticesIndicesToFit, targetVerticesSubsetted, fitWeight, stepCallback);
     }
 
     return currentVertices;

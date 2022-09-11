@@ -22,7 +22,11 @@ public:
             StepCallback* callback = nullptr
             ) override;
 
+    QVector<double> getTransformationVariablesVector() override;
+
     QMatrix4x4 transformationMatrixFromVariables(const QVector<double>& variables);
+
+    QVector<double> getScaledTransformationVariables(const QVector<double>& variables);
 
 private:
     QVector<QVector3D> m_baseVertices;

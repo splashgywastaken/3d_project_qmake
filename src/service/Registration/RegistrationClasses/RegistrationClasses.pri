@@ -4,10 +4,5 @@ REGISTRATIONCLASSES_PRI
 
     INCLUDEPATH += $$PWD
 
-    HEADERS += \
-        $$PWD/registration.h
-
-    SOURCES += \
-        $$PWD/registration.cpp
-
+    include($$PWD/Registration/Registration.pri)
 }

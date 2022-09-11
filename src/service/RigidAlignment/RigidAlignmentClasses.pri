@@ -7,4 +7,5 @@
     include($$PWD/RigidAlignmentScalingProblem/RigidAlignmentScalingProblem.pri)
     include($$PWD/RigidAlignmentProblem/RigidAlignmentProblem.pri)
     include($$PWD/TranslationProblem/TranslationProblem.pri)
+    include($$PWD/ClosestPointsBasedAlignmentProblem/ClosestPointsBasedAlignmentProblem.pri)
 }

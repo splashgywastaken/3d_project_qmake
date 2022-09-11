@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4501dd4e-63fb-43fe-a06c-887302093013" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/code playground/OptimizationPlayground/GradientDescentSolve/GradientDescentSolve.pri" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/code playground/OptimizationPlayground/GradientDescentSolve/gradientdescentsolve.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/code playground/OptimizationPlayground/GradientDescentSolve/gradientdescentsolve.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/service/RigidAlignment/RigidAlignmentScalingProblem/RigidAlignmentScalingProblem.pri" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/service/RigidAlignment/RigidAlignmentScalingProblem/rigidalignmentscalingproblem.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/service/RigidAlignment/RigidAlignmentScalingProblem/rigidalignmentscalingproblem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/3d_project_qmake.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/3d_project_qmake.pro" beforeDir="false" afterPath="$PROJECT_DIR$/3d_project_qmake.pro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code playground/Optimization/Optimization.pri" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code playground/PlaygroundFiles.pri" beforeDir="false" afterPath="$PROJECT_DIR$/code playground/PlaygroundFiles.pri" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/mainwindow/mainwindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/mainwindow/mainwindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/mainwindow/mainwindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/mainwindow/mainwindow.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/mainwindow/mainwindow.ui" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/mainwindow/mainwindow.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/EventFilters/CameraMovementEventFilter/cameramovementeventfilter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/EventFilters/CameraMovementEventFilter/cameramovementeventfilter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/FileReaders/ObjFileReader/ObjFileReader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/FileReaders/ObjFileReader/ObjFileReader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/KDTree/KDTree Utils/kdtreeutils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/KDTree/KDTree Utils/kdtreeutils.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/KDTree/KDTree Utils/kdtreeutils.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/KDTree/KDTree Utils/kdtreeutils.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/Optimization/GradientDescent/gradientdescent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/Optimization/GradientDescent/gradientdescent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/Optimization/GradientDescent/gradientdescent.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/Optimization/GradientDescent/gradientdescent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/Optimization/LambdaStepCallback/lambdastepcallback.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/Optimization/LambdaStepCallback/lambdastepcallback.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/ProgressNotifier/progressnotifiersingleton.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/ProgressNotifier/progressnotifiersingleton.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/ProgressNotifier/progressnotifiersingleton.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/ProgressNotifier/progressnotifiersingleton.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/RigidAlignment/RigidAlignmentClasses.pri" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/RigidAlignment/RigidAlignmentClasses.pri" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/RigidAlignment/RigidAlignmentProblem/rigidalignmentproblem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/RigidAlignment/RigidAlignmentProblem/rigidalignmentproblem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/OptimizationTests/optimizationtests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/OptimizationTests/optimizationtests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/OptimizationTests/optimizationtests.h" beforeDir="false" afterPath="$PROJECT_DIR$/tests/OptimizationTests/optimizationtests.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="settings.editor.selected.configurable" value="MTConfigurable" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4501dd4e-63fb-43fe-a06c-887302093013" name="Changes" comment="" />
+      <created>1659797938183</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1659797938183</updated>
+      <workItem from="1659797940364" duration="9000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

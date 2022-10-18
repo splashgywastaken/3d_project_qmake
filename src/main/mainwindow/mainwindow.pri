@@ -17,3 +17,6 @@
     FORMS += \
     $$PWD/mainwindow.ui
 }
+
+DISTFILES += \
+    $$PWD/mainwindow.qss

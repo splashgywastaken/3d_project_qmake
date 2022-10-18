@@ -39,6 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     m_ui->setupUi(this);
 
+    // Style sheet setup:
+    QFile styleFile(":/main/mainwindow/mainwindow.qss");
+    styleFile.open(QFile::ReadOnly);
+    this->setStyleSheet(QString::fromLatin1( styleFile.readAll() ));
+    styleFile.close();
+
     // Variables setup
 
     // MenuBar setup:
@@ -183,6 +189,16 @@ void MainWindow::changeLastObjectColor(bool value)
 void MainWindow::findNearestPointInLastObject(bool value)
 {
     Q_UNUSED(value);
+
+    if (m_objDataBase == nullptr)
+    {
+        QMessageBox::warning(
+                    this,
+                    tr("Failed to find an object"),
+                    tr("Load object first to find nearest point in")
+                    );
+        return;
+    }
 
     QVector<QVector3D> points = m_objDataBase->getVertices();
 

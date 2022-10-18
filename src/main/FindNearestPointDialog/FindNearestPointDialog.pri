@@ -16,3 +16,7 @@
     SOURCES += \
         $$PWD/findnearestpointdialog.cpp
 }
+
+DISTFILES += \
+    $$PWD/FindNearestPointDialog.qss
+

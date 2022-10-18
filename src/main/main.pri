@@ -18,4 +18,9 @@
 
     # Misc. code playground files
     include($$PWD/../../code playground/PlaygroundFiles.pri)
+
+    RESOURCES += \
+    $$PWD/main.qrc
+    DISTFILES += \
+    $$PWD/main.qss
 }

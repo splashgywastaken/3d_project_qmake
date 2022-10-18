@@ -1,8 +1,11 @@
 #ifndef FINDNEARESTPOINTDIALOG_H
 #define FINDNEARESTPOINTDIALOG_H
 
+#include "qtextedit.h"
 #include <QDialog>
+#include <QDoubleSpinBox>
 #include <node.h>
+#include <qcheckbox.h>
 
 namespace Ui {
 class FindNearestPointDialog;
@@ -30,8 +33,16 @@ protected:
 
 
 protected slots:
+    // Getting data from TextEdit widgets
+    void xValueDoubleSpinBoxValueChanged(double value);
+    void yValueDoubleSpinBoxValueChanged(double value);
+    void zValueDoubleSpinBoxValueChanged(double value);
+    void radiusValueDoubleSpinBoxValueChanged(double value);
+
+    // CheckBox
     void useRadiusCheckBoxChanged(bool value);
-    void findNearestButtonClicked(bool checked);
+    // Buttons
+    void getResultButtonClicked(bool checked);
 
 protected:
     QVector3D* m_nearestPoint = nullptr;
@@ -44,8 +55,27 @@ protected:
 
     // Ui
     Ui::FindNearestPointDialog *m_ui;
-    QPushButton* m_acceptButton;
 
+    // Accept button
+    QPushButton* m_getResultButton;
+
+    // Point input
+    QDoubleSpinBox* m_xValueDoubleSpinBox;
+    QDoubleSpinBox* m_yValueDoubleSpinBox;
+    QDoubleSpinBox* m_zValueDoubleSpinBox;
+
+    // Radius things
+    // Radiobutton (search in radius)
+    QCheckBox* m_useRadiusCheckBox;
+    // Radius input
+    QDoubleSpinBox* m_radiusValueDoubleSpinBox;
+
+    // Result
+    QLineEdit* m_nearestPointValueTextEdit;
+
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // FINDNEARESTPOINTDIALOG_H

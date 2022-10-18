@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/main">
+        <file>mainwindow/mainwindow.qss</file>
+        <file>FindNearestPointDialog/FindNearestPointDialog.qss</file>
+    </qresource>
+</RCC>

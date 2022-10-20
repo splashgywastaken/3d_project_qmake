@@ -12,6 +12,7 @@
 #include "tests/OptimizationTests/optimizationtests.h"
 #include "tests/GeomToolsTests/geomtoolstests.h"
 #include "tests/QVectorToolsTests/qvectortoolstests.h"
+#include "tests/DialogsToolsTests/dialogstoolstests.h"
 #include "code playground/KDTreeCompareMethods/timetester.h"
 #include "code playground/OptimizationPlayground/GradientDescentSolve/gradientdescentsolve.h"
 
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
     Q_UNUSED(argc);
     Q_UNUSED(argv);
 
-    #ifndef QT_NO_DEBUG
+    #ifdef QT_DEBUG
     ObjReaderTests objReaderTests;
     QTest::qExec(&objReaderTests);
     MeshToolsTests meshToolsTests;
@@ -33,6 +34,8 @@ int main(int argc, char *argv[])
     QTest::qExec(&qVectorToolsTests);
     GeomTools::Tests::GeomToolsTests geomToolsTests;
     QTest::qExec(&geomToolsTests);
+    DialogsTools::Tests::DialogsToolsTests dialogsToolsTests;
+    QTest::qExec(&dialogsToolsTests);
     #else
     #endif
 
@@ -43,24 +46,5 @@ int main(int argc, char *argv[])
 
     return app.exec();
 
-//    QString fileName = "E:/projects SSD/Qt/3d_project_qmake/res/obj/Car.obj";
-//    QVector3D pointToSearch = {-0.5, 0.5, -0.5};
-
-//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
-
-//    pointToSearch = {0.5, 0.5, 0.5};
-//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
-
-//    fileName = "input file name";
-//    pointToSearch = {0.5, 0.5, 0.5};
-//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
-
-//    pointToSearch = {0.5, 0.5, -0.5};
-//    KDTree::TimeTester::testBuildTreeFromFile01(fileName, pointToSearch);
-
-//    // Function minimize
-//    Optimization::GradientDescentSolve::solveMinimizeFunction();
-
     return 0;
-
 }

@@ -33,7 +33,7 @@ protected:
 
 
 protected slots:
-    // Getting data from TextEdit widgets
+    // Getting data from DoubleSpinBox widgets
     void xValueDoubleSpinBoxValueChanged(double value);
     void yValueDoubleSpinBoxValueChanged(double value);
     void zValueDoubleSpinBoxValueChanged(double value);

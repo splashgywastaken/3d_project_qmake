@@ -231,5 +231,8 @@ void FindNearestPointDialog::getResultButtonClicked(bool checked)
 void FindNearestPointDialog::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event);
-    emit foundNearest(*m_nearestPoint);
+    if (m_nearestPoint != nullptr)
+    {
+        emit foundNearest(*m_nearestPoint);
+    }
 }

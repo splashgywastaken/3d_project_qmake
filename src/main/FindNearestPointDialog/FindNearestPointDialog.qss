@@ -1,0 +1,21 @@
+.background-color-settings
+{
+    background-color: #b2bec3;
+    font-weight: bold;
+}
+
+.color-settings
+{
+    color: #b2bec3;
+    font-weight: bold;
+}
+
+QPushButton::hover {
+    background-color: #636e72;
+    class="background-color-settings";
+}
+QPushButton {
+    class="background-color-settings";
+}
+
+FindNearestPointDialog { background-color: #dfe6e9}

@@ -27,7 +27,7 @@
 #include <src/service/Registration/FitterClasses/LambdaStepCallback/lambdastepcallback.h>
 #include <src/service/Registration/FitterClasses/RigidFitter/rigidfitter.h>
 
-#include "src/service/KDTree/kdtree.h"
+#include <src/service/KDTree/kdtree.h>
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
 const QColor defaultSceneObjectColor(85, 170, 255);
@@ -72,6 +72,15 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete m_ui;
+}
+
+void MainWindow::parametersAreSet(QVector<double> variables, double stepLength, int nMaxIterations, double gradientNormThreshold)
+{
+    m_fittingGradientParams = new FittingGradientParams();
+    m_fittingGradientParams->variables = variables;
+    m_fittingGradientParams->stepLength = stepLength;
+    m_fittingGradientParams->nMaxIterations = nMaxIterations;
+    m_fittingGradientParams->gradientNormThreshold = gradientNormThreshold;
 }
 
 void MainWindow::setObjectColor(QColor objectColor)
@@ -346,14 +355,20 @@ void MainWindow::performFittingforTarget(bool value)
                 );
     Optimization::LambdaStepCallback callback(stepFunction);
 
-    const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0, 1};
-    const double stepLength = 0.4;
-    const int nMaxIterations = 1500;
-    const double gradientNormThreshold = 9e-7;
+    const int nVariables = 7;
+    m_gradientParamsDialog = new GradientParamsDialog(nVariables, this);
+    connect(
+            this->m_gradientParamsDialog, &GradientParamsDialog::parametersAreSet,
+            this, &MainWindow::parametersAreSet
+            );
+    if (m_gradientParamsDialog->exec() == 0){
+        delete problem;
+        return;
+    }
 
     QVector<double> result = Optimization::gradientDescent(
-                problem, initialVariables,
-                stepLength, nMaxIterations, gradientNormThreshold,
+                problem, m_fittingGradientParams->variables,
+                m_fittingGradientParams->stepLength, m_fittingGradientParams->nMaxIterations, m_fittingGradientParams->gradientNormThreshold,
                 true, &callback
                 );
 

@@ -11,4 +11,5 @@
     include($$PWD/GeomTools/GeomTools.pri)
     include($$PWD/QVectorTools/QVectorTools.pri)
     include($$PWD/Registration/Registration.pri)
+    include($$PWD/DialogsTools/DialogsTools.pri)
 }

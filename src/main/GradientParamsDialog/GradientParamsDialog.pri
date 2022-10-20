@@ -1,13 +1,14 @@
-FITTINGPARAMSDIALOG_PRI {
-    CONFIG += FITTINGPARAMSDIALOG_PRI
+!GRADIENTPARAMSDIALOG_PRI {
+    CONFIG += GRADIENTPARAMSDIALOG_PRI
 
     INCLUDEPATH += $$PWD
+
+    FORMS += \
+        $$PWD/gradientparamsdialog.ui
+
     HEADERS += \
-    $$PWD/gradientparamsdialog.h
+        $$PWD/gradientparamsdialog.h
 
     SOURCES += \
-    $$PWD/gradientparamsdialog.cpp
+        $$PWD/gradientparamsdialog.cpp
 }
-
-FORMS += \
-    $$PWD/GradientParamsDialog.ui

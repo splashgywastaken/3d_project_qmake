@@ -487,17 +487,28 @@ void MainWindow::performClosestPointsBasedFitting(bool value)
                 );
     Optimization::LambdaStepCallback callback(stepFunction);
 
-    const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0};
-    const double stepLength = 0.4;
-    const int nMaxIterations = 1500;
-    const double gradientNormThreshold = 9e-7;
     const int nLineSearchIterations = 10;
     const double stepLengthMax = 10;
     const bool verbose = true;
 
+    const int nVariables = 6;
+    m_gradientParamsDialog = new GradientParamsDialog(nVariables, this);
+    connect(
+            this->m_gradientParamsDialog, &GradientParamsDialog::parametersAreSet,
+            this, &MainWindow::parametersAreSet
+            );
+    if (m_gradientParamsDialog->exec() == 0){
+        delete problem;
+        return;
+    }
+
     QVector<double> result = Optimization::gradientDescentWithBackTrackingLineSearch(
-                *problem, initialVariables,
-                stepLength, nMaxIterations, gradientNormThreshold, nLineSearchIterations, stepLengthMax, verbose,
+                *problem,
+                m_fittingGradientParams->variables,
+                m_fittingGradientParams->stepLength,
+                m_fittingGradientParams->nMaxIterations,
+                m_fittingGradientParams->gradientNormThreshold,
+                nLineSearchIterations, stepLengthMax, verbose,
                 &callback
                 );
 
@@ -742,7 +753,9 @@ void MainWindow::setLabelFontColor(QLabel *label, QString color)
 
 void MainWindow::changeShader(const QString &shaderName)
 {
-    DrawableObjectTools::ShaderProgrammType shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
+    using namespace DrawableObjectTools;
+
+    ShaderProgrammType shaderType = ShaderProgrammType::Standard;
 
     #ifndef QT_NO_DEBUG
         qDebug() << "Change shader triggered";
@@ -750,19 +763,19 @@ void MainWindow::changeShader(const QString &shaderName)
 
     if (shaderName == "Basic shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
+        shaderType = ShaderProgrammType::Standard;
     }
     else if (shaderName == "Lightning shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
+        shaderType = ShaderProgrammType::Lightning;
     }
     else if (shaderName == "Normal map shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::NormalMap;
+        shaderType = ShaderProgrammType::NormalMap;
     }
     else if (shaderName == "Lightning shader with textures")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::LightningWithTextures;
+        shaderType = ShaderProgrammType::LightningWithTextures;
     }
 
     m_glWidget->switchShaders(shaderType);
@@ -776,9 +789,9 @@ void MainWindow::createActions()
     setupAction(
                 m_loadObjectFromObjFileAction,
                 this,
-                tr("Open file"),
+                tr("Open *.obj file"),
                 QKeySequence::Open,
-                tr("Open a new file"),
+                tr("Open a new object file to work with"),
                 this,
                 SLOT(loadObjectFromObjFile(bool))
                 );
@@ -975,10 +988,17 @@ void MainWindow::createMenus()
                 );
 
     setupMenu(
-                m_objectMenu,
-                tr("Object"),
-                tr("Objects related stuff"),
-                { m_changeObjectColorAction, m_findNearestPointInLastObjectAction }
+                m_viewMenu,
+                tr("View"),
+                tr("Change colors of scene's background and grid"),
+                { m_changeBackgroundColorAction, m_changeGridColorAction }
+                );
+
+    setupMenu(
+                m_sceneMenu,
+                tr("Scene"),
+                tr("Clear and delete objects"),
+                { m_deleteLastObjectAction, m_clearObjectsAction }
                 );
 
     // Shader's menu actions
@@ -988,10 +1008,10 @@ void MainWindow::createMenus()
     m_shaderMenu->addMenu(m_switchShaderMenu);
 
     setupMenu(
-                m_sceneMenu,
-                tr("Scene"),
-                tr("Clear and delete objects"),
-                { m_deleteLastObjectAction, m_clearObjectsAction }
+                m_objectMenu,
+                tr("Object"),
+                tr("Objects related stuff"),
+                { m_changeObjectColorAction, m_findNearestPointInLastObjectAction }
                 );
 
     setupMenu(
@@ -1015,13 +1035,6 @@ void MainWindow::createMenus()
                     m_loadRegistrationTargetObjectAction,
                     m_performRigidRegistrationAction
                 });
-
-    setupMenu(
-                m_viewMenu,
-                tr("View"),
-                tr("Change colors of scene's background and grid"),
-                { m_changeBackgroundColorAction, m_changeGridColorAction }
-                );
 }
 
 void MainWindow::setupMenu(

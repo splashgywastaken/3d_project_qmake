@@ -19,6 +19,8 @@ public:
             );
     ~GradientParamsDialog();
 
+
+
 signals:
     void parametersAreSet(
             QVector<double> variables,
@@ -49,5 +51,13 @@ private:
     QDoubleSpinBox* m_gradientNormThresholdDoubleSpinBox;
     QSpinBox* m_nMaxIterationsSpinBox;
     QLineEdit* m_variablesLineEdit;
+
+    //
+    // Overrides
+    //
+
+    // QWidget interface
+public:
+    QSize sizeHint() const override;
 };
 #endif

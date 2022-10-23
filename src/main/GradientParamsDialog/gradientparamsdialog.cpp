@@ -35,14 +35,12 @@ GradientParamsDialog::GradientParamsDialog(
 
     //UI setup
     m_ui->setupUi(this);
-    QVBoxLayout* mainLayout = new QVBoxLayout();
+    setWindowTitle(tr("Параметры оптимизации с использованием градиента"));
+    QGridLayout* gridLayout = new QGridLayout();
+    this->setFixedSize(QSize(336, 208));
     {
-        QLabel* mainLabel = new QLabel(tr("Введите параметры для проведения оптимизации с использованием градиента"));
-        mainLayout->addWidget(mainLabel);
         // Variables vector
         {
-            QHBoxLayout* variablesLayout = new QHBoxLayout();
-
             QVector<QString> variablesStringList;
             for (auto& el : m_variables){
                 variablesStringList << QString::number(el);
@@ -52,76 +50,75 @@ GradientParamsDialog::GradientParamsDialog(
             m_variablesLineEdit->setText(
                         variablesStringList.join(",")
                         );
-            variablesLayout->addWidget(
-                        new QLabel(tr("Переменные\n( вводить в формате x1,x2,...,xn )\nВведите ") + QString::number(m_nVariables) + tr(" переменных"))
+            gridLayout->addWidget(
+                        new QLabel(tr("Переменные\n( вводить в формате x1,x2,...,xn )\nВведите ") + QString::number(m_nVariables) + tr(" переменных")),
+                        0, 0, 1, 1, Qt::AlignLeft
                         );
-            variablesLayout->addWidget(m_variablesLineEdit);
-
-            mainLayout->addLayout(variablesLayout);
+            gridLayout->addWidget(
+                        m_variablesLineEdit,
+                        0, 1, 1, 1, Qt::AlignRight
+                        );
         }
 
         // Step length
         {
-            QHBoxLayout* stepLengthLayout = new QHBoxLayout();
-
             m_stepLengthDoubleSpinBox = new QDoubleSpinBox();
             m_stepLengthDoubleSpinBox->setRange(-DBL_MAX, DBL_MAX);
             m_stepLengthDoubleSpinBox->setSingleStep(0.05);
             m_stepLengthDoubleSpinBox->setValue(m_stepLength);
-            stepLengthLayout->addWidget(
-                        new QLabel(tr("Длина шага:"))
+            gridLayout->addWidget(
+                        new QLabel(tr("Длина шага:")),
+                        1, 0, 1, 1, Qt::AlignLeft
                         );
-            stepLengthLayout->addWidget(
-                        m_stepLengthDoubleSpinBox
+            gridLayout->addWidget(
+                        m_stepLengthDoubleSpinBox,
+                        1, 1, 1, 1, Qt::AlignRight
                         );
-
-            mainLayout->addLayout(stepLengthLayout);
         }
 
         // Gradient norm threshold
         {
-            QHBoxLayout* gradientNormThresholdLayout = new QHBoxLayout();
-
             m_gradientNormThresholdDoubleSpinBox = new QDoubleSpinBox();
             m_gradientNormThresholdDoubleSpinBox->setRange(-DBL_MAX, DBL_MAX);
             m_gradientNormThresholdDoubleSpinBox->setSingleStep(1e-7);
             m_gradientNormThresholdDoubleSpinBox->setDecimals(8);
             m_gradientNormThresholdDoubleSpinBox->setValue(m_gradientNormThreshold);
-            gradientNormThresholdLayout->addWidget(
-                        new QLabel(tr("Ограничение нормы градиента:"))
+            gridLayout->addWidget(
+                        new QLabel(tr("Ограничение нормы градиента:")),
+                        2, 0, 1, 1, Qt::AlignLeft
                         );
-            gradientNormThresholdLayout->addWidget(
-                        m_gradientNormThresholdDoubleSpinBox
+            gridLayout->addWidget(
+                        m_gradientNormThresholdDoubleSpinBox,
+                        2, 1, 1, 1, Qt::AlignRight
                         );
-
-            mainLayout->addLayout(gradientNormThresholdLayout);
         }
 
         // Max iterations
         {
-            QHBoxLayout* nMaxIterationsLayout = new QHBoxLayout();
-
             m_nMaxIterationsSpinBox = new QSpinBox();
             m_nMaxIterationsSpinBox->setRange(-INT_MAX, INT_MAX);
             m_nMaxIterationsSpinBox->setSingleStep(10);
             m_nMaxIterationsSpinBox->setValue(m_nMaxIterations);
-            nMaxIterationsLayout->addWidget(
-                        new QLabel(tr("Максимальное количество итераций:"))
+            gridLayout->addWidget(
+                        new QLabel(tr("Максимальное количество итераций:")),
+                        3, 0, 1, 1, Qt::AlignLeft
                         );
-            nMaxIterationsLayout->addWidget(
-                        m_nMaxIterationsSpinBox
+            gridLayout->addWidget(
+                        m_nMaxIterationsSpinBox,
+                        3, 1, 1, 1, Qt::AlignRight
                         );
-
-            mainLayout->addLayout(nMaxIterationsLayout);
         }
 
         // Accept button
         {
             m_acceptButton = new QPushButton(tr("Подтвердить"));
-            mainLayout->addWidget(m_acceptButton);
+            gridLayout->addWidget(
+                        m_acceptButton,
+                        4, 0, 2, 2
+                        );
         }
     }
-    setLayout(mainLayout);
+    setLayout(gridLayout);
 
     connect(
         m_acceptButton, &QPushButton::clicked,
@@ -204,4 +201,11 @@ bool GradientParamsDialog::parseVariablesLineEdit(QVector<double>& result, QStri
 
     result = variables;
     return true;
+}
+
+QSize GradientParamsDialog::sizeHint() const
+{
+    QSize dialogSize = QSize(336, 208);
+
+    return dialogSize;
 }

@@ -10,6 +10,7 @@
 
 #include <src/service/GlobalState.h>
 #include <src/main/FindNearestPointDialog/findnearestpointdialog.h>
+#include <src/main/SaveResultsDialog/saveresultsdialog.h>
 
 #include <src/service/Optimization/OptimizationUtils/optimizationutils.h>
 #include <src/service/Optimization/LambdaStepCallback/lambdastepcallback.h>
@@ -38,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_ui(new Ui::MainWindow)
 {
     m_ui->setupUi(this);
+    setWindowTitle(tr("3D optimization methods project"));
 
     // Style sheet setup:
     QFile styleFile(":/main/mainwindow/mainwindow.qss");
@@ -361,7 +363,7 @@ void MainWindow::performFittingforTarget(bool value)
             this->m_gradientParamsDialog, &GradientParamsDialog::parametersAreSet,
             this, &MainWindow::parametersAreSet
             );
-    if (m_gradientParamsDialog->exec() == 0){
+    if (m_gradientParamsDialog->exec() == QDialog::Rejected){
         delete problem;
         return;
     }
@@ -374,15 +376,14 @@ void MainWindow::performFittingforTarget(bool value)
 
     result = Optimization::RigidAlignmentScalingProblem::transformationVectorFromVars(result);
 
-    QMessageBox yesNoMessageBox(this);
-    setupYesNoTransformMessageBox(
-                yesNoMessageBox,
+    SaveResultsDialog saveResultsDialog(
                 tr("Fitting is finished"),
                 tr("Do you want to remove target object?"),
-                result
+                result,
+                this
                 );
 
-    if (yesNoMessageBox.exec() == QMessageBox::Yes)
+    if (saveResultsDialog.exec() == QDialog::Accepted)
     {
         m_glWidget->removeObject(m_fittingTargetSceneObject);
         delete m_fittingTargetSceneObject;
@@ -512,15 +513,14 @@ void MainWindow::performClosestPointsBasedFitting(bool value)
                 &callback
                 );
 
-    QMessageBox yesNoMessageBox(this);
-    setupYesNoTransformMessageBox(
-                yesNoMessageBox,
+    SaveResultsDialog saveResultsDialog(
                 tr("Fitting is finished"),
                 tr("Do you want to remove target object?"),
-                result
+                result,
+                this
                 );
 
-    if (yesNoMessageBox.exec() == QMessageBox::Yes)
+    if (saveResultsDialog.exec() == QDialog::Accepted)
     {
         m_glWidget->removeObject(m_fittingTargetSceneObject);
         delete m_fittingTargetSceneObject;
@@ -1061,27 +1061,27 @@ void MainWindow::setupYesNoTransformMessageBox(
         QMessageBox& yesNoMessageBox,
         QString windowTitle,
         QString mainText,
-        QVector<double> transformationVector
+        QVector<double> transformationResultVector
         )
 {
     yesNoMessageBox.setWindowTitle(windowTitle);
     yesNoMessageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if (!transformationVector.isEmpty())
+    if (!transformationResultVector.isEmpty())
     {
         yesNoMessageBox.setText(
                     QString(tr("Estimated transformation:\nTranslation (%1, %2, %3)\nRotation (%4, %5, %6)"))
-                    .arg(transformationVector[0]).arg(transformationVector[1]).arg(transformationVector[2])
-                .arg(transformationVector[3]).arg(transformationVector[4]).arg(transformationVector[5])
+                    .arg(transformationResultVector[0]).arg(transformationResultVector[1]).arg(transformationResultVector[2])
+                .arg(transformationResultVector[3]).arg(transformationResultVector[4]).arg(transformationResultVector[5])
                 );
-        if (transformationVector.size() == 7)
+        if (transformationResultVector.size() == 7)
         {
             yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling %7")
-                                    .arg(transformationVector[6]));
+                                    .arg(transformationResultVector[6]));
         }
-        else if (transformationVector.size() == 9)
+        else if (transformationResultVector.size() == 9)
         {
             yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling (%7, %8, %9)")
-                                    .arg(transformationVector[6]).arg(transformationVector[7]).arg(transformationVector[8]));
+                                    .arg(transformationResultVector[6]).arg(transformationResultVector[7]).arg(transformationResultVector[8]));
         }
     }
     yesNoMessageBox.setText(yesNoMessageBox.text() + "\n" + mainText);

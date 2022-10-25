@@ -31,97 +31,98 @@ FindNearestPointDialog::FindNearestPointDialog(
 
     // UI creation
     m_ui->setupUi(this);
-    setWindowTitle(tr("Nearest point finder"));
-    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    this->setFixedSize(QSize(320, 204));
+    setWindowTitle(tr("Nearest point finder parameters"));
     // Setting up main layout
-    QVBoxLayout* mainLayout = new QVBoxLayout();
+    QGridLayout* mainLayout = new QGridLayout;
     {
         mainLayout->addWidget(
-                    new QLabel(tr("Введите данные для поиска ближайшей точки"))
+                    new QLabel(tr("Input data for your point")),
+                    0, 0, 1, 5
                     );
         // Nearest point data layout setup
         {
-            QHBoxLayout* nearestPointDataLayout = new QHBoxLayout();
-            mainLayout->addLayout(nearestPointDataLayout);
-            nearestPointDataLayout->addSpacerItem(
-                        new QSpacerItem(
-                            10, 10,
-                            QSizePolicy::Maximum, QSizePolicy::Minimum
-                            )
-                        );
             // X Data
             {
-               QHBoxLayout* xLayout = new QHBoxLayout();
-
-               xLayout->addWidget(
-                           new QLabel("X")
+               mainLayout->addWidget(
+                           new QLabel("X"),
+                           1, 0, 1, 1, Qt::AlignRight
                            );
                m_xValueDoubleSpinBox = new QDoubleSpinBox(0);
                m_xValueDoubleSpinBox->setRange(-DBL_MAX, DBL_MAX);
-               xLayout->addWidget(m_xValueDoubleSpinBox);
-
-               nearestPointDataLayout->addLayout(xLayout);
+               mainLayout->addWidget(
+                           m_xValueDoubleSpinBox,
+                           1, 1, 1, 1, Qt::AlignLeft
+                           );
             }
             // Y Data
             {
-                QHBoxLayout* yLayout = new QHBoxLayout();
-
-                yLayout->addWidget(
-                            new QLabel("Y")
+                mainLayout->addWidget(
+                            new QLabel("Y"),
+                            1, 2, 1, 1, Qt::AlignLeft
                             );
                 m_yValueDoubleSpinBox = new QDoubleSpinBox(0);
                 m_yValueDoubleSpinBox->setRange(-DBL_MAX, DBL_MAX);
-                yLayout->addWidget(m_yValueDoubleSpinBox);
-
-                nearestPointDataLayout->addLayout(yLayout);
+                mainLayout->addWidget(
+                            m_yValueDoubleSpinBox,
+                            1, 3, 1, 1, Qt::AlignLeft
+                            );
             }
             // Z Data
             {
-                QHBoxLayout* zLayout = new QHBoxLayout();
-                zLayout->addWidget(
-                            new QLabel("Z")
+                mainLayout->addWidget(
+                            new QLabel("Z"),
+                            1, 4, 1, 1, Qt::AlignLeft
                             );
                 m_zValueDoubleSpinBox = new QDoubleSpinBox(0);
                 m_zValueDoubleSpinBox->setRange(-DBL_MAX, DBL_MAX);
-                zLayout->addWidget(m_zValueDoubleSpinBox);
-
-                nearestPointDataLayout->addLayout(zLayout);
+                mainLayout->addWidget(
+                            m_zValueDoubleSpinBox,
+                            1, 5, 1, 1, Qt::AlignLeft
+                            );
             }
-            nearestPointDataLayout->addSpacerItem(
-                        new QSpacerItem(
-                            10, 10,
-                            QSizePolicy::Maximum, QSizePolicy::Minimum
-                            )
-                        );
         }
 
         // Radius data
         {
             // CheckBox
-            m_useRadiusCheckBox = new QCheckBox(tr("Вести поиск в радиусе"));
+            m_useRadiusCheckBox = new QCheckBox(tr("Search in radius"));
+            m_useRadiusCheckBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
             m_useRadiusCheckBox->setCheckState(Qt::Checked);
-            mainLayout->addWidget(m_useRadiusCheckBox);
+            mainLayout->addWidget(
+                        m_useRadiusCheckBox,
+                        2, 0, 1, 5, Qt::AlignLeft
+                        );
             // Radius data
             {
-                QHBoxLayout* radiusDataLayout = new QHBoxLayout();
-                radiusDataLayout->addWidget(
-                            new QLabel(tr("Радиус"))
+                mainLayout->addWidget(
+                            new QLabel(tr("Radius value")),
+                            3, 0, 1, 3
                             );
                 m_radiusValueDoubleSpinBox = new QDoubleSpinBox(0);
-                radiusDataLayout->addWidget(m_radiusValueDoubleSpinBox);
-
-                mainLayout->addLayout(radiusDataLayout);
+                mainLayout->addWidget(
+                            m_radiusValueDoubleSpinBox,
+                            3, 4, 1, 3
+                            );
             }
         }
 
-        m_getResultButton = new QPushButton(tr("Найти ближайшую точку"));
-        mainLayout->addWidget(m_getResultButton);
-
+        m_getResultButton = new QPushButton(tr("Find closest point"));
         mainLayout->addWidget(
-                    new QLabel(tr("Значение найденной точки"))
+                    m_getResultButton,
+                    4, 0, 1, 6
                     );
-        m_nearestPointValueTextEdit = new QLineEdit();
-        mainLayout->addWidget(m_nearestPointValueTextEdit);
+        mainLayout->addWidget(
+                    new QLabel(tr("Closest point value")),
+                    5, 0, 1, 5, Qt::AlignLeft
+                    );
+        m_nearestPointValueTextEdit = new QLineEdit(tr("search result"));
+        m_nearestPointValueTextEdit->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
+        m_nearestPointValueTextEdit->setReadOnly(true);
+        mainLayout->addWidget(
+                    m_nearestPointValueTextEdit,
+                    6, 0, 1, 6
+                    );
     }
     setLayout(mainLayout);
 
@@ -215,7 +216,7 @@ void FindNearestPointDialog::getResultButtonClicked(bool checked)
 
     if (m_nearestPoint == nullptr)
     {
-        m_nearestPointValueTextEdit->setText("Ошибка при поиске ближайшей точки");
+        m_nearestPointValueTextEdit->setText("Error while searching for closest point");
     }
     else
     {
@@ -231,5 +232,8 @@ void FindNearestPointDialog::getResultButtonClicked(bool checked)
 void FindNearestPointDialog::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event);
-    emit foundNearest(*m_nearestPoint);
+    if (m_nearestPoint != nullptr)
+    {
+        emit foundNearest(*m_nearestPoint);
+    }
 }

@@ -16,6 +16,7 @@ public:
             ErrorFunction errorFunction,
             GradientFunction gradientFunction
             );
+    virtual ~LambdaProblem() = default;
 
     double computeError(const QVector<double>& variables) override;
     QVector<double> computeGradient(const QVector<double> &variables) override;

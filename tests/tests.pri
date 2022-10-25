@@ -9,4 +9,5 @@
     include($$PWD/OptimizationTests/OptimizationTests.pri)
     include($$PWD/GeomToolsTests/GeomToolsTests.pri)
     include($$PWD/QVectorToolsTests/QVectorToolsTests.pri)
+    include($$PWD/DialogsToolsTests/dialogstoolstests.pri)
 }

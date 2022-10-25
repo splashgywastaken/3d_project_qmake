@@ -10,6 +10,7 @@
 
 #include <src/service/GlobalState.h>
 #include <src/main/FindNearestPointDialog/findnearestpointdialog.h>
+#include <src/main/SaveResultsDialog/saveresultsdialog.h>
 
 #include <src/service/Optimization/OptimizationUtils/optimizationutils.h>
 #include <src/service/Optimization/LambdaStepCallback/lambdastepcallback.h>
@@ -27,7 +28,7 @@
 #include <src/service/Registration/FitterClasses/LambdaStepCallback/lambdastepcallback.h>
 #include <src/service/Registration/FitterClasses/RigidFitter/rigidfitter.h>
 
-#include "src/service/KDTree/kdtree.h"
+#include <src/service/KDTree/kdtree.h>
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 
 const QColor defaultSceneObjectColor(85, 170, 255);
@@ -38,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_ui(new Ui::MainWindow)
 {
     m_ui->setupUi(this);
+    setWindowTitle(tr("3D optimization methods project"));
 
     // Style sheet setup:
     QFile styleFile(":/main/mainwindow/mainwindow.qss");
@@ -72,6 +74,15 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete m_ui;
+}
+
+void MainWindow::parametersAreSet(QVector<double> variables, double stepLength, int nMaxIterations, double gradientNormThreshold)
+{
+    m_fittingGradientParams = new FittingGradientParams();
+    m_fittingGradientParams->variables = variables;
+    m_fittingGradientParams->stepLength = stepLength;
+    m_fittingGradientParams->nMaxIterations = nMaxIterations;
+    m_fittingGradientParams->gradientNormThreshold = gradientNormThreshold;
 }
 
 void MainWindow::setObjectColor(QColor objectColor)
@@ -346,28 +357,33 @@ void MainWindow::performFittingforTarget(bool value)
                 );
     Optimization::LambdaStepCallback callback(stepFunction);
 
-    const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0, 1};
-    const double stepLength = 0.4;
-    const int nMaxIterations = 1500;
-    const double gradientNormThreshold = 9e-7;
+    const int nVariables = 7;
+    m_gradientParamsDialog = new GradientParamsDialog(nVariables, this);
+    connect(
+            this->m_gradientParamsDialog, &GradientParamsDialog::parametersAreSet,
+            this, &MainWindow::parametersAreSet
+            );
+    if (m_gradientParamsDialog->exec() == QDialog::Rejected){
+        delete problem;
+        return;
+    }
 
     QVector<double> result = Optimization::gradientDescent(
-                problem, initialVariables,
-                stepLength, nMaxIterations, gradientNormThreshold,
+                problem, m_fittingGradientParams->variables,
+                m_fittingGradientParams->stepLength, m_fittingGradientParams->nMaxIterations, m_fittingGradientParams->gradientNormThreshold,
                 true, &callback
                 );
 
     result = Optimization::RigidAlignmentScalingProblem::transformationVectorFromVars(result);
 
-    QMessageBox yesNoMessageBox(this);
-    setupYesNoTransformMessageBox(
-                yesNoMessageBox,
+    SaveResultsDialog saveResultsDialog(
                 tr("Fitting is finished"),
                 tr("Do you want to remove target object?"),
-                result
+                result,
+                this
                 );
 
-    if (yesNoMessageBox.exec() == QMessageBox::Yes)
+    if (saveResultsDialog.exec() == QDialog::Accepted)
     {
         m_glWidget->removeObject(m_fittingTargetSceneObject);
         delete m_fittingTargetSceneObject;
@@ -472,29 +488,39 @@ void MainWindow::performClosestPointsBasedFitting(bool value)
                 );
     Optimization::LambdaStepCallback callback(stepFunction);
 
-    const QVector<double> initialVariables = {0, 0, 0, 0, 0, 0};
-    const double stepLength = 0.4;
-    const int nMaxIterations = 1500;
-    const double gradientNormThreshold = 9e-7;
     const int nLineSearchIterations = 10;
     const double stepLengthMax = 10;
     const bool verbose = true;
 
+    const int nVariables = 6;
+    m_gradientParamsDialog = new GradientParamsDialog(nVariables, this);
+    connect(
+            this->m_gradientParamsDialog, &GradientParamsDialog::parametersAreSet,
+            this, &MainWindow::parametersAreSet
+            );
+    if (m_gradientParamsDialog->exec() == 0){
+        delete problem;
+        return;
+    }
+
     QVector<double> result = Optimization::gradientDescentWithBackTrackingLineSearch(
-                *problem, initialVariables,
-                stepLength, nMaxIterations, gradientNormThreshold, nLineSearchIterations, stepLengthMax, verbose,
+                *problem,
+                m_fittingGradientParams->variables,
+                m_fittingGradientParams->stepLength,
+                m_fittingGradientParams->nMaxIterations,
+                m_fittingGradientParams->gradientNormThreshold,
+                nLineSearchIterations, stepLengthMax, verbose,
                 &callback
                 );
 
-    QMessageBox yesNoMessageBox(this);
-    setupYesNoTransformMessageBox(
-                yesNoMessageBox,
+    SaveResultsDialog saveResultsDialog(
                 tr("Fitting is finished"),
                 tr("Do you want to remove target object?"),
-                result
+                result,
+                this
                 );
 
-    if (yesNoMessageBox.exec() == QMessageBox::Yes)
+    if (saveResultsDialog.exec() == QDialog::Accepted)
     {
         m_glWidget->removeObject(m_fittingTargetSceneObject);
         delete m_fittingTargetSceneObject;
@@ -727,7 +753,9 @@ void MainWindow::setLabelFontColor(QLabel *label, QString color)
 
 void MainWindow::changeShader(const QString &shaderName)
 {
-    DrawableObjectTools::ShaderProgrammType shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
+    using namespace DrawableObjectTools;
+
+    ShaderProgrammType shaderType = ShaderProgrammType::Standard;
 
     #ifndef QT_NO_DEBUG
         qDebug() << "Change shader triggered";
@@ -735,19 +763,19 @@ void MainWindow::changeShader(const QString &shaderName)
 
     if (shaderName == "Basic shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::Standard;
+        shaderType = ShaderProgrammType::Standard;
     }
     else if (shaderName == "Lightning shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::Lightning;
+        shaderType = ShaderProgrammType::Lightning;
     }
     else if (shaderName == "Normal map shader")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::NormalMap;
+        shaderType = ShaderProgrammType::NormalMap;
     }
     else if (shaderName == "Lightning shader with textures")
     {
-        shaderType = DrawableObjectTools::ShaderProgrammType::LightningWithTextures;
+        shaderType = ShaderProgrammType::LightningWithTextures;
     }
 
     m_glWidget->switchShaders(shaderType);
@@ -761,9 +789,9 @@ void MainWindow::createActions()
     setupAction(
                 m_loadObjectFromObjFileAction,
                 this,
-                tr("Open file"),
+                tr("Open *.obj file"),
                 QKeySequence::Open,
-                tr("Open a new file"),
+                tr("Open a new object file to work with"),
                 this,
                 SLOT(loadObjectFromObjFile(bool))
                 );
@@ -960,10 +988,17 @@ void MainWindow::createMenus()
                 );
 
     setupMenu(
-                m_objectMenu,
-                tr("Object"),
-                tr("Objects related stuff"),
-                { m_changeObjectColorAction, m_findNearestPointInLastObjectAction }
+                m_viewMenu,
+                tr("View"),
+                tr("Change colors of scene's background and grid"),
+                { m_changeBackgroundColorAction, m_changeGridColorAction }
+                );
+
+    setupMenu(
+                m_sceneMenu,
+                tr("Scene"),
+                tr("Clear and delete objects"),
+                { m_deleteLastObjectAction, m_clearObjectsAction }
                 );
 
     // Shader's menu actions
@@ -973,10 +1008,10 @@ void MainWindow::createMenus()
     m_shaderMenu->addMenu(m_switchShaderMenu);
 
     setupMenu(
-                m_sceneMenu,
-                tr("Scene"),
-                tr("Clear and delete objects"),
-                { m_deleteLastObjectAction, m_clearObjectsAction }
+                m_objectMenu,
+                tr("Object"),
+                tr("Objects related stuff"),
+                { m_changeObjectColorAction, m_findNearestPointInLastObjectAction }
                 );
 
     setupMenu(
@@ -1000,13 +1035,6 @@ void MainWindow::createMenus()
                     m_loadRegistrationTargetObjectAction,
                     m_performRigidRegistrationAction
                 });
-
-    setupMenu(
-                m_viewMenu,
-                tr("View"),
-                tr("Change colors of scene's background and grid"),
-                { m_changeBackgroundColorAction, m_changeGridColorAction }
-                );
 }
 
 void MainWindow::setupMenu(
@@ -1033,27 +1061,27 @@ void MainWindow::setupYesNoTransformMessageBox(
         QMessageBox& yesNoMessageBox,
         QString windowTitle,
         QString mainText,
-        QVector<double> transformationVector
+        QVector<double> transformationResultVector
         )
 {
     yesNoMessageBox.setWindowTitle(windowTitle);
     yesNoMessageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if (!transformationVector.isEmpty())
+    if (!transformationResultVector.isEmpty())
     {
         yesNoMessageBox.setText(
                     QString(tr("Estimated transformation:\nTranslation (%1, %2, %3)\nRotation (%4, %5, %6)"))
-                    .arg(transformationVector[0]).arg(transformationVector[1]).arg(transformationVector[2])
-                .arg(transformationVector[3]).arg(transformationVector[4]).arg(transformationVector[5])
+                    .arg(transformationResultVector[0]).arg(transformationResultVector[1]).arg(transformationResultVector[2])
+                .arg(transformationResultVector[3]).arg(transformationResultVector[4]).arg(transformationResultVector[5])
                 );
-        if (transformationVector.size() == 7)
+        if (transformationResultVector.size() == 7)
         {
             yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling %7")
-                                    .arg(transformationVector[6]));
+                                    .arg(transformationResultVector[6]));
         }
-        else if (transformationVector.size() == 9)
+        else if (transformationResultVector.size() == 9)
         {
             yesNoMessageBox.setText(yesNoMessageBox.text() + QString("\nScaling (%7, %8, %9)")
-                                    .arg(transformationVector[6]).arg(transformationVector[7]).arg(transformationVector[8]));
+                                    .arg(transformationResultVector[6]).arg(transformationResultVector[7]).arg(transformationResultVector[8]));
         }
     }
     yesNoMessageBox.setText(yesNoMessageBox.text() + "\n" + mainText);

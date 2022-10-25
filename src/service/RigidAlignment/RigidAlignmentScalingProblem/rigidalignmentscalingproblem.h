@@ -13,6 +13,7 @@ public:
             const QVector<QVector3D>& baseVertices,
             const QVector<QVector3D>& targetVertices
             );
+    virtual ~RigidAlignmentScalingProblem() = default;
 
     double computeError(const QVector<double>& variables) override;
     virtual QVector<double> computeGradient(const QVector<double>& variables) override;

@@ -14,6 +14,7 @@ public:
             const QVector<QVector3D>& baseVertices,
             const QVector<QVector3D>& targetVertices
             );
+    virtual ~RigidAlignmentProblem() = default;
 
     double computeError(const QVector<double>& variables) override;
     QVector<double> computeGradient(const QVector<double>& variables) override;

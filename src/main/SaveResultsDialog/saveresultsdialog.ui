@@ -1,6 +1,6 @@
 <ui version="4.0">
- <class>GradientParamsDialog</class>
- <widget class="QDialog" name="GradientParamsDialog">
+ <class>SaveResultsDialog</class>
+ <widget name="SaveResultsDialog" class="QDialog">
   <property name="geometry">
    <rect>
     <x>0</x>

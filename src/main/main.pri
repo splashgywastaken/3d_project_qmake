@@ -12,6 +12,7 @@
     include($$PWD/mainwindow/mainwindow.pri)
     include($$PWD/FindNearestPointDialog/FindNearestPointDialog.pri)
     include($$PWD/GradientParamsDialog/GradientParamsDialog.pri)
+    include($$PWD/SaveResultsDialog/SaveResultsDialog.pri)
 
     # Tests
     include($$PWD/../../tests/tests.pri)
@@ -24,3 +25,4 @@
     DISTFILES += \
     $$PWD/main.qss
 }
+

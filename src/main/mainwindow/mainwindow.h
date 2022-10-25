@@ -3,12 +3,14 @@
 
 #include "qdir.h"
 #include <QMainWindow>
-#include <findnearestpointdialog.h>
 #include <qlabel.h>
 #include <QWidgetAction>
 #include <QComboBox>
 #include <QColorDialog>
 #include <qboxlayout.h>
+
+#include <src/main/FindNearestPointDialog/findnearestpointdialog.h>
+#include <src/main/GradientParamsDialog/gradientparamsdialog.h>
 
 #include <src/widgets/objectviewglwidget/objectviewglwidget.h>
 #include <src/models/dto/ObjFileData/ObjFileData.h>
@@ -18,6 +20,15 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+// custom structs for data
+struct FittingGradientParams
+{
+    QVector<double> variables;
+    double stepLength;
+    int nMaxIterations;
+    double gradientNormThreshold;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -25,8 +36,13 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
 public slots:
+    void parametersAreSet(
+            QVector<double> variables,
+            double stepLength,
+            int nMaxIterations,
+            double gradientNormThreshold
+            );
     void nearestPointFound(QVector3D nearestPoint);
     void setObjectColor(QColor objectColor);
     void setGridColor(QColor objectColor);
@@ -113,9 +129,14 @@ protected:
             );
 
 protected:
+    // UI
+    Ui::MainWindow *m_ui;
+    QProgressBar* m_taskProgressBar;
+
     // Dialogs
     QColorDialog* m_colorPickerDialog = nullptr;
     FindNearestPointDialog* m_findNearestPointDialog = nullptr;
+    GradientParamsDialog* m_gradientParamsDialog = nullptr;
 
     // Menu bar actions
     QMenu* m_fileMenu;
@@ -158,10 +179,6 @@ protected:
     // OpenGL widget and corresponding data
     ObjectViewGLWidget * m_glWidget;
 
-    // UI
-    Ui::MainWindow *m_ui;
-    QProgressBar* m_taskProgressBar;
-
     // Event filters:
     CameraMovementEventFilter* m_cameraMovementEventFilter = nullptr;
 
@@ -189,6 +206,8 @@ protected:
     SceneObject* m_registrationBaseMeshSceneObject = nullptr;
     SceneObject* m_registrationTargetMeshSceneObject = nullptr;
 
+    // Misc. Data Variables
+    FittingGradientParams* m_fittingGradientParams = nullptr;
     QColor* m_currentObjectColor = nullptr;
 };
 #endif // MAINWINDOW_H

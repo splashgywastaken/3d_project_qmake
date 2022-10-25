@@ -21,6 +21,7 @@ public:
             const double errorWeight = 1.0f,
             const double minCosBetweenNormals = 0.3f
         );
+    virtual ~ClosestPointsBasedAlignmentProblem() = default;
 
     double computeError(const QVector<double>& variables) override;
     QVector<double> computeGradient(const QVector<double>& variables) override;

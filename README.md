@@ -7,6 +7,14 @@
 Project dedicated to create basic reader for ***wavefront .obj*** files with some additional features.
 This is kinda my first project made with use of Qt Framework
 
+## App build 
+App could be built by using default 
+```
+**qmake** 
+```
+command in command window
+App was made with Qt 6.2.4 MinGW 64-bit
+
 ## How to use
 
 App has three modes of usage:
